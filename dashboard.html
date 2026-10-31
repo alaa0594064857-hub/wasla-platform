@@ -354,11 +354,13 @@ function toggleLanguage() {
   }
 
   const message = document.getElementById('message');
-  if (message.textContent.includes('مرحباً بك')) {
+    if (message.textContent.includes('مرحباً بك')) {
     message.textContent = en
       ? 'Welcome to your WASLA dashboard.'
       : 'مرحباً بك في لوحة تحكم WASLA.';
   }
+
+  loadProducts();
 }
 start();
 </script>
