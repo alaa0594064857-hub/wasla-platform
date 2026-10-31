@@ -3,202 +3,418 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WASLA | لوحة التحكم</title>
+<title>WASLA | Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+:root{
+  --navy:#102b46;
+  --navy2:#173d5e;
+  --blue:#1675bd;
+  --cyan:#42c5d8;
+  --bg:#f3f6fa;
+  --white:#fff;
+  --text:#172b3d;
+  --muted:#748397;
+  --border:#e3eaf1;
+  --green:#159b79;
+  --red:#c44d59;
+  --shadow:0 8px 28px rgba(20,45,70,.07);
+}
 *{box-sizing:border-box}
-body{margin:0;background:#f3f6fa;color:#172b3a;font-family:Arial,sans-serif}
-header{background:#102b3f;color:white;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-header strong{font-size:25px;color:#55d6b0}
-.header-actions{display:flex;gap:8px}
-main{max-width:1000px;margin:28px auto;padding:0 16px}
-.card{background:white;padding:22px;border-radius:14px;margin-bottom:18px;box-shadow:0 3px 14px #0000000b}
-h1,h2{margin-top:0}
-input,textarea,button{width:100%;padding:12px;margin:7px 0;border:1px solid #d9e0e5;border-radius:8px;font:inherit}
-textarea{min-height:90px;resize:vertical}
-button{background:#087f70;color:white;border:0;font-weight:bold;cursor:pointer}
-button.secondary{background:#17394d}
-button.danger{background:#8b3940}
-button:disabled{opacity:.5;cursor:not-allowed}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.item{padding:14px;border:1px solid #e2e8ec;border-radius:10px;margin:10px 0}
-.muted{color:#657681;font-size:14px;line-height:1.7}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Arial,Tahoma,sans-serif;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
 .hidden{display:none!important}
-#message{padding:13px;border-radius:8px;margin:12px 0;background:#eaf2f7;white-space:pre-wrap;line-height:1.6}
-.pill{display:inline-block;padding:5px 10px;border-radius:20px;background:#e8f5f2;color:#087f70;font-size:13px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.actions button{width:auto;min-width:130px}
-.company-link{color:#087f70;text-decoration:none;font-weight:bold;font-size:17px}
-.company-link:hover{text-decoration:underline}
-.open-company{display:inline-block;margin-top:8px;color:#087f70;text-decoration:none;font-weight:bold}
-.inquiry-item{padding:16px;border:1px solid #dce6eb;border-radius:12px;margin:12px 0;background:#fbfdfe}
-.inquiry-item p{line-height:1.8;overflow-wrap:anywhere}
-.inquiry-date{font-size:12px;color:#71818c}
-.inquiry-status{display:inline-block;padding:5px 10px;border-radius:20px;background:#fff2d8;color:#8a5b00;font-size:13px}
-.reply-area{margin-top:14px;padding-top:12px;border-top:1px solid #e2e8ec}
-.closed-note{color:#8b3940;font-size:14px;margin-top:12px}
-
-/* واجهة المحادثة */
-.chat-box{margin-top:16px;border:1px solid #dce6eb;border-radius:12px;overflow:hidden;background:#f4f7fa}
-.chat-heading{padding:12px 15px;background:#17394d;color:white;font-weight:bold}
-.chat-messages{padding:14px;max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:100px}
-.chat-bubble{max-width:85%;padding:11px 13px;border-radius:12px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-wrap}
-.chat-mine{align-self:flex-start;background:#dff3eb;border:1px solid #c8e8dc}
-.chat-theirs{align-self:flex-end;background:white;border:1px solid #e0e6ea}
-.chat-meta{font-size:11px;color:#71818c;margin-top:6px}
-.chat-sender{font-size:12px;font-weight:bold;color:#087f70;margin-bottom:4px}
-.chat-composer{padding:12px;background:white;border-top:1px solid #e2e8ec}
-.chat-composer textarea{min-height:65px;margin:0 0 7px}
-.chat-send{width:100%;margin:0}
-.chat-empty{color:#71818c;text-align:center;padding:15px;font-size:14px}
-.chat-closed{padding:12px;color:#8b3940;background:#fff3f3;border-top:1px solid #f0dada;font-size:13px}
-.chat-refresh{margin-top:8px;background:#17394d}
-
-@media(max-width:600px){
- .grid{grid-template-columns:1fr}
- header{align-items:flex-start;flex-direction:column}
- .actions button{flex:1}
- .chat-bubble{max-width:94%}
+a{text-decoration:none;color:inherit}
+.app{min-height:100vh}
+.topbar{
+  height:72px;background:var(--navy);color:white;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 25px;position:sticky;top:0;z-index:20;
+  box-shadow:0 3px 15px #102b4620;
+}
+.brand{font-size:27px;font-weight:900;letter-spacing:1px;color:var(--cyan)}
+.brand small{display:block;font-size:10px;color:#d0e5f1;letter-spacing:3px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.icon-btn{
+  position:relative;width:42px;height:42px;border:1px solid #ffffff30;
+  background:#ffffff12;color:white;border-radius:12px;font-size:19px;
+}
+.dot{
+  position:absolute;top:-5px;left:-5px;background:#ef6473;color:white;
+  min-width:18px;height:18px;border-radius:20px;font-size:11px;
+  display:grid;place-items:center;padding:0 4px;
+}
+.profile-menu{position:relative}
+.profile-trigger{
+  display:flex;align-items:center;gap:10px;border:1px solid #ffffff30;
+  background:#ffffff12;color:white;border-radius:30px;padding:6px 12px;
+}
+.avatar{
+  width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:grid;place-items:center;color:white;font-weight:bold;
+}
+.dropdown{
+  position:absolute;top:52px;left:0;background:white;color:var(--text);
+  width:210px;border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow);padding:8px;z-index:50;
+}
+.dropdown button{
+  width:100%;text-align:right;border:0;background:white;padding:12px;
+  border-radius:9px;color:var(--text);
+}
+.dropdown button:hover{background:var(--bg)}
+.layout{display:flex;max-width:1600px;margin:auto}
+.sidebar{
+  width:245px;flex-shrink:0;padding:22px 14px;
+  min-height:calc(100vh - 72px);
+}
+.side-title{font-size:12px;color:var(--muted);padding:10px 13px}
+.nav-btn{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:13px 14px;margin:4px 0;border:0;background:transparent;
+  border-radius:11px;color:#52677b;text-align:right;font-weight:600;
+}
+.nav-btn .ico{font-size:18px;width:25px;text-align:center}
+.nav-btn:hover{background:#e9f0f7}
+.nav-btn.active{background:#e2f2fa;color:var(--blue)}
+.content{flex:1;min-width:0;padding:28px;max-width:1250px}
+.page-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:15px;margin-bottom:22px;flex-wrap:wrap;
+}
+.page-head h1{margin:0;font-size:25px}
+.page-head p{color:var(--muted);margin:8px 0 0;font-size:14px}
+.card{
+  background:white;border:1px solid var(--border);border-radius:17px;
+  padding:22px;margin-bottom:18px;box-shadow:var(--shadow);
+}
+.card h2{font-size:18px;margin:0 0 15px}
+.stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px;
+}
+.stat{
+  background:white;border:1px solid var(--border);border-radius:16px;
+  padding:20px;box-shadow:var(--shadow);
+}
+.stat span{font-size:13px;color:var(--muted)}
+.stat strong{display:block;font-size:27px;margin-top:10px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input,textarea,select{
+  width:100%;padding:13px;border:1px solid #dce5ed;border-radius:10px;
+  background:white;color:var(--text);margin:6px 0;outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+textarea{min-height:100px;resize:vertical}
+.btn{
+  border:0;background:var(--blue);color:white;padding:12px 18px;
+  border-radius:10px;font-weight:bold;
+}
+.btn:hover{filter:brightness(.94)}
+.btn.secondary{background:var(--navy2)}
+.btn.light{background:#e8f3fa;color:var(--blue)}
+.btn.danger{background:var(--red)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.muted{color:var(--muted);font-size:14px;line-height:1.8}
+.notice{
+  padding:13px 16px;background:#eaf4fa;border:1px solid #d5e8f4;
+  color:#28536d;border-radius:11px;margin-bottom:18px;white-space:pre-wrap;
+}
+.item{
+  border:1px solid var(--border);border-radius:13px;
+  padding:16px;margin:12px 0;background:#fff;
+}
+.item h3{margin:0 0 8px;font-size:16px}
+.item p{line-height:1.8;overflow-wrap:anywhere}
+.pill{
+  display:inline-block;padding:5px 10px;border-radius:30px;
+  background:#e8f6f2;color:var(--green);font-size:12px;
+}
+.pill.pending{background:#fff4df;color:#946400}
+.pill.closed{background:#fcebed;color:var(--red)}
+.company-link{color:var(--blue);font-weight:bold}
+.search-row{display:flex;gap:8px;margin-bottom:15px}
+.search-row input{margin:0}
+.inbox-layout{display:grid;grid-template-columns:320px 1fr;gap:15px;min-height:420px}
+.inbox-list{border:1px solid var(--border);border-radius:13px;overflow:auto;max-height:600px}
+.inbox-entry{
+  width:100%;text-align:right;background:white;border:0;
+  border-bottom:1px solid var(--border);padding:15px;
+}
+.inbox-entry.active{background:#eaf4fa}
+.inbox-entry strong{display:block;margin-bottom:6px}
+.chat-panel{
+  border:1px solid var(--border);border-radius:13px;
+  display:flex;flex-direction:column;min-height:420px;overflow:hidden;
+}
+.chat-head{padding:15px;border-bottom:1px solid var(--border);font-weight:bold}
+.chat-messages{
+  padding:15px;flex:1;overflow:auto;min-height:250px;
+  background:#f8fafc;
+}
+.bubble{
+  max-width:80%;padding:12px 14px;border-radius:13px;
+  margin:9px 0;line-height:1.7;overflow-wrap:anywhere;
+  background:white;border:1px solid var(--border);
+}
+.bubble.mine{margin-right:auto;background:#e5f4fb;border-color:#cce7f4}
+.bubble small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+.chat-compose{padding:12px;border-top:1px solid var(--border)}
+.chat-compose textarea{min-height:65px}
+.empty{
+  text-align:center;color:var(--muted);padding:35px 15px;line-height:1.9;
+}
+#loading{
+  position:fixed;inset:0;background:#102b46eF;color:white;
+  display:grid;place-items:center;z-index:100;font-size:18px;
+}
+.mobile-menu{display:none}
+footer{text-align:center;color:#91a0ae;font-size:12px;padding:25px}
+@media(max-width:850px){
+  .sidebar{width:200px}
+  .content{padding:20px}
+  .inbox-layout{grid-template-columns:1fr}
+  .inbox-list{max-height:240px}
+}
+@media(max-width:650px){
+  .topbar{height:64px;padding:0 13px}
+  .brand{font-size:22px}
+  .profile-trigger span.name{display:none}
+  .sidebar{
+    display:none;position:fixed;top:64px;bottom:0;right:0;
+    width:260px;background:white;z-index:30;box-shadow:var(--shadow);
+    overflow:auto;
+  }
+  .sidebar.open{display:block}
+  .mobile-menu{display:inline-block}
+  .layout{display:block}
+  .content{padding:17px 12px}
+  .stats{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr}
+  .card{padding:16px}
+  .page-head h1{font-size:21px}
 }
 </style>
 </head>
 
 <body>
+<div id="loading">WASLA — جارٍ تحميل لوحة التحكم...</div>
 
-<header>
-<strong>WASLA</strong>
-<div class="header-actions">
-<button class="secondary" style="width:auto" id="languageButton" onclick="toggleLanguage()">English</button>
-<button class="secondary" style="width:auto" id="logoutButton" onclick="logout()">تسجيل الخروج</button>
-</div>
+<div class="app">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="icon-btn mobile-menu" onclick="toggleSidebar()">☰</button>
+    <div class="brand">WASLA<small>BUSINESS NETWORK</small></div>
+  </div>
+
+  <div class="top-actions">
+    <button class="icon-btn" title="صندوق الرسائل" onclick="navigate('inbox')">✉</button>
+    <button class="icon-btn" title="النشاط" onclick="navigate('notifications')">♧</button>
+    <button class="icon-btn" onclick="toggleLanguage()" id="langButton">EN</button>
+
+    <div class="profile-menu">
+      <button class="profile-trigger" onclick="toggleDropdown()">
+        <div class="avatar" id="avatar">W</div>
+        <span class="name" id="topName">حسابي</span>
+        <span>⌄</span>
+      </button>
+      <div class="dropdown hidden" id="dropdown">
+        <button onclick="navigate('profile');toggleDropdown()">👤 الملف الشخصي</button>
+        <button onclick="navigate('company');toggleDropdown()">🏢 ملف النشاط</button>
+        <button onclick="navigate('settings');toggleDropdown()">⚙ الإعدادات</button>
+        <button onclick="logout()">↪ تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>
 </header>
 
-<main>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-title" id="navLabel">القائمة الرئيسية</div>
+    <button class="nav-btn active" data-page="overview" onclick="navigate('overview')"><span class="ico">▦</span><span data-ar="نظرة عامة" data-en="Overview">نظرة عامة</span></button>
+    <button class="nav-btn" data-page="discover" onclick="navigate('discover')"><span class="ico">⌕</span><span data-ar="اكتشف المنتجات" data-en="Discover products">اكتشف المنتجات</span></button>
+    <button class="nav-btn" data-page="companies" onclick="navigate('companies')"><span class="ico">🏢</span><span data-ar="الشركات" data-en="Companies">الشركات</span></button>
+    <button class="nav-btn" data-page="myproducts" onclick="navigate('myproducts')"><span class="ico">▤</span><span data-ar="منتجاتي" data-en="My products">منتجاتي</span></button>
+    <button class="nav-btn" data-page="inbox" onclick="navigate('inbox')"><span class="ico">✉</span><span data-ar="صندوق الاستفسارات" data-en="Inbox">صندوق الاستفسارات</span></button>
+    <button class="nav-btn" data-page="notifications" onclick="navigate('notifications')"><span class="ico">♧</span><span data-ar="النشاط" data-en="Activity">النشاط</span></button>
+    <button class="nav-btn" data-page="profile" onclick="navigate('profile')"><span class="ico">👤</span><span data-ar="ملفي الشخصي" data-en="My profile">ملفي الشخصي</span></button>
+    <button class="nav-btn" data-page="company" onclick="navigate('company')"><span class="ico">▣</span><span data-ar="ملف النشاط التجاري" data-en="Business profile">ملف النشاط التجاري</span></button>
+    <button class="nav-btn" data-page="settings" onclick="navigate('settings')"><span class="ico">⚙</span><span data-ar="الإعدادات" data-en="Settings">الإعدادات</span></button>
+  </aside>
 
-<div id="message">جارٍ التحقق من تسجيل الدخول...</div>
+  <main class="content">
+    <div id="notice" class="notice hidden"></div>
 
-<section id="welcomeSection" class="card hidden">
-<h1 id="welcomeTitle">مرحبًا بك في WASLA</h1>
-<p id="accountLine" class="muted"></p>
-<span id="accountBadge" class="pill"></span>
-</section>
+    <section id="page-overview" class="page">
+      <div class="page-head">
+        <div>
+          <h1 id="welcomeTitle">مرحبًا بك في WASLA</h1>
+          <p id="welcomeSub">مساحتك لإدارة علاقاتك التجارية والتواصل مع الشركات.</p>
+        </div>
+        <span class="pill" id="accountType">حساب</span>
+      </div>
 
-<section id="buyerSection" class="hidden">
+      <div class="stats">
+        <div class="stat"><span id="statOneLabel">نوع الحساب</span><strong id="statOne">—</strong></div>
+        <div class="stat"><span id="statTwoLabel">المنتجات</span><strong id="statTwo">—</strong></div>
+        <div class="stat"><span id="statThreeLabel">الاستفسارات</span><strong id="statThree">—</strong></div>
+      </div>
 
-<div class="card">
-<h2 id="buyerTitle">لوحة المشتري</h2>
-<p id="buyerIntro" class="muted">
-تصفح الشركات والمنتجات المنشورة وتواصل مباشرة مع أصحابها.
-</p>
+      <div class="card">
+        <h2 id="quickTitle">الوصول السريع</h2>
+        <p class="muted" id="quickText">استخدم الأقسام للوصول إلى المنتجات والشركات والاستفسارات.</p>
+        <div class="btn-row">
+          <button class="btn" onclick="navigate('discover')" id="quickDiscover">استكشاف المنتجات</button>
+          <button class="btn secondary" onclick="navigate('inbox')" id="quickInbox">فتح صندوق الرسائل</button>
+          <button class="btn light" onclick="navigate('profile')" id="quickProfile">ملفي الشخصي</button>
+        </div>
+      </div>
 
-<div class="actions">
-<button onclick="showBuyerTab('products')" id="productsTabButton">تصفح المنتجات</button>
-<button class="secondary" onclick="showBuyerTab('companies')" id="companiesTabButton">استكشاف الشركات</button>
-<button class="secondary" onclick="showBuyerTab('inquiries')" id="myInquiriesTabButton">استفساراتي</button>
+      <div class="card">
+        <h2 id="recentTitle">آخر الاستفسارات</h2>
+        <div id="recentList" class="muted">جارٍ التحميل...</div>
+      </div>
+    </section>
+
+    <section id="page-profile" class="page hidden">
+      <div class="page-head"><div><h1 id="profileHeading">ملفي الشخصي</h1><p id="profileSub">بيانات حسابك في WASLA.</p></div></div>
+      <div class="card">
+        <h2 id="personalInfoTitle">المعلومات الأساسية</h2>
+        <div class="grid">
+          <div><label id="nameLabel">الاسم الكامل</label><input id="fullName" disabled></div>
+          <div><label id="emailLabel">البريد الإلكتروني</label><input id="userEmail" disabled></div>
+          <div><label id="typeLabel">نوع الحساب</label><input id="userType" disabled></div>
+          <div><label id="createdLabel">تاريخ إنشاء الحساب</label><input id="createdAt" disabled></div>
+        </div>
+        <p class="muted" id="profileNote">هذه البيانات للعرض فقط؛ لا يتم تعديل حقول غير مؤكدة في قاعدة البيانات.</p>
+      </div>
+    </section>
+
+    <section id="page-company" class="page hidden">
+      <div class="page-head"><div><h1 id="companyHeading">ملف النشاط التجاري</h1><p id="companySub">عرّف الآخرين بنشاطك التجاري.</p></div></div>
+      <div class="card">
+        <div id="companyStatus" class="muted"></div>
+        <form id="companyForm">
+          <label id="businessNameLabel">اسم النشاط</label>
+          <input id="companyName" required>
+          <div class="grid">
+            <input id="country" placeholder="الدولة" required>
+            <input id="city" placeholder="المدينة">
+            <input id="sector" placeholder="القطاع">
+            <input id="businessType" placeholder="نوع النشاط">
+            <input id="companyEmail" type="email" placeholder="البريد الإلكتروني">
+            <input id="phone" placeholder="رقم الهاتف">
+          </div>
+          <input id="website" placeholder="الموقع الإلكتروني">
+          <textarea id="description" placeholder="نبذة عن النشاط التجاري"></textarea>
+          <button class="btn" id="saveCompanyButton">حفظ البيانات</button>
+        </form>
+        <div id="publicCompanyLink" class="muted"></div>
+      </div>
+    </section>
+
+    <section id="page-discover" class="page hidden">
+      <div class="page-head"><div><h1 id="discoverHeading">اكتشف المنتجات</h1><p id="discoverSub">منتجات الشركات المنشورة على WASLA.</p></div></div>
+      <div class="card">
+        <div class="search-row">
+          <input id="productSearch" placeholder="ابحث عن منتج أو تصنيف...">
+          <button class="btn" onclick="loadPublicProducts()">بحث</button>
+        </div>
+        <div id="publicProducts">جارٍ تحميل المنتجات...</div>
+      </div>
+    </section>
+
+    <section id="page-companies" class="page hidden">
+      <div class="page-head"><div><h1 id="companiesHeading">الشركات</h1><p id="companiesSub">استكشف الأنشطة التجارية المنشورة.</p></div></div>
+      <div class="card">
+        <div class="search-row">
+          <input id="companySearch" placeholder="ابحث عن شركة أو قطاع...">
+          <button class="btn" onclick="loadPublicCompanies()">بحث</button>
+        </div>
+        <div id="publicCompanies">جارٍ تحميل الشركات...</div>
+      </div>
+    </section>
+
+    <section id="page-myproducts" class="page hidden">
+      <div class="page-head"><div><h1 id="myProductsHeading">منتجاتي</h1><p id="myProductsSub">إدارة المنتجات المرتبطة بنشاطك.</p></div></div>
+      <div class="card" id="addProductCard">
+        <h2 id="addProductTitle">إضافة منتج جديد</h2>
+        <form id="productForm">
+          <input id="productName" placeholder="اسم المنتج" required>
+          <input id="category" placeholder="التصنيف">
+          <textarea id="productDescription" placeholder="وصف المنتج"></textarea>
+          <input id="imageUrl" type="url" placeholder="رابط صورة المنتج (اختياري)">
+          <button class="btn" id="addProductButton">إضافة المنتج</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 id="myProductsListTitle">قائمة المنتجات</h2>
+        <div id="myProductsList">جارٍ التحميل...</div>
+      </div>
+    </section>
+
+    <section id="page-inbox" class="page hidden">
+      <div class="page-head"><div><h1 id="inboxHeading">صندوق الاستفسارات</h1><p id="inboxSub">تواصل مع المشترين أو تابع استفساراتك.</p></div></div>
+      <div class="card">
+        <div class="inbox-layout">
+          <div class="inbox-list" id="inboxList"><div class="empty">جارٍ تحميل الاستفسارات...</div></div>
+          <div class="chat-panel">
+            <div class="chat-head" id="chatTitle">اختر استفسارًا لعرض المحادثة</div>
+            <div class="chat-messages" id="chatMessages"><div class="empty">ستظهر المحادثة هنا.</div></div>
+            <div class="chat-compose">
+              <textarea id="chatInput" placeholder="اكتب رسالتك..." disabled></textarea>
+              <button class="btn" id="sendMessageButton" onclick="sendChatMessage()" disabled>إرسال</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-notifications" class="page hidden">
+      <div class="page-head"><div><h1 id="activityHeading">النشاط</h1><p id="activitySub">آخر الاستفسارات والردود المرتبطة بحسابك.</p></div></div>
+      <div class="card"><div id="activityList">جارٍ تحميل النشاط...</div></div>
+    </section>
+
+    <section id="page-settings" class="page hidden">
+      <div class="page-head"><div><h1 id="settingsHeading">الإعدادات</h1><p id="settingsSub">إعدادات عرض لوحة التحكم.</p></div></div>
+      <div class="card">
+        <h2 id="languageTitle">اللغة</h2>
+        <p class="muted" id="languageDesc">اختر لغة واجهة لوحة التحكم.</p>
+        <button class="btn" onclick="toggleLanguage()" id="languageSettingButton">التبديل إلى الإنجليزية</button>
+      </div>
+      <div class="card">
+        <h2 id="securityTitle">الحساب</h2>
+        <p class="muted" id="securityDesc">تسجيل الخروج من حسابك الحالي.</p>
+        <button class="btn danger" onclick="logout()" id="logoutSettingButton">تسجيل الخروج</button>
+      </div>
+    </section>
+
+    <footer>WASLA © 2026 — Business Network</footer>
+  </main>
 </div>
 </div>
-
-<div class="card" id="buyerProductsCard">
-<h2 id="publicProductsTitle">المنتجات المنشورة</h2>
-<div id="publicProductsList" class="muted">جارٍ تحميل المنتجات...</div>
-</div>
-
-<div class="card hidden" id="buyerCompaniesCard">
-<h2 id="publicCompaniesTitle">الشركات المنشورة</h2>
-<div id="publicCompaniesList" class="muted">جارٍ تحميل الشركات...</div>
-</div>
-
-<div class="card hidden" id="buyerInquiriesCard">
-<h2 id="myInquiriesTitle">استفساراتي</h2>
-<p id="myInquiriesIntro" class="muted">تابع استفساراتك ومحادثاتك مع الشركات.</p>
-
-<div class="actions">
-<button class="secondary" id="refreshMyInquiriesButton" onclick="loadMyInquiries()">تحديث الاستفسارات</button>
-</div>
-
-<div id="myInquiriesList" class="muted">جارٍ تحميل استفساراتك...</div>
-</div>
-
-</section>
-
-<section id="businessSection" class="hidden">
-
-<section class="card" id="companySection">
-<h2 id="profileTitle">ملف النشاط التجاري</h2>
-<p id="profileIntro" class="muted">
-أدخل بيانات نشاطك. سيخضع الحساب للمراجعة قبل نشره.
-</p>
-
-<div id="companyStatus" class="muted"></div>
-
-<form id="companyForm">
-<input id="companyName" placeholder="اسم النشاط التجاري" required>
-
-<div class="grid">
-<input id="country" placeholder="الدولة" required>
-<input id="city" placeholder="المدينة">
-<input id="sector" placeholder="القطاع">
-<input id="businessType" placeholder="نوع النشاط">
-</div>
-
-<textarea id="description" placeholder="نبذة عن النشاط"></textarea>
-
-<div class="grid">
-<input id="email" type="email" placeholder="البريد الإلكتروني">
-<input id="phone" placeholder="رقم الهاتف">
-</div>
-
-<input id="website" placeholder="الموقع الإلكتروني">
-<button id="companyButton">حفظ البيانات</button>
-</form>
-</section>
-
-<section id="productSection" class="card hidden">
-<h2 id="addProductTitle">إضافة منتج</h2>
-<p id="productIntro" class="muted">أضف منتجات نشاطك التجاري.</p>
-
-<form id="productForm">
-<input id="productName" placeholder="اسم المنتج" required>
-<input id="category" placeholder="التصنيف">
-<textarea id="productDescription" placeholder="وصف المنتج"></textarea>
-<input id="imageUrl" type="url" placeholder="رابط صورة المنتج (اختياري)">
-<button id="productButton">إضافة المنتج</button>
-</form>
-</section>
-
-<section id="productsSection" class="card hidden">
-<h2 id="myProductsTitle">منتجات نشاطي</h2>
-<div id="productsList" class="muted">جارٍ التحميل...</div>
-</section>
-
-<section id="inquiriesSection" class="card hidden">
-<h2 id="inquiriesTitle">استفسارات المشترين</h2>
-<p id="inquiriesIntro" class="muted">
-هنا تظهر الرسائل التي يرسلها المشترون بخصوص منتجات نشاطك.
-</p>
-<div id="inquiriesList" class="muted">جارٍ تحميل الاستفسارات...</div>
-</section>
-
-</section>
-</main>
 
 <script>
+/* إعداد الاتصال */
 const SUPABASE_URL = 'https://bzrcbodvcuujdjupfgzw.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u';
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
+let currentUser=null;
+let profile=null;
+let company=null;
+let myProducts=[];
+let inquiries=[];
+let selectedInquiry=null;
+let messagesChannel=null;
+let currentLanguage='ar';
 
-let currentUser = null;
-let profile = null;
-let company = null;
-let currentLanguage = 'ar';
-let messagesRealtimeChannel = null;
-
-const accountNames = {
+const accountNames={
   company:{ar:'شركة',en:'Company'},
   manufacturer:{ar:'مصنع',en:'Manufacturer'},
   brand:{ar:'علامة تجارية',en:'Brand'},
@@ -206,1119 +422,592 @@ const accountNames = {
   buyer:{ar:'مشتري',en:'Buyer'}
 };
 
-const profileTitles = {
-  company:{ar:'ملف شركتي',en:'My Company Profile'},
-  manufacturer:{ar:'ملف مصنعي',en:'My Factory Profile'},
-  brand:{ar:'ملف علامتي التجارية',en:'My Brand Profile'},
-  trader:{ar:'ملف نشاطي التجاري',en:'My Trading Profile'}
-};
+const $=id=>document.getElementById(id);
+const isEn=()=>currentLanguage==='en';
+const tr=(ar,en)=>isEn()?en:ar;
+const value=id=>$(id).value.trim();
 
-function isEnglish(){
-  return currentLanguage === 'en';
+function escapeHTML(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
 }
-
-function val(id){
-  return document.getElementById(id).value.trim();
+function showNotice(text){
+  $('notice').textContent=text;
+  $('notice').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-
-function showMessage(text){
-  document.getElementById('message').textContent = text;
+function hideNotice(){$('notice').classList.add('hidden')}
+function relationOne(v){return Array.isArray(v)?v[0]||null:v}
+function dateText(v){
+  if(!v)return '';
+  return new Date(v).toLocaleString(isEn()?'en-GB':'ar');
 }
-
-function statusLabel(status){
-  const labels = {
-    pending:isEnglish()?'Pending review':'قيد المراجعة',
-    published:isEnglish()?'Published':'منشور',
-    suspended:isEnglish()?'Suspended':'موقوف'
+function accountName(type){
+  return accountNames[type]?.[currentLanguage]||type||'';
+}
+function statusText(status){
+  const map={
+    pending:tr('قيد المراجعة','Pending review'),
+    published:tr('منشور','Published'),
+    suspended:tr('موقوف','Suspended')
   };
-
-  return labels[status] || status || '';
+  return map[status]||status||'';
 }
-
-function inquiryStatusLabel(status){
-  const labels = {
-    pending:isEnglish()?'New inquiry':'استفسار جديد',
-    responded:isEnglish()?'Responded':'تمت الإجابة',
-    closed:isEnglish()?'Closed':'مغلق'
+function inquiryStatus(status){
+  const map={
+    pending:tr('جديد','New'),
+    responded:tr('تم الرد','Responded'),
+    closed:tr('مغلق','Closed')
   };
-
-  return labels[status] || status || '';
+  return map[status]||status||'';
 }
+function toggleDropdown(){$('dropdown').classList.toggle('hidden')}
+function toggleSidebar(){$('sidebar').classList.toggle('open')}
 
-function formatInquiryDate(date){
-  if(!date)return '';
-  return new Date(date).toLocaleString(isEnglish()?'en-GB':'ar');
-}
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  $('page-'+page)?.classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.page===page);
+  });
+  $('sidebar').classList.remove('open');
+  hideNotice();
 
-function relationOne(value){
-  return Array.isArray(value) ? (value[0] || null) : value;
-}
-
-function escapeHtml(value){
-  return String(value ?? '').replace(/[&<>"']/g,char=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[char]));
-}
-
-/* تشغيل التحديث اللحظي للرسائل */
-function setupMessagesRealtime(){
-
-  if(messagesRealtimeChannel){
-    db.removeChannel(messagesRealtimeChannel);
-    messagesRealtimeChannel = null;
-  }
-
-  messagesRealtimeChannel = db
-    .channel('wasla-inquiry-messages')
-
-    .on(
-      'postgres_changes',
-      {
-        event:'INSERT',
-        schema:'public',
-        table:'inquiry_messages'
-      },
-      payload=>{
-
-        const inquiryId = payload.new?.inquiry_id;
-
-        if(!inquiryId)return;
-
-        const container = document.getElementById(
-          'chat-messages-'+inquiryId
-        );
-
-        /*
-          إذا كانت المحادثة مفتوحة في الصفحة،
-          نعيد تحميل رسائلها تلقائيًا.
-        */
-        if(container){
-          loadChatMessages(inquiryId);
-        }
-
-      }
-    )
-
-    .subscribe(status=>{
-      console.log('WASLA Realtime:',status);
-    });
+  if(page==='discover')loadPublicProducts();
+  if(page==='companies')loadPublicCompanies();
+  if(page==='myproducts')loadMyProducts();
+  if(page==='inbox')loadInbox();
+  if(page==='notifications')loadActivity();
+  if(page==='overview')loadOverview();
 }
 
 async function start(){
+  try{
+    const {data,error}=await db.auth.getUser();
+    if(error||!data.user){
+      $('loading').textContent=tr('يرجى تسجيل الدخول أولًا.','Please sign in first.');
+      setTimeout(()=>location.href='./',1200);
+      return;
+    }
+    currentUser=data.user;
 
-  const {data,error} = await db.auth.getUser();
+    const result=await db.from('profiles')
+      .select('id,full_name,account_type,created_at')
+      .eq('id',currentUser.id).maybeSingle();
 
-  if(error || !data.user){
-    showMessage('يجب تسجيل الدخول أولًا من الصفحة الرئيسية.');
-    return;
+    if(result.error)throw result.error;
+    if(!result.data||!accountNames[result.data.account_type]){
+      throw new Error(tr('لم يتم العثور على نوع حساب صحيح.','Account type was not found.'));
+    }
+    profile=result.data;
+
+    await loadCompany();
+    renderHeader();
+    renderProfile();
+    await loadOverview();
+    $('loading').classList.add('hidden');
+  }catch(e){
+    $('loading').textContent=tr('حدث خطأ: ','Error: ')+e.message;
   }
-
-  currentUser = data.user;
-
-  const {data:profileData,error:profileError} = await db
-    .from('profiles')
-    .select('id,full_name,account_type')
-    .eq('id',currentUser.id)
-    .maybeSingle();
-
-  if(profileError){
-    showMessage('تعذر قراءة نوع الحساب: '+profileError.message);
-    return;
-  }
-
-  if(!profileData || !accountNames[profileData.account_type]){
-    showMessage('لم يتم العثور على نوع حساب صحيح في profiles. يرجى مراجعة الإدارة.');
-    return;
-  }
-
-  profile = profileData;
-
-  renderAccountHeader();
-
-  /* تشغيل Realtime بعد التأكد من الحساب */
-  setupMessagesRealtime();
-
-  if(profile.account_type === 'buyer'){
-
-    document.getElementById('buyerSection').classList.remove('hidden');
-
-    await loadPublicProducts();
-    await loadMyInquiries();
-
-    showMessage('مرحبًا بك في لوحة المشتري.');
-    return;
-  }
-
-  document.getElementById('businessSection').classList.remove('hidden');
-
-  document.getElementById('profileTitle').textContent =
-    profileTitles[profile.account_type][currentLanguage];
-
-  await loadBusinessDashboard();
 }
 
-function renderAccountHeader(){
-
-  document.getElementById('welcomeSection').classList.remove('hidden');
-
-  document.getElementById('welcomeTitle').textContent =
-    isEnglish()?'Welcome to WASLA':'مرحبًا بك في WASLA';
-
-  document.getElementById('accountLine').textContent =
-    (isEnglish()?'Signed in as: ':'تم تسجيل الدخول باسم: ')+
-    (profile.full_name || currentUser.email || '');
-
-  document.getElementById('accountBadge').textContent =
-    (isEnglish()?'Account type: ':'نوع الحساب: ')+
-    accountNames[profile.account_type][currentLanguage];
+function renderHeader(){
+  const name=profile.full_name||currentUser.email||'WASLA';
+  $('topName').textContent=name;
+  $('avatar').textContent=(name.trim()[0]||'W').toUpperCase();
+  $('accountType').textContent=accountName(profile.account_type);
+  $('welcomeTitle').textContent=tr('مرحبًا بك، ','Welcome, ')+name;
 }
 
-async function loadBusinessDashboard(){
+function renderProfile(){
+  $('fullName').value=profile.full_name||'';
+  $('userEmail').value=currentUser.email||'';
+  $('userType').value=accountName(profile.account_type);
+  $('createdAt').value=dateText(profile.created_at);
+}
 
-  const {data:companies,error} = await db.from('companies')
-    .select('*')
-    .eq('owner_id',currentUser.id)
-    .limit(1);
-
-  if(error){
-    showMessage(
-      (isEnglish()?'Could not load business profile: ':'تعذر تحميل بيانات النشاط: ')+
-      error.message
-    );
-    return;
-  }
-
-  company = companies && companies.length ? companies[0] : null;
-
-  if(company){
-
-    fillCompany();
-
-    document.getElementById('companyStatus').textContent =
-      (isEnglish()?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
-
-    document.getElementById('companyButton').textContent =
-      isEnglish()?'Update details':'تحديث البيانات';
-
-    document.getElementById('productSection').classList.remove('hidden');
-    document.getElementById('productsSection').classList.remove('hidden');
-    document.getElementById('inquiriesSection').classList.remove('hidden');
-
-    await loadProducts();
-    await loadInquiries();
-
-  }else{
-
-    document.getElementById('companyStatus').textContent =
-      isEnglish()
-      ?'No business profile has been created yet.'
-      :'لم يتم إنشاء ملف نشاط تجاري بعد.';
-  }
-
-  showMessage(
-    isEnglish()
-    ?'Your business dashboard is ready.'
-    :'لوحة نشاطك التجاري جاهزة.'
-  );
+async function loadCompany(){
+  if(profile.account_type==='buyer')return;
+  const {data,error}=await db.from('companies')
+    .select('*').eq('owner_id',currentUser.id).limit(1);
+  if(error)throw error;
+  company=data?.[0]||null;
+  if(company)fillCompany();
+  updateBusinessAccess();
 }
 
 function fillCompany(){
-
-  const fields = {
-    companyName:'name',
-    country:'country',
-    city:'city',
-    sector:'sector',
-    businessType:'business_type',
-    description:'description',
-    email:'email',
-    phone:'phone',
-    website:'website'
+  const fields={
+    companyName:'name',country:'country',city:'city',
+    sector:'sector',businessType:'business_type',
+    companyEmail:'email',phone:'phone',website:'website',
+    description:'description'
   };
+  Object.keys(fields).forEach(id=>{
+    $(id).value=company[fields[id]]||'';
+  });
+  $('companyStatus').innerHTML=
+    `${tr('حالة النشاط: ','Business status: ')}<span class="pill">${escapeHTML(statusText(company.status))}</span>`;
+  $('publicCompanyLink').innerHTML=company.status==='published'
+    ?`<a class="company-link" href="company.html?id=${encodeURIComponent(company.id)}">${tr('عرض صفحة النشاط المنشورة ←','View published company page →')}</a>`
+    :'';
+}
 
-  for(const id in fields){
-    document.getElementById(id).value = company[fields[id]] || '';
+function updateBusinessAccess(){
+  const buyer=profile.account_type==='buyer';
+  $('addProductCard').classList.toggle('hidden',buyer||!company);
+  $('page-company').querySelector('form').classList.toggle('hidden',buyer);
+  if(buyer){
+    $('companyStatus').textContent=tr('حساب المشتري لا يحتاج إلى ملف نشاط تجاري.','Buyer accounts do not need a business profile.');
   }
 }
 
-document.getElementById('companyForm').addEventListener('submit',async e=>{
-
+$('companyForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  if(!company&&profile.account_type==='buyer')return;
 
-  if(!currentUser || !profile || profile.account_type === 'buyer')return;
-
-  const button = document.getElementById('companyButton');
-  button.disabled = true;
-
-  const payload = {
-    name:val('companyName'),
-    country:val('country'),
-    city:val('city'),
-    sector:val('sector'),
-    business_type:val('businessType'),
-    description:val('description'),
-    email:val('email'),
-    phone:val('phone'),
-    website:val('website')
+  const button=$('saveCompanyButton');
+  button.disabled=true;
+  const payload={
+    name:value('companyName'),
+    country:value('country'),
+    city:value('city'),
+    sector:value('sector'),
+    business_type:value('businessType'),
+    email:value('companyEmail'),
+    phone:value('phone'),
+    website:value('website'),
+    description:value('description')
   };
 
   let result;
+  if(company){
+    result=await db.from('companies').update(payload)
+      .eq('id',company.id).eq('owner_id',currentUser.id).select().single();
+  }else{
+    result=await db.from('companies')
+      .insert({...payload,owner_id:currentUser.id}).select().single();
+  }
+  button.disabled=false;
+  if(result.error){showNotice(tr('تعذر الحفظ: ','Save failed: ')+result.error.message);return}
+  company=result.data;
+  fillCompany();
+  updateBusinessAccess();
+  showNotice(tr('تم حفظ بيانات النشاط.','Business profile saved.'));
+});
+
+$('productForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!company){
+    showNotice(tr('أنشئ ملف النشاط التجاري أولًا.','Create your business profile first.'));
+    return;
+  }
+  const button=$('addProductButton');
+  button.disabled=true;
+  const {error}=await db.from('products').insert({
+    company_id:company.id,
+    name:value('productName'),
+    category:value('category'),
+    description:value('productDescription'),
+    image_url:value('imageUrl')
+  });
+  button.disabled=false;
+  if(error){showNotice(tr('تعذر إضافة المنتج: ','Could not add product: ')+error.message);return}
+  $('productForm').reset();
+  showNotice(tr('تم إرسال المنتج للمراجعة أو النشر حسب حالة النشاط.','Product submitted.'));
+  await loadMyProducts();
+  await loadOverview();
+});
+
+async function loadOverview(){
+  let productCount=0;
+  let inquiryCount=0;
 
   if(company){
+    const p=await db.from('products').select('id',{count:'exact',head:true}).eq('company_id',company.id);
+    if(!p.error)productCount=p.count||0;
+  }
+  const q=await db.from('inquiries').select('id',{count:'exact',head:true});
+  if(!q.error)inquiryCount=q.count||0;
 
-    result = await db.from('companies')
-      .update(payload)
-      .eq('id',company.id)
-      .eq('owner_id',currentUser.id)
-      .select()
-      .single();
+  $('statOne').textContent=accountName(profile.account_type);
+  $('statTwo').textContent=productCount;
+  $('statThree').textContent=inquiryCount;
 
+  if(profile.account_type==='buyer'){
+    $('statTwoLabel').textContent=tr('المنتجات المتاحة','Available products');
+    $('statThreeLabel').textContent=tr('استفساراتي','My inquiries');
   }else{
-
-    result = await db.from('companies')
-      .insert({...payload,owner_id:currentUser.id})
-      .select()
-      .single();
+    $('statTwoLabel').textContent=tr('منتجات نشاطي','My products');
+    $('statThreeLabel').textContent=tr('الاستفسارات الواردة','Received inquiries');
   }
+  await loadRecent();
+}
 
-  button.disabled = false;
-
-  if(result.error){
-    showMessage(
-      (isEnglish()?'Could not save: ':'لم يتم حفظ البيانات: ')+
-      result.error.message
-    );
-    return;
-  }
-
-  company = result.data;
-
-  document.getElementById('companyStatus').textContent =
-    (isEnglish()?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
-
-  document.getElementById('productSection').classList.remove('hidden');
-  document.getElementById('productsSection').classList.remove('hidden');
-  document.getElementById('inquiriesSection').classList.remove('hidden');
-
-  showMessage(isEnglish()?'Business profile saved.':'تم حفظ بيانات النشاط بنجاح.');
-
-  await loadProducts();
-  await loadInquiries();
-});
-
-document.getElementById('productForm').addEventListener('submit',async e=>{
-
-  e.preventDefault();
-
-  if(!company || !currentUser || profile.account_type === 'buyer'){
-    showMessage(
-      isEnglish()
-      ?'Create your business profile first.'
-      :'أنشئ ملف النشاط أولًا.'
-    );
-    return;
-  }
-
-  const button = document.getElementById('productButton');
-  button.disabled = true;
-
-  const {error} = await db.from('products').insert({
-    company_id:company.id,
-    name:val('productName'),
-    category:val('category'),
-    description:val('productDescription'),
-    image_url:val('imageUrl')
-  });
-
-  button.disabled = false;
-
-  if(error){
-    showMessage(
-      (isEnglish()?'Could not add product: ':'لم تتم إضافة المنتج: ')+
-      error.message
-    );
-    return;
-  }
-
-  document.getElementById('productForm').reset();
-
-  showMessage(isEnglish()?'Product submitted.':'تم إرسال المنتج بنجاح.');
-
-  await loadProducts();
-});
-
-async function loadProducts(){
-
-  if(!company)return;
-
-  const {data,error} = await db.from('products')
-    .select('id,name,category,description,status')
-    .eq('company_id',company.id)
-    .order('created_at',{ascending:false});
-
-  const list = document.getElementById('productsList');
-
-  if(error){
-    list.textContent =
-      (isEnglish()?'Could not load products: ':'تعذر تحميل المنتجات: ')+
-      error.message;
-    return;
-  }
-
-  if(!data || !data.length){
-    list.textContent =
-      isEnglish()?'No products yet.':'لم تضف أي منتجات حتى الآن.';
-    return;
-  }
-
-  list.innerHTML = '';
-
-  data.forEach(p=>{
-
-    const item = document.createElement('div');
-    item.className = 'item';
-
-    const title = document.createElement('strong');
-    title.textContent = p.name;
-
-    const detail = document.createElement('p');
-    detail.textContent = (p.category || '')+' — '+(p.description || '');
-
-    const status = document.createElement('small');
-    status.textContent =
-      (isEnglish()?'Status: ':'الحالة: ')+statusLabel(p.status);
-
-    item.append(title,detail,status);
-    list.appendChild(item);
+async function loadRecent(){
+  const list=$('recentList');
+  const {data,error}=await getMyInquiries();
+  if(error){list.textContent=error.message;return}
+  if(!data?.length){list.innerHTML=`<div class="empty">${tr('لا توجد استفسارات حتى الآن.','No inquiries yet.')}</div>`;return}
+  list.innerHTML='';
+  data.slice(0,4).forEach(q=>{
+    const p=relationOne(q.products);
+    const c=relationOne(q.companies);
+    const el=document.createElement('div');
+    el.className='item';
+    const title=document.createElement('h3');
+    title.textContent=p?.name||tr('استفسار','Inquiry');
+    const desc=document.createElement('p');
+    desc.textContent=(profile.account_type==='buyer'?(c?.name||''):(q.message||''));
+    const status=document.createElement('span');
+    status.className='pill';
+    status.textContent=inquiryStatus(q.status);
+    el.append(title,desc,status);
+    list.append(el);
   });
 }
 
-/* إنشاء واجهة المحادثة */
-function createChatInterface(inquiry,otherPartyLabel){
+async function getMyInquiries(){
+  let query=db.from('inquiries')
+    .select('id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)')
+    .order('created_at',{ascending:false}).limit(100);
 
-  const box = document.createElement('div');
-  box.className = 'chat-box';
-
-  const heading = document.createElement('div');
-  heading.className = 'chat-heading';
-  heading.textContent = isEnglish()?'Conversation':'المحادثة';
-
-  const messages = document.createElement('div');
-  messages.className = 'chat-messages';
-  messages.id = 'chat-messages-'+inquiry.id;
-
-  const composer = document.createElement('div');
-  composer.className = 'chat-composer';
-
-  box.append(heading,messages);
-
-  if(inquiry.status === 'closed'){
-
-    const closed = document.createElement('div');
-    closed.className = 'chat-closed';
-
-    closed.textContent = isEnglish()
-      ?'This inquiry is closed. Messages can still be viewed.'
-      :'تم إغلاق هذا الاستفسار. يمكنك قراءة المحادثة السابقة.';
-
-    box.appendChild(closed);
-
+  if(profile.account_type==='buyer'){
+    query=query.eq('buyer_id',currentUser.id);
   }else{
-
-    const textarea = document.createElement('textarea');
-    textarea.placeholder = isEnglish()?'Write a message...':'اكتب رسالتك هنا...';
-    textarea.id = 'chat-input-'+inquiry.id;
-
-    const send = document.createElement('button');
-    send.className = 'chat-send';
-    send.textContent = isEnglish()?'Send message':'إرسال الرسالة';
-
-    send.addEventListener('click',()=>{
-      sendChatMessage(inquiry.id);
-    });
-
-    textarea.addEventListener('keydown',event=>{
-
-      if(event.key === 'Enter' && !event.shiftKey){
-        event.preventDefault();
-        sendChatMessage(inquiry.id);
-      }
-
-    });
-
-    composer.append(textarea,send);
-    box.appendChild(composer);
+    if(!company)return {data:[],error:null};
+    query=query.eq('company_id',company.id);
   }
+  return await query;
+}
 
-  const refresh = document.createElement('button');
-  refresh.className = 'chat-refresh';
-  refresh.textContent = isEnglish()?'Refresh conversation':'تحديث المحادثة';
-
-  refresh.addEventListener('click',()=>{
-    loadChatMessages(inquiry.id);
+async function loadMyProducts(){
+  const list=$('myProductsList');
+  if(!company){list.innerHTML=`<div class="empty">${tr('أنشئ ملف النشاط أولًا.','Create your business profile first.')}</div>`;return}
+  list.textContent=tr('جارٍ التحميل...','Loading...');
+  const {data,error}=await db.from('products')
+    .select('id,name,category,description,image_url,status,created_at')
+    .eq('company_id',company.id).order('created_at',{ascending:false});
+  if(error){list.textContent=error.message;return}
+  myProducts=data||[];
+  if(!myProducts.length){list.innerHTML=`<div class="empty">${tr('لم تضف منتجات بعد.','No products added yet.')}</div>`;return}
+  list.innerHTML='';
+  myProducts.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='item';
+    const title=document.createElement('h3');title.textContent=p.name;
+    const desc=document.createElement('p');desc.textContent=[p.category,p.description].filter(Boolean).join(' — ');
+    const status=document.createElement('span');status.className='pill';status.textContent=statusText(p.status);
+    el.append(title,desc,status);list.append(el);
   });
-
-  box.appendChild(refresh);
-
-  /*
-    لا نحمل الرسائل هنا لأن العنصر لم يضاف إلى الصفحة بعد.
-    يتم التحميل بعد إضافته داخل loadInquiries و loadMyInquiries.
-  */
-
-  return box;
-}
-
-/* تحميل رسائل محادثة واحدة */
-async function loadChatMessages(inquiryId){
-
-  const container = document.getElementById('chat-messages-'+inquiryId);
-
-  if(!container)return;
-
-  container.innerHTML =
-    '<div class="chat-empty">'+
-    (isEnglish()?'Loading messages...':'جارٍ تحميل الرسائل...')+
-    '</div>';
-
-  const {data,error} = await db.from('inquiry_messages')
-    .select('id,inquiry_id,sender_id,message,created_at')
-    .eq('inquiry_id',inquiryId)
-    .order('created_at',{ascending:true});
-
-  if(error){
-
-    container.textContent =
-      (isEnglish()?'Could not load messages: ':'تعذر تحميل الرسائل: ')+
-      error.message;
-
-    return;
-  }
-
-  if(!data || !data.length){
-
-    container.innerHTML =
-      '<div class="chat-empty">'+
-      (isEnglish()
-      ?'No messages yet. Start the conversation.'
-      :'لا توجد رسائل بعد. ابدأ المحادثة برسالتك.')+
-      '</div>';
-
-    return;
-  }
-
-  container.innerHTML = '';
-
-  data.forEach(msg=>{
-
-    const mine = msg.sender_id === currentUser.id;
-
-    const bubble = document.createElement('div');
-    bubble.className =
-      'chat-bubble '+(mine?'chat-mine':'chat-theirs');
-
-    const sender = document.createElement('div');
-    sender.className = 'chat-sender';
-
-    sender.textContent = mine
-      ? (isEnglish()?'You':(profile.full_name || 'أنت'))
-      : (isEnglish()?'Other party':(otherPartyNameForChat || 'الطرف الآخر'));
-
-    const text = document.createElement('div');
-    text.textContent = msg.message;
-
-    const time = document.createElement('div');
-    time.className = 'chat-meta';
-    time.textContent = formatInquiryDate(msg.created_at);
-
-    bubble.append(sender,text,time);
-    container.appendChild(bubble);
-  });
-
-  container.scrollTop = container.scrollHeight;
-}
-
-/* اسم الطرف الآخر في المحادثة */
-let otherPartyNameForChat = '';
-
-/* إرسال رسالة */
-async function sendChatMessage(inquiryId){
-
-  const input = document.getElementById('chat-input-'+inquiryId);
-
-  if(!input || !currentUser)return;
-
-  const messageText = input.value.trim();
-
-  if(!messageText){
-    alert(isEnglish()?'Write a message first.':'اكتب الرسالة أولًا.');
-    return;
-  }
-
-  const sendButton = input.parentElement.querySelector('button');
-  sendButton.disabled = true;
-
-  const {error} = await db.from('inquiry_messages').insert({
-    inquiry_id:inquiryId,
-    sender_id:currentUser.id,
-    message:messageText
-  });
-
-  sendButton.disabled = false;
-
-  if(error){
-
-    showMessage(
-      (isEnglish()?'Could not send message: ':'تعذر إرسال الرسالة: ')+
-      error.message
-    );
-
-    return;
-  }
-
-  input.value = '';
-
-  showMessage(isEnglish()?'Message sent.':'تم إرسال الرسالة.');
-
-  await loadChatMessages(inquiryId);
-}
-
-/* استفسارات النشاط التجاري */
-async function loadInquiries(){
-
-  const list = document.getElementById('inquiriesList');
-
-  if(!company){
-    list.textContent =
-      isEnglish()?'Create your business profile first.':'أنشئ ملف نشاطك أولًا.';
-    return;
-  }
-
-  list.textContent =
-    isEnglish()?'Loading inquiries...':'جارٍ تحميل الاستفسارات...';
-
-  const {data,error} = await db.from('inquiries')
-    .select('id,buyer_id,product_id,quantity,message,status,created_at,products(name)')
-    .eq('company_id',company.id)
-    .order('created_at',{ascending:false});
-
-  if(error){
-
-    list.textContent =
-      (isEnglish()?'Could not load inquiries: ':'تعذر تحميل الاستفسارات: ')+
-      error.message;
-
-    return;
-  }
-
-  if(!data || !data.length){
-
-    list.textContent =
-      isEnglish()
-      ?'No inquiries have arrived yet.'
-      :'لا توجد استفسارات واردة حتى الآن.';
-
-    return;
-  }
-
-  list.innerHTML = '';
-
-  for(const inquiry of data){
-
-    const item = document.createElement('div');
-    item.className = 'inquiry-item';
-
-    const productData = relationOne(inquiry.products);
-
-    const product = document.createElement('strong');
-    product.textContent =
-      (isEnglish()?'Product: ':'المنتج: ')+
-      (productData?.name || (isEnglish()?'Unavailable':'غير متوفر'));
-
-    const quantity = document.createElement('p');
-    quantity.textContent =
-      (isEnglish()?'Requested quantity: ':'الكمية المطلوبة: ')+
-      (inquiry.quantity || (isEnglish()?'Not specified':'لم تُحدد'));
-
-    const originalMessage = document.createElement('p');
-    originalMessage.textContent =
-      (isEnglish()?'Original buyer inquiry: ':'رسالة المشتري الأصلية: ')+
-      (inquiry.message || '');
-
-    const status = document.createElement('span');
-    status.className = 'inquiry-status';
-    status.textContent = inquiryStatusLabel(inquiry.status);
-
-    const date = document.createElement('p');
-    date.className = 'inquiry-date';
-    date.textContent =
-      (isEnglish()?'Received: ':'تاريخ الاستلام: ')+
-      formatInquiryDate(inquiry.created_at);
-
-    item.append(product,quantity,originalMessage,status,date);
-
-    const chat = createChatInterface(inquiry,'المشتري');
-    item.appendChild(chat);
-
-    const replyArea = document.createElement('div');
-    replyArea.className = 'reply-area';
-
-    if(inquiry.status !== 'closed'){
-
-      const closeButton = document.createElement('button');
-      closeButton.className = 'danger';
-      closeButton.textContent =
-        isEnglish()?'Close inquiry':'إغلاق الاستفسار';
-
-      closeButton.addEventListener('click',async()=>{
-
-        if(!confirm(
-          isEnglish()
-          ?'Are you sure you want to close this inquiry?'
-          :'هل تريد إغلاق هذا الاستفسار؟'
-        ))return;
-
-        closeButton.disabled = true;
-
-        const {data,error} = await db.from('inquiries')
-          .update({status:'closed'})
-          .eq('id',inquiry.id)
-          .eq('company_id',company.id)
-          .select('id')
-          .maybeSingle();
-
-        if(error || !data){
-
-          closeButton.disabled = false;
-
-          showMessage(
-            (isEnglish()?'Could not close inquiry: ':'تعذر إغلاق الاستفسار: ')+
-            (error?.message || '')
-          );
-
-          return;
-        }
-
-        showMessage(isEnglish()?'Inquiry closed.':'تم إغلاق الاستفسار.');
-
-        await loadInquiries();
-      });
-
-      replyArea.appendChild(closeButton);
-
-    }else{
-
-      const closedNote = document.createElement('p');
-      closedNote.className = 'closed-note';
-      closedNote.textContent =
-        isEnglish()?'This inquiry is closed.':'تم إغلاق هذا الاستفسار.';
-
-      replyArea.appendChild(closedNote);
-    }
-
-    item.appendChild(replyArea);
-    list.appendChild(item);
-
-    /* تحميل الرسائل بعد ظهور صندوق المحادثة */
-    await loadChatMessages(inquiry.id);
-  }
-}
-
-/* استفسارات المشتري */
-async function loadMyInquiries(){
-
-  const list = document.getElementById('myInquiriesList');
-
-  if(!currentUser){
-    list.textContent =
-      isEnglish()?'Please sign in first.':'يرجى تسجيل الدخول أولًا.';
-    return;
-  }
-
-  list.textContent =
-    isEnglish()?'Loading your inquiries...':'جارٍ تحميل استفساراتك...';
-
-  const refreshButton = document.getElementById('refreshMyInquiriesButton');
-
-  if(refreshButton)refreshButton.disabled = true;
-
-  const {data,error} = await db.from('inquiries')
-    .select('id,product_id,company_id,quantity,message,status,created_at,products(name),companies(name)')
-    .eq('buyer_id',currentUser.id)
-    .order('created_at',{ascending:false});
-
-  if(refreshButton)refreshButton.disabled = false;
-
-  if(error){
-
-    list.textContent =
-      (isEnglish()?'Could not load your inquiries: ':'تعذر تحميل استفساراتك: ')+
-      error.message;
-
-    return;
-  }
-
-  if(!data || !data.length){
-
-    list.textContent =
-      isEnglish()
-      ?'You have not sent any inquiries yet.'
-      :'لم ترسل أي استفسارات حتى الآن.';
-
-    return;
-  }
-
-  list.innerHTML = '';
-
-  for(const inquiry of data){
-
-    const item = document.createElement('div');
-    item.className = 'inquiry-item';
-
-    const productData = relationOne(inquiry.products);
-    const companyData = relationOne(inquiry.companies);
-
-    const product = document.createElement('strong');
-    product.textContent =
-      (isEnglish()?'Product: ':'المنتج: ')+
-      (productData?.name || (isEnglish()?'Unavailable':'غير متوفر'));
-
-    const business = document.createElement('p');
-    business.textContent =
-      (isEnglish()?'Company: ':'الشركة: ')+
-      (companyData?.name || (isEnglish()?'Unavailable':'غير متوفرة'));
-
-    const quantity = document.createElement('p');
-    quantity.textContent =
-      (isEnglish()?'Requested quantity: ':'الكمية المطلوبة: ')+
-      (inquiry.quantity || (isEnglish()?'Not specified':'لم تُحدد'));
-
-    const originalMessage = document.createElement('p');
-    originalMessage.textContent =
-      (isEnglish()?'Your original message: ':'رسالتك الأصلية: ')+
-      (inquiry.message || '');
-
-    const status = document.createElement('span');
-    status.className = 'inquiry-status';
-    status.textContent = inquiryStatusLabel(inquiry.status);
-
-    const date = document.createElement('p');
-    date.className = 'inquiry-date';
-    date.textContent =
-      (isEnglish()?'Sent: ':'تاريخ الإرسال: ')+
-      formatInquiryDate(inquiry.created_at);
-
-    item.append(product,business,quantity,originalMessage,status,date);
-
-    const chat = createChatInterface(inquiry,'الشركة');
-    item.appendChild(chat);
-
-    list.appendChild(item);
-
-    /* تحميل الرسائل بعد إضافة العنصر للصفحة */
-    await loadChatMessages(inquiry.id);
-  }
 }
 
 async function loadPublicProducts(){
-
-  const list = document.getElementById('publicProductsList');
-
-  list.textContent =
-    isEnglish()?'Loading products...':'جارٍ تحميل المنتجات...';
-
-  const {data,error} = await db.from('products')
-    .select('id,name,category,description,image_url,company_id,companies(name,country,city,phone,website)')
-    .eq('status','published')
-    .order('created_at',{ascending:false})
-    .limit(50);
-
-  if(error){
-
-    list.textContent =
-      (isEnglish()?'Could not load public products: ':'تعذر تحميل المنتجات المنشورة: ')+
-      error.message;
-
-    return;
-  }
-
-  if(!data || !data.length){
-
-    list.textContent =
-      isEnglish()
-      ?'No published products are available yet.'
-      :'لا توجد منتجات منشورة حاليًا.';
-
-    return;
-  }
-
-  list.innerHTML = '';
-
-  data.forEach(p=>{
-
-    const item = document.createElement('div');
-    item.className = 'item';
-
-    const title = document.createElement('strong');
-    title.textContent = p.name;
-
-    const c = relationOne(p.companies);
-
-    const companyLine = document.createElement('p');
-    companyLine.className = 'muted';
-
-    if(c && c.name){
-
-      const link = document.createElement('a');
-      link.className = 'company-link';
-      link.href = 'company.html?id='+encodeURIComponent(p.company_id);
-      link.textContent = c.name;
-
-      companyLine.appendChild(link);
+  const list=$('publicProducts');
+  list.textContent=tr('جارٍ تحميل المنتجات...','Loading products...');
+  const {data,error}=await db.from('products')
+    .select('id,name,category,description,image_url,company_id,companies(name,country,city)')
+    .eq('status','published').order('created_at',{ascending:false}).limit(60);
+  if(error){list.textContent=error.message;return}
+  const term=value('productSearch').toLowerCase();
+  const rows=(data||[]).filter(p=>
+    !term||[p.name,p.category,p.description].join(' ').toLowerCase().includes(term)
+  );
+  if(!rows.length){list.innerHTML=`<div class="empty">${tr('لا توجد نتائج.','No results found.')}</div>`;return}
+  list.innerHTML='';
+  rows.forEach(p=>{
+    const c=relationOne(p.companies);
+    const el=document.createElement('div');el.className='item';
+    if(p.image_url){
+      const img=document.createElement('img');
+      img.src=p.image_url;img.alt=p.name;img.loading='lazy';
+      img.style='width:100%;max-height:190px;object-fit:cover;border-radius:10px';
+      img.onerror=()=>img.remove();el.append(img);
     }
-
-    const detail = document.createElement('p');
-    detail.textContent = (p.category || '')+' — '+(p.description || '');
-
-    item.append(title,companyLine,detail);
-    list.appendChild(item);
+    const title=document.createElement('h3');title.textContent=p.name;
+    const desc=document.createElement('p');desc.textContent=p.description||'';
+    const category=document.createElement('span');category.className='pill';category.textContent=p.category||tr('منتج','Product');
+    const companyLink=document.createElement('p');
+    if(c?.name){
+      const a=document.createElement('a');
+      a.className='company-link';a.href='company.html?id='+encodeURIComponent(p.company_id);
+      a.textContent=c.name;companyLink.append(a);
+    }
+    const contact=document.createElement('button');
+    contact.className='btn';contact.textContent=tr('إرسال استفسار','Send inquiry');
+    contact.addEventListener('click',()=>createInquiry(p));
+    el.append(title,desc,category,companyLink,contact);list.append(el);
   });
 }
 
 async function loadPublicCompanies(){
-
-  const list = document.getElementById('publicCompaniesList');
-
-  list.textContent =
-    isEnglish()?'Loading companies...':'جارٍ تحميل الشركات...';
-
-  const {data,error} = await db.from('companies')
-    .select('id,name,country,city,sector,business_type,description,phone,website')
-    .eq('status','published')
-    .order('created_at',{ascending:false})
-    .limit(50);
-
-  if(error){
-
-    list.textContent =
-      (isEnglish()?'Could not load companies: ':'تعذر تحميل الشركات: ')+
-      error.message;
-
-    return;
-  }
-
-  if(!data || !data.length){
-
-    list.textContent =
-      isEnglish()
-      ?'No published companies are available yet.'
-      :'لا توجد شركات منشورة حاليًا.';
-
-    return;
-  }
-
-  list.innerHTML = '';
-
-  data.forEach(c=>{
-
-    const item = document.createElement('div');
-    item.className = 'item';
-
-    const title = document.createElement('a');
-    title.className = 'company-link';
-    title.href = 'company.html?id='+encodeURIComponent(c.id);
-    title.textContent = c.name;
-
-    const info = document.createElement('p');
-    info.className = 'muted';
-    info.textContent =
-      [c.country,c.city,c.sector,c.business_type].filter(Boolean).join(' — ');
-
-    const desc = document.createElement('p');
-    desc.textContent = c.description || '';
-
-    const openLink = document.createElement('a');
-    openLink.className = 'open-company';
-    openLink.href = 'company.html?id='+encodeURIComponent(c.id);
-    openLink.textContent =
-      isEnglish()?'View company profile →':'عرض صفحة الشركة ←';
-
-    item.append(title,info,desc,openLink);
-    list.appendChild(item);
+  const list=$('publicCompanies');
+  list.textContent=tr('جارٍ تحميل الشركات...','Loading companies...');
+  const {data,error}=await db.from('companies')
+    .select('id,name,country,city,sector,business_type,description')
+    .eq('status','published').order('created_at',{ascending:false}).limit(60);
+  if(error){list.textContent=error.message;return}
+  const term=value('companySearch').toLowerCase();
+  const rows=(data||[]).filter(c=>
+    !term||[c.name,c.country,c.city,c.sector,c.business_type].join(' ').toLowerCase().includes(term)
+  );
+  if(!rows.length){list.innerHTML=`<div class="empty">${tr('لا توجد شركات مطابقة.','No matching companies.')}</div>`;return}
+  list.innerHTML='';
+  rows.forEach(c=>{
+    const el=document.createElement('div');el.className='item';
+    const a=document.createElement('a');a.className='company-link';
+    a.href='company.html?id='+encodeURIComponent(c.id);a.textContent=c.name;
+    const info=document.createElement('p');info.textContent=[c.country,c.city,c.sector,c.business_type].filter(Boolean).join(' — ');
+    const desc=document.createElement('p');desc.textContent=c.description||'';
+    el.append(a,info,desc);list.append(el);
   });
 }
 
-function showBuyerTab(tab){
+async function createInquiry(product){
+  if(profile.account_type!=='buyer'){
+    showNotice(tr('إرسال الاستفسارات متاح لحسابات المشترين.','Only buyer accounts can send inquiries.'));
+    return;
+  }
+  const quantity=prompt(tr('ما الكمية المطلوبة؟','Requested quantity?'));
+  if(quantity===null)return;
+  const message=prompt(tr('اكتب رسالتك إلى الشركة:','Write your message to the company:'));
+  if(message===null||!message.trim())return;
 
-  const products = tab === 'products';
-  const companies = tab === 'companies';
+  const {error}=await db.from('inquiries').insert({
+    product_id:product.id,
+    company_id:product.company_id,
+    buyer_id:currentUser.id,
+    quantity:quantity.trim(),
+    message:message.trim()
+  });
+  if(error){showNotice(tr('تعذر إرسال الاستفسار: ','Could not send inquiry: ')+error.message);return}
+  showNotice(tr('تم إرسال استفسارك بنجاح.','Your inquiry was sent.'));
+  await loadOverview();
+}
 
-  document.getElementById('buyerProductsCard')
-    .classList.toggle('hidden',!products);
+async function loadInbox(){
+  const list=$('inboxList');
+  list.innerHTML=`<div class="empty">${tr('جارٍ تحميل الاستفسارات...','Loading inquiries...')}</div>`;
+  const {data,error}=await getMyInquiries();
+  if(error){list.textContent=error.message;return}
+  inquiries=data||[];
+  if(!inquiries.length){
+    list.innerHTML=`<div class="empty">${tr('لا توجد محادثات حتى الآن.','No conversations yet.')}</div>`;
+    return;
+  }
+  list.innerHTML='';
+  inquiries.forEach(q=>{
+    const p=relationOne(q.products);
+    const c=relationOne(q.companies);
+    const button=document.createElement('button');
+    button.className='inbox-entry'+(selectedInquiry?.id===q.id?' active':'');
+    const title=document.createElement('strong');
+    title.textContent=profile.account_type==='buyer'?(c?.name||tr('شركة','Company')):(p?.name||tr('منتج','Product'));
+    const preview=document.createElement('span');
+    preview.className='muted';
+    preview.textContent=(q.message||'').slice(0,75);
+    const state=document.createElement('small');
+    state.textContent=' · '+inquiryStatus(q.status);
+    button.append(title,preview,state);
+    button.addEventListener('click',()=>openConversation(q));
+    list.append(button);
+  });
+  if(selectedInquiry){
+    const still=inquiries.find(q=>q.id===selectedInquiry.id);
+    if(still)await openConversation(still,false);
+  }
+}
 
-  document.getElementById('buyerCompaniesCard')
-    .classList.toggle('hidden',!companies);
+async function openConversation(inquiry,subscribe=true){
+  selectedInquiry=inquiry;
+  const p=relationOne(inquiry.products);
+  const c=relationOne(inquiry.companies);
+  $('chatTitle').textContent=(p?.name||tr('استفسار','Inquiry'))+' — '+(c?.name||'');
+  $('chatInput').disabled=inquiry.status==='closed';
+  $('sendMessageButton').disabled=inquiry.status==='closed';
 
-  document.getElementById('buyerInquiriesCard')
-    .classList.toggle('hidden',tab !== 'inquiries');
+  document.querySelectorAll('.inbox-entry').forEach(b=>b.classList.remove('active'));
+  await loadMessages(inquiry);
 
-  document.getElementById('productsTabButton').className =
-    products?'':'secondary';
+  if(subscribe){
+    if(messagesChannel)await db.removeChannel(messagesChannel);
+    messagesChannel=db.channel('inquiry-'+inquiry.id)
+      .on('postgres_changes',{
+        event:'INSERT',schema:'public',table:'inquiry_messages',
+        filter:'inquiry_id=eq.'+inquiry.id
+      },()=>loadMessages(inquiry))
+      .subscribe();
+  }
+}
 
-  document.getElementById('companiesTabButton').className =
-    companies?'':'secondary';
+async function loadMessages(inquiry){
+  const box=$('chatMessages');
+  box.innerHTML=`<div class="empty">${tr('جارٍ تحميل الرسائل...','Loading messages...')}</div>`;
+  const {data,error}=await db.from('inquiry_messages')
+    .select('id,inquiry_id,sender_id,message,created_at')
+    .eq('inquiry_id',inquiry.id).order('created_at',{ascending:true});
 
-  document.getElementById('myInquiriesTabButton').className =
-    tab === 'inquiries'?'':'secondary';
+  if(error){
+    box.innerHTML=`<div class="empty">${tr('تعذر تحميل المحادثة: ','Could not load conversation: ')}${escapeHTML(error.message)}</div>`;
+    return;
+  }
 
-  if(companies)loadPublicCompanies();
+  box.innerHTML='';
+  const rows=data||[];
 
-  if(tab === 'inquiries')loadMyInquiries();
+  /* الرسالة الأصلية محفوظة في inquiries.message */
+  const original=document.createElement('div');
+  original.className='bubble';
+  original.textContent=inquiry.message||'';
+  const originalDate=document.createElement('small');
+  originalDate.textContent=dateText(inquiry.created_at);
+  original.append(originalDate);
+  box.append(original);
+
+  /* عرض الرد القديم إن كان موجودًا قبل استخدام جدول الرسائل */
+  if(inquiry.reply&&!rows.length){
+    const old=document.createElement('div');
+    old.className='bubble';
+    old.textContent=inquiry.reply;
+    box.append(old);
+  }
+
+  rows.forEach(m=>{
+    const bubble=document.createElement('div');
+    bubble.className='bubble'+(m.sender_id===currentUser.id?' mine':'');
+    bubble.textContent=m.message;
+    const stamp=document.createElement('small');
+    stamp.textContent=dateText(m.created_at);
+    bubble.append(stamp);box.append(bubble);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+
+async function sendChatMessage(){
+  if(!selectedInquiry||!value('chatInput'))return;
+  if(selectedInquiry.status==='closed'){
+    showNotice(tr('هذا الاستفسار مغلق.','This inquiry is closed.'));
+    return;
+  }
+  const button=$('sendMessageButton');
+  button.disabled=true;
+  const text=value('chatInput');
+  const {error}=await db.from('inquiry_messages').insert({
+    inquiry_id:selectedInquiry.id,
+    sender_id:currentUser.id,
+    message:text
+  });
+  button.disabled=false;
+  if(error){
+    showNotice(tr('تعذر إرسال الرسالة. تحقق من صلاحيات المحادثة: ','Could not send message. Check conversation permissions: ')+error.message);
+    return;
+  }
+  $('chatInput').value='';
+  await loadMessages(selectedInquiry);
+  await loadInbox();
+}
+
+async function loadActivity(){
+  const list=$('activityList');
+  const {data,error}=await getMyInquiries();
+  if(error){list.textContent=error.message;return}
+  if(!data?.length){list.innerHTML=`<div class="empty">${tr('لا يوجد نشاط بعد.','No activity yet.')}</div>`;return}
+  list.innerHTML='';
+  data.forEach(q=>{
+    const p=relationOne(q.products);
+    const c=relationOne(q.companies);
+    const el=document.createElement('div');el.className='item';
+    const title=document.createElement('h3');
+    title.textContent=profile.account_type==='buyer'
+      ?tr('استفسارك لدى ','Your inquiry to ')+(c?.name||'')
+      :tr('استفسار جديد عن ','New inquiry about ')+(p?.name||'');
+    const body=document.createElement('p');
+    body.textContent=q.reply||q.message||'';
+    const date=document.createElement('small');
+    date.className='muted';date.textContent=dateText(q.responded_at||q.created_at);
+    el.append(title,body,date);list.append(el);
+  });
 }
 
 async function logout(){
-
-  if(messagesRealtimeChannel){
-    await db.removeChannel(messagesRealtimeChannel);
-    messagesRealtimeChannel = null;
-  }
-
+  if(messagesChannel)await db.removeChannel(messagesChannel);
   await db.auth.signOut();
-
-  window.location.href = './';
+  location.href='./';
 }
 
 function toggleLanguage(){
+  currentLanguage=isEn()?'ar':'en';
+  document.documentElement.lang=currentLanguage;
+  document.documentElement.dir=isEn()?'ltr':'rtl';
+  $('langButton').textContent=isEn()?'العربية':'EN';
+  $('languageSettingButton').textContent=tr('التبديل إلى الإنجليزية','Switch to Arabic');
 
-  currentLanguage = isEnglish()?'ar':'en';
+  document.querySelectorAll('[data-ar]').forEach(el=>{
+    el.textContent=el.dataset[currentLanguage];
+  });
 
-  const en = isEnglish();
-
-  document.documentElement.lang = currentLanguage;
-  document.documentElement.dir = en?'ltr':'rtl';
-
-  document.getElementById('languageButton').textContent =
-    en?'العربية':'English';
-
-  document.getElementById('logoutButton').textContent =
-    en?'Log out':'تسجيل الخروج';
-
-  if(profile)renderAccountHeader();
-
-  document.getElementById('buyerTitle').textContent =
-    en?'Buyer Dashboard':'لوحة المشتري';
-
-  document.getElementById('buyerIntro').textContent =
-    en
-    ?'Browse published companies and products, then contact businesses directly.'
-    :'تصفح الشركات والمنتجات المنشورة وتواصل مباشرة مع أصحابها.';
-
-  document.getElementById('productsTabButton').textContent =
-    en?'Browse Products':'تصفح المنتجات';
-
-  document.getElementById('companiesTabButton').textContent =
-    en?'Explore Companies':'استكشاف الشركات';
-
-  document.getElementById('myInquiriesTabButton').textContent =
-    en?'My Inquiries':'استفساراتي';
-
-  document.getElementById('publicProductsTitle').textContent =
-    en?'Published Products':'المنتجات المنشورة';
-
-  document.getElementById('publicCompaniesTitle').textContent =
-    en?'Published Companies':'الشركات المنشورة';
-
-  document.getElementById('myInquiriesTitle').textContent =
-    en?'My Inquiries':'استفساراتي';
-
-  document.getElementById('myInquiriesIntro').textContent =
-    en
-    ?'Track your inquiries and conversations with companies here.'
-    :'تابع استفساراتك ومحادثاتك مع الشركات هنا.';
-
-  document.getElementById('refreshMyInquiriesButton').textContent =
-    en?'Refresh inquiries':'تحديث الاستفسارات';
-
-  if(profile && profile.account_type !== 'buyer'){
-
-    document.getElementById('profileTitle').textContent =
-      profileTitles[profile.account_type][currentLanguage];
-  }
-
-  document.getElementById('profileIntro').textContent =
-    en
-    ?'Manage your business details. Your account is reviewed before publication.'
-    :'أدخل بيانات نشاطك. سيخضع الحساب للمراجعة قبل نشره.';
-
-  document.getElementById('addProductTitle').textContent =
-    en?'Add a Product':'إضافة منتج';
-
-  document.getElementById('productIntro').textContent =
-    en?'Add products offered by your business.':'أضف منتجات نشاطك التجاري.';
-
-  document.getElementById('myProductsTitle').textContent =
-    en?'My Products':'منتجات نشاطي';
-
-  document.getElementById('inquiriesTitle').textContent =
-    en?'Buyer Inquiries':'استفسارات المشترين';
-
-  document.getElementById('inquiriesIntro').textContent =
-    en
-    ?'Messages sent by buyers about your products appear here.'
-    :'هنا تظهر الرسائل التي يرسلها المشترون بخصوص منتجات نشاطك.';
-
-  const placeholders = {
-
-    companyName:['Business name','اسم النشاط التجاري'],
-    country:['Country','الدولة'],
-    city:['City','المدينة'],
-    sector:['Sector','القطاع'],
-    businessType:['Business type','نوع النشاط'],
-    description:['Business description','نبذة عن النشاط'],
-    email:['Email','البريد الإلكتروني'],
-    phone:['Phone','رقم الهاتف'],
-    website:['Website','الموقع الإلكتروني'],
-    productName:['Product name','اسم المنتج'],
-    category:['Category','التصنيف'],
-    productDescription:['Product description','وصف المنتج'],
-    imageUrl:['Product image URL (optional)','رابط صورة المنتج (اختياري)']
+  const labels={
+    navLabel:['القائمة الرئيسية','Main menu'],
+    welcomeSub:['مساحتك لإدارة علاقاتك التجارية والتواصل مع الشركات.','Manage your business relationships and connect with companies.'],
+    statOneLabel:['نوع الحساب','Account type'],
+    quickTitle:['الوصول السريع','Quick access'],
+    quickText:['استخدم الأقسام للوصول إلى المنتجات والشركات والاستفسارات.','Use the sections to access products, companies and inquiries.'],
+    quickDiscover:['استكشاف المنتجات','Explore products'],
+    quickInbox:['فتح صندوق الرسائل','Open inbox'],
+    quickProfile:['ملفي الشخصي','My profile'],
+    recentTitle:['آخر الاستفسارات','Recent inquiries'],
+    profileHeading:['ملفي الشخصي','My profile'],
+    profileSub:['بيانات حسابك في WASLA.','Your WASLA account information.'],
+    personalInfoTitle:['المعلومات الأساسية','Basic information'],
+    nameLabel:['الاسم الكامل','Full name'],
+    emailLabel:['البريد الإلكتروني','Email'],
+    typeLabel:['نوع الحساب','Account type'],
+    createdLabel:['تاريخ إنشاء الحساب','Account created'],
+    profileNote:['هذه البيانات للعرض فقط؛ لا يتم تعديل حقول غير مؤكدة في قاعدة البيانات.','These details are read-only.'],
+    companyHeading:['ملف النشاط التجاري','Business profile'],
+    companySub:['عرّف الآخرين بنشاطك التجاري.','Introduce your business.'],
+    businessNameLabel:['اسم النشاط','Business name'],
+    discoverHeading:['اكتشف المنتجات','Discover products'],
+    discoverSub:['منتجات الشركات المنشورة على WASLA.','Published products on WASLA.'],
+    companiesHeading:['الشركات','Companies'],
+    companiesSub:['استكشف الأنشطة التجارية المنشورة.','Explore published businesses.'],
+    myProductsHeading:['منتجاتي','My products'],
+    myProductsSub:['إدارة المنتجات المرتبطة بنشاطك.','Manage your business products.'],
+    addProductTitle:['إضافة منتج جديد','Add a product'],
+    myProductsListTitle:['قائمة المنتجات','Product list'],
+    inboxHeading:['صندوق الاستفسارات','Inbox'],
+    inboxSub:['تواصل مع المشترين أو تابع استفساراتك.','Communicate with buyers or follow your inquiries.'],
+    activityHeading:['النشاط','Activity'],
+    activitySub:['آخر الاستفسارات والردود المرتبطة بحسابك.','Recent inquiries and replies linked to your account.'],
+    settingsHeading:['الإعدادات','Settings'],
+    settingsSub:['إعدادات عرض لوحة التحكم.','Dashboard display settings.'],
+    languageTitle:['اللغة','Language'],
+    languageDesc:['اختر لغة واجهة لوحة التحكم.','Choose the dashboard language.'],
+    securityTitle:['الحساب','Account'],
+    securityDesc:['تسجيل الخروج من حسابك الحالي.','Sign out of your account.'],
+    logoutSettingButton:['تسجيل الخروج','Log out']
   };
+  Object.keys(labels).forEach(id=>{if($(id))$(id).textContent=labels[id][isEn()?1:0]});
 
-  for(const id in placeholders){
-
-    document.getElementById(id).placeholder =
-      placeholders[id][en?0:1];
-  }
-
-  document.getElementById('companyButton').textContent =
-    en
-    ?(company?'Update details':'Save details')
-    :(company?'تحديث البيانات':'حفظ البيانات');
-
-  document.getElementById('productButton').textContent =
-    en?'Add Product':'إضافة المنتج';
-
-  if(company){
-
-    document.getElementById('companyStatus').textContent =
-      (en?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
-
-    loadProducts();
-    loadInquiries();
-  }
-
-  if(profile && profile.account_type === 'buyer'){
-
-    loadPublicProducts();
-    loadMyInquiries();
-
-    if(!document.getElementById('buyerCompaniesCard').classList.contains('hidden')){
-      loadPublicCompanies();
-    }
-  }
+  const placeholders={
+    country:['الدولة','Country'],city:['المدينة','City'],sector:['القطاع','Sector'],
+    businessType:['نوع النشاط','Business type'],companyEmail:['البريد الإلكتروني','Email'],
+    phone:['رقم الهاتف','Phone'],website:['الموقع الإلكتروني','Website'],
+    description:['نبذة عن النشاط التجاري','Business description'],
+    productName:['اسم المنتج','Product name'],category:['التصنيف','Category'],
+    productDescription:['وصف المنتج','Product description'],
+    imageUrl:['رابط صورة المنتج (اختياري)','Product image URL (optional)'],
+    productSearch:['ابحث عن منتج أو تصنيف...','Search products or categories...'],
+    companySearch:['ابحث عن شركة أو قطاع...','Search companies or sectors...'],
+    chatInput:['اكتب رسالتك...','Write your message...']
+  };
+  Object.keys(placeholders).forEach(id=>$(id).placeholder=placeholders[id][isEn()?1:0]);
+  $('logoutSettingButton').textContent=tr('تسجيل الخروج','Log out');
+  $('saveCompanyButton').textContent=tr('حفظ البيانات','Save details');
+  $('addProductButton').textContent=tr('إضافة المنتج','Add product');
+  $('sendMessageButton').textContent=tr('إرسال','Send');
+  renderHeader();
 }
 
 start();
