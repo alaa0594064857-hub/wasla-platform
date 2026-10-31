@@ -20,13 +20,17 @@ h1{color:#087f70;font-size:28px}
 #message{background:#eaf2f7;padding:14px;border-radius:9px;line-height:1.7}
 #productImage{width:100%;max-height:420px;object-fit:contain;border-radius:10px;margin:12px 0}
 .company-link{display:inline-block;color:#087f70;font-weight:bold;text-decoration:none;font-size:18px}
-.company-link:hover{text-decoration:underline}
 .contact a{display:block;color:#087f70;text-decoration:none;margin:12px 0;overflow-wrap:anywhere}
 .back-company{display:inline-block;margin-top:12px;color:#087f70;text-decoration:none}
-@media(max-width:600px){
-  header{align-items:flex-start;flex-direction:column}
-  .card{padding:18px}
-}
+label{display:block;font-weight:bold;margin:16px 0 7px}
+input,textarea{width:100%;padding:13px;border:1px solid #d8e1e7;border-radius:8px;font:inherit}
+textarea{min-height:120px;resize:vertical}
+button{width:100%;margin-top:18px;padding:14px;background:#087f70;color:white;border:0;border-radius:8px;font:inherit;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6;cursor:not-allowed}
+#inquiryMessage{margin-top:14px;padding:12px;border-radius:8px;line-height:1.7;display:none}
+.success{background:#e5f7ee;color:#126b46}
+.error{background:#fdecec;color:#a12d2d}
+@media(max-width:600px){header{align-items:flex-start;flex-direction:column}.card{padding:18px}}
 </style>
 </head>
 <body>
@@ -58,6 +62,40 @@ h1{color:#087f70;font-size:28px}
 <h2>التواصل مع الشركة</h2>
 <div id="contactDetails" class="contact"></div>
 </section>
+
+<section id="inquiryCard" class="card" style="display:none">
+<h2>إرسال استفسار تجاري</h2>
+<p class="muted">أرسل طلبك مباشرة إلى الشركة المورّدة.</p>
+
+<form id="inquiryForm">
+<label for="quantity">الكمية المطلوبة</label>
+<input
+  id="quantity"
+  type="text"
+  placeholder="مثال: 200 طن"
+>
+
+<label for="inquiryText">تفاصيل الاستفسار</label>
+<textarea
+  id="inquiryText"
+  required
+  placeholder="اكتب تفاصيل طلبك هنا..."
+></textarea>
+
+<button id="sendButton" type="submit">
+إرسال الاستفسار
+</button>
+</form>
+
+<div id="inquiryMessage"></div>
+</section>
+
+<section id="loginNotice" class="card" style="display:none">
+<h2>تسجيل الدخول مطلوب</h2>
+<p>يجب تسجيل الدخول بحساب مشتري لإرسال استفسار تجاري.</p>
+<a href="index.html">الذهاب إلى تسجيل الدخول ←</a>
+</section>
+
 </main>
 
 <script>
@@ -70,6 +108,10 @@ const db = window.supabase.createClient(
 );
 
 const productId = new URLSearchParams(window.location.search).get('id');
+
+let currentProduct = null;
+let currentCompany = null;
+let currentBuyer = null;
 
 function validUuid(value){
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value || '');
@@ -92,6 +134,35 @@ function addContact(label,value,href){
   }
 
   document.getElementById('contactDetails').appendChild(a);
+}
+
+async function checkBuyer(){
+
+  const {data:{user},error} = await db.auth.getUser();
+
+  if(error || !user){
+    document.getElementById('loginNotice').style.display = 'block';
+    return;
+  }
+
+  const {data:profile,error:profileError} = await db
+    .from('profiles')
+    .select('account_type')
+    .eq('id',user.id)
+    .maybeSingle();
+
+  if(profileError){
+    document.getElementById('loginNotice').style.display = 'block';
+    return;
+  }
+
+  if(!profile || profile.account_type !== 'buyer'){
+    document.getElementById('loginNotice').style.display = 'block';
+    return;
+  }
+
+  currentBuyer = user;
+  document.getElementById('inquiryCard').style.display = 'block';
 }
 
 async function loadProduct(){
@@ -135,6 +206,9 @@ async function loadProduct(){
     return;
   }
 
+  currentProduct = product;
+  currentCompany = company;
+
   document.getElementById('message').style.display = 'none';
   document.getElementById('productCard').style.display = 'block';
   document.getElementById('companyCard').style.display = 'block';
@@ -154,10 +228,7 @@ async function loadProduct(){
     img.src = product.image_url;
     img.alt = product.name || 'Product image';
     img.style.display = 'block';
-
-    img.onerror = ()=>{
-      img.style.display = 'none';
-    };
+    img.onerror = ()=>{img.style.display = 'none';};
   }
 
   const companyName = document.getElementById('companyName');
@@ -184,7 +255,60 @@ async function loadProduct(){
 
     addContact('الموقع الإلكتروني',website,website);
   }
+
+  await checkBuyer();
 }
+
+document.getElementById('inquiryForm').addEventListener('submit',async function(event){
+
+  event.preventDefault();
+
+  if(!currentBuyer || !currentProduct || !currentCompany){
+    return;
+  }
+
+  const quantity = document.getElementById('quantity').value.trim();
+  const inquiryText = document.getElementById('inquiryText').value.trim();
+  const button = document.getElementById('sendButton');
+  const result = document.getElementById('inquiryMessage');
+
+  if(!inquiryText){
+    result.className = 'error';
+    result.textContent = 'يرجى كتابة تفاصيل الاستفسار.';
+    result.style.display = 'block';
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'جارٍ الإرسال...';
+  result.style.display = 'none';
+
+  const {error} = await db
+    .from('inquiries')
+    .insert({
+      product_id: currentProduct.id,
+      company_id: currentCompany.id,
+      buyer_id: currentBuyer.id,
+      quantity: quantity || null,
+      message: inquiryText
+    });
+
+  button.disabled = false;
+  button.textContent = 'إرسال الاستفسار';
+
+  if(error){
+    result.className = 'error';
+    result.textContent = 'تعذر إرسال الاستفسار: '+error.message;
+    result.style.display = 'block';
+    return;
+  }
+
+  result.className = 'success';
+  result.textContent = 'تم إرسال استفسارك بنجاح! ستتمكن الشركة من الاطلاع عليه داخل WASLA.';
+  result.style.display = 'block';
+
+  document.getElementById('inquiryForm').reset();
+});
 
 loadProduct();
 </script>
