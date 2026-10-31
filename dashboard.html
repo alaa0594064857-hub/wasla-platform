@@ -28,6 +28,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .pill{display:inline-block;padding:5px 10px;border-radius:20px;background:#e8f5f2;color:#087f70;font-size:13px}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 .actions button{width:auto;min-width:130px}
+.company-link{color:#087f70;text-decoration:none;font-weight:bold;font-size:17px}
+.company-link:hover{text-decoration:underline}
+.open-company{display:inline-block;margin-top:8px;color:#087f70;text-decoration:none;font-weight:bold}
 @media(max-width:600px){
  .grid{grid-template-columns:1fr}
  header{align-items:flex-start;flex-direction:column}
@@ -54,7 +57,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <span id="accountBadge" class="pill"></span>
 </section>
 
-<!-- لوحة المشتري -->
 <section id="buyerSection" class="hidden">
 <div class="card">
 <h2 id="buyerTitle">لوحة المشتري</h2>
@@ -78,7 +80,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </section>
 
-<!-- لوحة النشاط التجاري -->
 <section id="businessSection" class="hidden">
 
 <section class="card" id="companySection">
@@ -199,16 +200,12 @@ async function start(){
     .maybeSingle();
 
   if(profileError){
-    showMessage(
-      'تعذر قراءة نوع الحساب: '+profileError.message
-    );
+    showMessage('تعذر قراءة نوع الحساب: '+profileError.message);
     return;
   }
 
   if(!profileData || !accountNames[profileData.account_type]){
-    showMessage(
-      'لم يتم العثور على نوع حساب صحيح في profiles. يرجى مراجعة الإدارة.'
-    );
+    showMessage('لم يتم العثور على نوع حساب صحيح في profiles. يرجى مراجعة الإدارة.');
     return;
   }
 
@@ -256,10 +253,7 @@ async function loadBusinessDashboard(){
     .limit(1);
 
   if(error){
-    showMessage(
-      (isEnglish()?'Could not load business profile: ':'تعذر تحميل بيانات النشاط: ')+
-      error.message
-    );
+    showMessage((isEnglish()?'Could not load business profile: ':'تعذر تحميل بيانات النشاط: ')+error.message);
     return;
   }
 
@@ -270,8 +264,7 @@ async function loadBusinessDashboard(){
     fillCompany();
 
     document.getElementById('companyStatus').textContent =
-      (isEnglish()?'Account status: ':'حالة الحساب: ')+
-      statusLabel(company.status);
+      (isEnglish()?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
 
     document.getElementById('companyButton').textContent =
       isEnglish()?'Update details':'تحديث البيانات';
@@ -284,14 +277,10 @@ async function loadBusinessDashboard(){
   }else{
 
     document.getElementById('companyStatus').textContent =
-      isEnglish()?
-      'No business profile has been created yet.':
-      'لم يتم إنشاء ملف نشاط تجاري بعد.';
+      isEnglish()?'No business profile has been created yet.':'لم يتم إنشاء ملف نشاط تجاري بعد.';
   }
 
-  showMessage(
-    isEnglish()?'Your business dashboard is ready.':'لوحة نشاطك التجاري جاهزة.'
-  );
+  showMessage(isEnglish()?'Your business dashboard is ready.':'لوحة نشاطك التجاري جاهزة.');
 }
 
 function fillCompany(){
@@ -309,8 +298,7 @@ function fillCompany(){
   };
 
   for(const id in fields){
-    document.getElementById(id).value =
-      company[fields[id]] || '';
+    document.getElementById(id).value = company[fields[id]] || '';
   }
 }
 
@@ -352,10 +340,7 @@ document.getElementById('companyForm')
   }else{
 
     result = await db.from('companies')
-      .insert({
-        ...payload,
-        owner_id:currentUser.id
-      })
+      .insert({...payload,owner_id:currentUser.id})
       .select()
       .single();
   }
@@ -363,25 +348,19 @@ document.getElementById('companyForm')
   button.disabled = false;
 
   if(result.error){
-    showMessage(
-      (isEnglish()?'Could not save: ':'لم يتم حفظ البيانات: ')+
-      result.error.message
-    );
+    showMessage((isEnglish()?'Could not save: ':'لم يتم حفظ البيانات: ')+result.error.message);
     return;
   }
 
   company = result.data;
 
   document.getElementById('companyStatus').textContent =
-    (isEnglish()?'Account status: ':'حالة الحساب: ')+
-    statusLabel(company.status);
+    (isEnglish()?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
 
   document.getElementById('productSection').classList.remove('hidden');
   document.getElementById('productsSection').classList.remove('hidden');
 
-  showMessage(
-    isEnglish()?'Business profile saved.':'تم حفظ بيانات النشاط بنجاح.'
-  );
+  showMessage(isEnglish()?'Business profile saved.':'تم حفظ بيانات النشاط بنجاح.');
 
   await loadProducts();
 });
@@ -392,9 +371,7 @@ document.getElementById('productForm')
   e.preventDefault();
 
   if(!company || !currentUser || profile.account_type === 'buyer'){
-    showMessage(
-      isEnglish()?'Create your business profile first.':'أنشئ ملف النشاط أولًا.'
-    );
+    showMessage(isEnglish()?'Create your business profile first.':'أنشئ ملف النشاط أولًا.');
     return;
   }
 
@@ -412,18 +389,13 @@ document.getElementById('productForm')
   button.disabled = false;
 
   if(error){
-    showMessage(
-      (isEnglish()?'Could not add product: ':'لم تتم إضافة المنتج: ')+
-      error.message
-    );
+    showMessage((isEnglish()?'Could not add product: ':'لم تتم إضافة المنتج: ')+error.message);
     return;
   }
 
   document.getElementById('productForm').reset();
 
-  showMessage(
-    isEnglish()?'Product submitted.':'تم إرسال المنتج بنجاح.'
-  );
+  showMessage(isEnglish()?'Product submitted.':'تم إرسال المنتج بنجاح.');
 
   await loadProducts();
 });
@@ -440,15 +412,12 @@ async function loadProducts(){
   const list = document.getElementById('productsList');
 
   if(error){
-    list.textContent =
-      (isEnglish()?'Could not load products: ':'تعذر تحميل المنتجات: ')+
-      error.message;
+    list.textContent = (isEnglish()?'Could not load products: ':'تعذر تحميل المنتجات: ')+error.message;
     return;
   }
 
   if(!data || !data.length){
-    list.textContent =
-      isEnglish()?'No products yet.':'لم تضف أي منتجات حتى الآن.';
+    list.textContent = isEnglish()?'No products yet.':'لم تضف أي منتجات حتى الآن.';
     return;
   }
 
@@ -463,12 +432,10 @@ async function loadProducts(){
     title.textContent = p.name;
 
     const detail = document.createElement('p');
-    detail.textContent =
-      (p.category || '')+' — '+(p.description || '');
+    detail.textContent = (p.category || '')+' — '+(p.description || '');
 
     const status = document.createElement('small');
-    status.textContent =
-      (isEnglish()?'Status: ':'الحالة: ')+statusLabel(p.status);
+    status.textContent = (isEnglish()?'Status: ':'الحالة: ')+statusLabel(p.status);
 
     item.append(title,detail,status);
     list.appendChild(item);
@@ -479,8 +446,7 @@ async function loadPublicProducts(){
 
   const list = document.getElementById('publicProductsList');
 
-  list.textContent =
-    isEnglish()?'Loading products...':'جارٍ تحميل المنتجات...';
+  list.textContent = isEnglish()?'Loading products...':'جارٍ تحميل المنتجات...';
 
   const {data,error} = await db.from('products')
     .select('id,name,category,description,image_url,company_id,companies(name,country,city,email,phone,website)')
@@ -489,17 +455,12 @@ async function loadPublicProducts(){
     .limit(50);
 
   if(error){
-    list.textContent =
-      (isEnglish()?'Could not load public products: ':'تعذر تحميل المنتجات المنشورة: ')+
-      error.message;
+    list.textContent = (isEnglish()?'Could not load public products: ':'تعذر تحميل المنتجات المنشورة: ')+error.message;
     return;
   }
 
   if(!data || !data.length){
-    list.textContent =
-      isEnglish()?
-      'No published products are available yet.':
-      'لا توجد منتجات منشورة حاليًا.';
+    list.textContent = isEnglish()?'No published products are available yet.':'لا توجد منتجات منشورة حاليًا.';
     return;
   }
 
@@ -513,42 +474,23 @@ async function loadPublicProducts(){
     const title = document.createElement('strong');
     title.textContent = p.name;
 
-    const c = Array.isArray(p.companies) ?
-      p.companies[0] : p.companies;
+    const c = Array.isArray(p.companies) ? p.companies[0] : p.companies;
 
     const companyLine = document.createElement('p');
     companyLine.className = 'muted';
-    companyLine.textContent =
-      (c && c.name ? c.name : '')+
-      (c && c.country ? ' — '+c.country : '');
 
-    const detail = document.createElement('p');
-    detail.textContent =
-      (p.category || '')+' — '+(p.description || '');
-
-    item.append(title,companyLine,detail);
-
-    if(c){
-
-      const contact = document.createElement('p');
-      contact.className = 'muted';
-
-      const bits = [];
-
-      if(c.email) bits.push(
-        (isEnglish()?'Email: ':'البريد: ')+c.email
-      );
-
-      if(c.phone) bits.push(
-        (isEnglish()?'Phone: ':'الهاتف: ')+c.phone
-      );
-
-      if(c.website) bits.push(c.website);
-
-      contact.textContent = bits.join(' | ');
-      item.appendChild(contact);
+    if(c && c.name){
+      const link = document.createElement('a');
+      link.className = 'company-link';
+      link.href = 'company.html?id='+encodeURIComponent(p.company_id);
+      link.textContent = c.name;
+      companyLine.appendChild(link);
     }
 
+    const detail = document.createElement('p');
+    detail.textContent = (p.category || '')+' — '+(p.description || '');
+
+    item.append(title,companyLine,detail);
     list.appendChild(item);
   });
 }
@@ -557,8 +499,7 @@ async function loadPublicCompanies(){
 
   const list = document.getElementById('publicCompaniesList');
 
-  list.textContent =
-    isEnglish()?'Loading companies...':'جارٍ تحميل الشركات...';
+  list.textContent = isEnglish()?'Loading companies...':'جارٍ تحميل الشركات...';
 
   const {data,error} = await db.from('companies')
     .select('id,name,country,city,sector,business_type,description,email,phone,website')
@@ -567,17 +508,12 @@ async function loadPublicCompanies(){
     .limit(50);
 
   if(error){
-    list.textContent =
-      (isEnglish()?'Could not load companies: ':'تعذر تحميل الشركات: ')+
-      error.message;
+    list.textContent = (isEnglish()?'Could not load companies: ':'تعذر تحميل الشركات: ')+error.message;
     return;
   }
 
   if(!data || !data.length){
-    list.textContent =
-      isEnglish()?
-      'No published companies are available yet.':
-      'لا توجد شركات منشورة حاليًا.';
+    list.textContent = isEnglish()?'No published companies are available yet.':'لا توجد شركات منشورة حاليًا.';
     return;
   }
 
@@ -588,23 +524,24 @@ async function loadPublicCompanies(){
     const item = document.createElement('div');
     item.className = 'item';
 
-    const title = document.createElement('strong');
+    const title = document.createElement('a');
+    title.className = 'company-link';
+    title.href = 'company.html?id='+encodeURIComponent(c.id);
     title.textContent = c.name;
 
     const info = document.createElement('p');
-    info.textContent =
-      [c.country,c.city,c.sector,c.business_type]
-      .filter(Boolean).join(' — ');
+    info.className = 'muted';
+    info.textContent = [c.country,c.city,c.sector,c.business_type].filter(Boolean).join(' — ');
 
     const desc = document.createElement('p');
     desc.textContent = c.description || '';
 
-    const contact = document.createElement('p');
-    contact.className = 'muted';
-    contact.textContent =
-      [c.email,c.phone,c.website].filter(Boolean).join(' | ');
+    const openLink = document.createElement('a');
+    openLink.className = 'open-company';
+    openLink.href = 'company.html?id='+encodeURIComponent(c.id);
+    openLink.textContent = isEnglish()?'View company profile →':'عرض صفحة الشركة ←';
 
-    item.append(title,info,desc,contact);
+    item.append(title,info,desc,openLink);
     list.appendChild(item);
   });
 }
@@ -613,11 +550,8 @@ function showBuyerTab(tab){
 
   const products = tab === 'products';
 
-  document.getElementById('buyerProductsCard')
-    .classList.toggle('hidden',!products);
-
-  document.getElementById('buyerCompaniesCard')
-    .classList.toggle('hidden',products);
+  document.getElementById('buyerProductsCard').classList.toggle('hidden',!products);
+  document.getElementById('buyerCompaniesCard').classList.toggle('hidden',products);
 
   if(!products){
     loadPublicCompanies();
@@ -639,54 +573,33 @@ function toggleLanguage(){
   document.documentElement.lang = currentLanguage;
   document.documentElement.dir = en?'ltr':'rtl';
 
-  document.getElementById('languageButton').textContent =
-    en?'العربية':'English';
-
-  document.getElementById('logoutButton').textContent =
-    en?'Log out':'تسجيل الخروج';
+  document.getElementById('languageButton').textContent = en?'العربية':'English';
+  document.getElementById('logoutButton').textContent = en?'Log out':'تسجيل الخروج';
 
   if(profile){
     renderAccountHeader();
   }
 
-  document.getElementById('buyerTitle').textContent =
-    en?'Buyer Dashboard':'لوحة المشتري';
+  document.getElementById('buyerTitle').textContent = en?'Buyer Dashboard':'لوحة المشتري';
 
   document.getElementById('buyerIntro').textContent =
-    en?
-    'Browse published companies and products, then contact businesses directly.':
-    'تصفح الشركات والمنتجات المنشورة وتواصل مباشرة مع أصحابها.';
+    en?'Browse published companies and products, then contact businesses directly.':'تصفح الشركات والمنتجات المنشورة وتواصل مباشرة مع أصحابها.';
 
-  document.getElementById('productsTabButton').textContent =
-    en?'Browse Products':'تصفح المنتجات';
-
-  document.getElementById('companiesTabButton').textContent =
-    en?'Explore Companies':'استكشاف الشركات';
-
-  document.getElementById('publicProductsTitle').textContent =
-    en?'Published Products':'المنتجات المنشورة';
-
-  document.getElementById('publicCompaniesTitle').textContent =
-    en?'Published Companies':'الشركات المنشورة';
+  document.getElementById('productsTabButton').textContent = en?'Browse Products':'تصفح المنتجات';
+  document.getElementById('companiesTabButton').textContent = en?'Explore Companies':'استكشاف الشركات';
+  document.getElementById('publicProductsTitle').textContent = en?'Published Products':'المنتجات المنشورة';
+  document.getElementById('publicCompaniesTitle').textContent = en?'Published Companies':'الشركات المنشورة';
 
   if(profile && profile.account_type !== 'buyer'){
-    document.getElementById('profileTitle').textContent =
-      profileTitles[profile.account_type][currentLanguage];
+    document.getElementById('profileTitle').textContent = profileTitles[profile.account_type][currentLanguage];
   }
 
   document.getElementById('profileIntro').textContent =
-    en?
-    'Manage your business details. Your account is reviewed before publication.':
-    'أدخل بيانات نشاطك. سيخضع الحساب للمراجعة قبل نشره.';
+    en?'Manage your business details. Your account is reviewed before publication.':'أدخل بيانات نشاطك. سيخضع الحساب للمراجعة قبل نشره.';
 
-  document.getElementById('addProductTitle').textContent =
-    en?'Add a Product':'إضافة منتج';
-
-  document.getElementById('productIntro').textContent =
-    en?'Add products offered by your business.':'أضف منتجات نشاطك التجاري.';
-
-  document.getElementById('myProductsTitle').textContent =
-    en?'My Products':'منتجات نشاطي';
+  document.getElementById('addProductTitle').textContent = en?'Add a Product':'إضافة منتج';
+  document.getElementById('productIntro').textContent = en?'Add products offered by your business.':'أضف منتجات نشاطك التجاري.';
+  document.getElementById('myProductsTitle').textContent = en?'My Products':'منتجات نشاطي';
 
   const placeholders = {
     companyName:['Business name','اسم النشاط التجاري'],
@@ -705,22 +618,17 @@ function toggleLanguage(){
   };
 
   for(const id in placeholders){
-    document.getElementById(id).placeholder =
-      placeholders[id][en?0:1];
+    document.getElementById(id).placeholder = placeholders[id][en?0:1];
   }
 
   document.getElementById('companyButton').textContent =
-    en?
-    (company?'Update details':'Save details'):
-    (company?'تحديث البيانات':'حفظ البيانات');
+    en?(company?'Update details':'Save details'):(company?'تحديث البيانات':'حفظ البيانات');
 
-  document.getElementById('productButton').textContent =
-    en?'Add Product':'إضافة المنتج';
+  document.getElementById('productButton').textContent = en?'Add Product':'إضافة المنتج';
 
   if(company){
     document.getElementById('companyStatus').textContent =
-      (en?'Account status: ':'حالة الحساب: ')+
-      statusLabel(company.status);
+      (en?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
   }
 
   if(profile && profile.account_type === 'buyer'){
