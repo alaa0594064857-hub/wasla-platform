@@ -4,66 +4,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WASLA | لوحة تحكم الشركة</title>
+<title>WASLA | لوحة التحكم</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f4f6f8;color:#172b3a;font-family:Arial,sans-serif}
-header{background:#102b3f;color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center}
-header strong{font-size:24px;color:#55d6b0}
-main{max-width:950px;margin:30px auto;padding:0 16px}
-.card{background:white;padding:22px;border-radius:14px;margin-bottom:20px;box-shadow:0 3px 14px #0000000b}
-h2{margin-top:0}
+body{margin:0;background:#f3f6fa;color:#172b3a;font-family:Arial,sans-serif}
+header{background:#102b3f;color:white;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header strong{font-size:25px;color:#55d6b0}
+.header-actions{display:flex;gap:8px}
+main{max-width:1000px;margin:28px auto;padding:0 16px}
+.card{background:white;padding:22px;border-radius:14px;margin-bottom:18px;box-shadow:0 3px 14px #0000000b}
+h1,h2{margin-top:0}
 input,textarea,button{width:100%;padding:12px;margin:7px 0;border:1px solid #d9e0e5;border-radius:8px;font:inherit}
-textarea{min-height:90px}
+textarea{min-height:90px;resize:vertical}
 button{background:#087f70;color:white;border:0;font-weight:bold;cursor:pointer}
 button.secondary{background:#17394d}
-button:disabled{opacity:.5}
+button:disabled{opacity:.5;cursor:not-allowed}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.item{padding:12px;border:1px solid #e2e8ec;border-radius:9px;margin:10px 0}
-.muted{color:#657681;font-size:14px}
-#message{padding:12px;border-radius:8px;margin:12px 0;white-space:pre-wrap}
-.hidden{display:none}
-@media(max-width:600px){.grid{grid-template-columns:1fr}header{align-items:flex-start;gap:10px;flex-direction:column}}
+.item{padding:14px;border:1px solid #e2e8ec;border-radius:10px;margin:10px 0}
+.muted{color:#657681;font-size:14px;line-height:1.7}
+.hidden{display:none!important}
+#message{padding:13px;border-radius:8px;margin:12px 0;background:#eaf2f7;white-space:pre-wrap;line-height:1.6}
+.pill{display:inline-block;padding:5px 10px;border-radius:20px;background:#e8f5f2;color:#087f70;font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{width:auto;min-width:130px}
+@media(max-width:600px){
+ .grid{grid-template-columns:1fr}
+ header{align-items:flex-start;flex-direction:column}
+ .actions button{flex:1}
+}
 </style>
 </head>
 <body>
+
 <header>
 <strong>WASLA</strong>
-<div style="display:flex;gap:8px">
-<button class="secondary" style="width:auto" onclick="toggleLanguage()">العربية / English</button>
-<button class="secondary" style="width:auto" onclick="logout()">Logout</button>
+<div class="header-actions">
+<button class="secondary" style="width:auto" id="languageButton" onclick="toggleLanguage()">English</button>
+<button class="secondary" style="width:auto" id="logoutButton" onclick="logout()">تسجيل الخروج</button>
 </div>
 </header>
 
 <main>
 <div id="message">جارٍ التحقق من تسجيل الدخول...</div>
 
-<section id="companySection" class="card hidden">
-<h2>ملف شركتي</h2>
-<p class="muted">أدخل بيانات شركتك. ستبقى قيد المراجعة قبل نشرها.</p>
+<section id="welcomeSection" class="card hidden">
+<h1 id="welcomeTitle">مرحبًا بك في WASLA</h1>
+<p id="accountLine" class="muted"></p>
+<span id="accountBadge" class="pill"></span>
+</section>
+
+<!-- لوحة المشتري -->
+<section id="buyerSection" class="hidden">
+<div class="card">
+<h2 id="buyerTitle">لوحة المشتري</h2>
+<p id="buyerIntro" class="muted">
+تصفح الشركات والمنتجات المنشورة وتواصل مباشرة مع أصحابها.
+</p>
+<div class="actions">
+<button onclick="showBuyerTab('products')" id="productsTabButton">تصفح المنتجات</button>
+<button class="secondary" onclick="showBuyerTab('companies')" id="companiesTabButton">استكشاف الشركات</button>
+</div>
+</div>
+
+<div class="card" id="buyerProductsCard">
+<h2 id="publicProductsTitle">المنتجات المنشورة</h2>
+<div id="publicProductsList" class="muted">جارٍ تحميل المنتجات...</div>
+</div>
+
+<div class="card hidden" id="buyerCompaniesCard">
+<h2 id="publicCompaniesTitle">الشركات المنشورة</h2>
+<div id="publicCompaniesList" class="muted">جارٍ تحميل الشركات...</div>
+</div>
+</section>
+
+<!-- لوحة النشاط التجاري -->
+<section id="businessSection" class="hidden">
+
+<section class="card" id="companySection">
+<h2 id="profileTitle">ملف النشاط التجاري</h2>
+<p id="profileIntro" class="muted">
+أدخل بيانات نشاطك. سيخضع الحساب للمراجعة قبل نشره.
+</p>
 <div id="companyStatus" class="muted"></div>
+
 <form id="companyForm">
-<input id="companyName" placeholder="اسم الشركة" required>
+<input id="companyName" placeholder="اسم النشاط التجاري" required>
+
 <div class="grid">
 <input id="country" placeholder="الدولة" required>
 <input id="city" placeholder="المدينة">
 <input id="sector" placeholder="القطاع">
 <input id="businessType" placeholder="نوع النشاط">
 </div>
-<textarea id="description" placeholder="نبذة عن الشركة"></textarea>
+
+<textarea id="description" placeholder="نبذة عن النشاط"></textarea>
+
 <div class="grid">
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="phone" placeholder="رقم الهاتف">
 </div>
+
 <input id="website" placeholder="الموقع الإلكتروني">
-<button id="companyButton">حفظ بيانات الشركة</button>
+<button id="companyButton">حفظ البيانات</button>
 </form>
 </section>
 
 <section id="productSection" class="card hidden">
-<h2>إضافة منتج</h2>
-<p class="muted">لا يمكن إضافة المنتجات إلا بعد إنشاء ملف الشركة.</p>
+<h2 id="addProductTitle">إضافة منتج</h2>
+<p id="productIntro" class="muted">أضف منتجات نشاطك التجاري.</p>
+
 <form id="productForm">
 <input id="productName" placeholder="اسم المنتج" required>
 <input id="category" placeholder="التصنيف">
@@ -74,15 +124,15 @@ button:disabled{opacity:.5}
 </section>
 
 <section id="productsSection" class="card hidden">
-<h2>منتجات شركتي</h2>
-<div id="productsList">جارٍ التحميل...</div>
+<h2 id="myProductsTitle">منتجات نشاطي</h2>
+<div id="productsList" class="muted">جارٍ التحميل...</div>
+</section>
+
 </section>
 </main>
 
 <script>
 const SUPABASE_URL = 'https://bzrcbodvcuujdjupfgzw.supabase.co';
-
-// ضع هنا نفس Publishable Key الموجود في index.html
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u';
 
 const db = window.supabase.createClient(
@@ -91,59 +141,161 @@ const db = window.supabase.createClient(
 );
 
 let currentUser = null;
+let profile = null;
 let company = null;
+let currentLanguage = 'ar';
 
-function showMessage(text){
-  document.getElementById('message').textContent = text;
+const accountNames = {
+  company: {ar:'شركة', en:'Company'},
+  manufacturer: {ar:'مصنع', en:'Manufacturer'},
+  brand: {ar:'علامة تجارية', en:'Brand'},
+  trader: {ar:'تاجر', en:'Trader'},
+  buyer: {ar:'مشتري', en:'Buyer'}
+};
+
+const profileTitles = {
+  company: {ar:'ملف شركتي', en:'My Company Profile'},
+  manufacturer: {ar:'ملف مصنعي', en:'My Factory Profile'},
+  brand: {ar:'ملف علامتي التجارية', en:'My Brand Profile'},
+  trader: {ar:'ملف نشاطي التجاري', en:'My Trading Profile'}
+};
+
+function isEnglish(){
+  return currentLanguage === 'en';
 }
 
 function val(id){
   return document.getElementById(id).value.trim();
 }
 
+function showMessage(text){
+  document.getElementById('message').textContent = text;
+}
+
+function statusLabel(status){
+  const labels = {
+    pending: isEnglish()?'Pending review':'قيد المراجعة',
+    published: isEnglish()?'Published':'منشور',
+    suspended: isEnglish()?'Suspended':'موقوف'
+  };
+  return labels[status] || status || '';
+}
+
 async function start(){
-  if(SUPABASE_PUBLISHABLE_KEY.includes('PASTE_')){
-    showMessage('يجب وضع Publishable Key الموجود في ملف index.html أولاً.');
-    return;
-  }
 
   const {data,error} = await db.auth.getUser();
+
   if(error || !data.user){
-    showMessage('يجب تسجيل الدخول أولاً من الصفحة الرئيسية.');
+    showMessage('يجب تسجيل الدخول أولًا من الصفحة الرئيسية.');
     return;
   }
 
   currentUser = data.user;
-  showMessage('مرحباً بك في لوحة تحكم WASLA.');
 
-  const {data:companies,error:companyError} = await db
+  const {data:profileData,error:profileError} = await db
+    .from('profiles')
+    .select('id,full_name,account_type')
+    .eq('id',currentUser.id)
+    .maybeSingle();
+
+  if(profileError){
+    showMessage(
+      'تعذر قراءة نوع الحساب: '+profileError.message
+    );
+    return;
+  }
+
+  if(!profileData || !accountNames[profileData.account_type]){
+    showMessage(
+      'لم يتم العثور على نوع حساب صحيح في profiles. يرجى مراجعة الإدارة.'
+    );
+    return;
+  }
+
+  profile = profileData;
+
+  renderAccountHeader();
+
+  if(profile.account_type === 'buyer'){
+    document.getElementById('buyerSection').classList.remove('hidden');
+    await loadPublicProducts();
+    showMessage('مرحبًا بك في لوحة المشتري.');
+    return;
+  }
+
+  document.getElementById('businessSection').classList.remove('hidden');
+
+  document.getElementById('profileTitle').textContent =
+    profileTitles[profile.account_type][currentLanguage];
+
+  await loadBusinessDashboard();
+}
+
+function renderAccountHeader(){
+
+  document.getElementById('welcomeSection').classList.remove('hidden');
+
+  document.getElementById('welcomeTitle').textContent =
+    isEnglish()?'Welcome to WASLA':'مرحبًا بك في WASLA';
+
+  document.getElementById('accountLine').textContent =
+    (isEnglish()?'Signed in as: ':'تم تسجيل الدخول باسم: ')+
+    (profile.full_name || currentUser.email || '');
+
+  document.getElementById('accountBadge').textContent =
+    (isEnglish()?'Account type: ':'نوع الحساب: ')+
+    accountNames[profile.account_type][currentLanguage];
+}
+
+async function loadBusinessDashboard(){
+
+  const {data:companies,error} = await db
     .from('companies')
     .select('*')
     .eq('owner_id',currentUser.id)
     .limit(1);
 
-  if(companyError){
-    showMessage('تعذر تحميل بيانات الشركة: '+companyError.message);
+  if(error){
+    showMessage(
+      (isEnglish()?'Could not load business profile: ':'تعذر تحميل بيانات النشاط: ')+
+      error.message
+    );
     return;
   }
 
   company = companies && companies.length ? companies[0] : null;
 
-  document.getElementById('companySection').classList.remove('hidden');
-
   if(company){
+
     fillCompany();
+
     document.getElementById('companyStatus').textContent =
-      'حالة الشركة: '+company.status;
+      (isEnglish()?'Account status: ':'حالة الحساب: ')+
+      statusLabel(company.status);
+
     document.getElementById('companyButton').textContent =
-      'تحديث بيانات الشركة';
+      isEnglish()?'Update details':'تحديث البيانات';
+
     document.getElementById('productSection').classList.remove('hidden');
     document.getElementById('productsSection').classList.remove('hidden');
-    loadProducts();
+
+    await loadProducts();
+
+  }else{
+
+    document.getElementById('companyStatus').textContent =
+      isEnglish()?
+      'No business profile has been created yet.':
+      'لم يتم إنشاء ملف نشاط تجاري بعد.';
   }
+
+  showMessage(
+    isEnglish()?'Your business dashboard is ready.':'لوحة نشاطك التجاري جاهزة.'
+  );
 }
 
 function fillCompany(){
+
   const fields = {
     companyName:'name',
     country:'country',
@@ -155,13 +307,22 @@ function fillCompany(){
     phone:'phone',
     website:'website'
   };
+
   for(const id in fields){
-    document.getElementById(id).value = company[fields[id]] || '';
+    document.getElementById(id).value =
+      company[fields[id]] || '';
   }
 }
 
-document.getElementById('companyForm').addEventListener('submit',async e=>{
+document.getElementById('companyForm')
+.addEventListener('submit',async e=>{
+
   e.preventDefault();
+
+  if(!currentUser || !profile || profile.account_type === 'buyer'){
+    return;
+  }
+
   const button = document.getElementById('companyButton');
   button.disabled = true;
 
@@ -178,16 +339,23 @@ document.getElementById('companyForm').addEventListener('submit',async e=>{
   };
 
   let result;
+
   if(company){
+
     result = await db.from('companies')
       .update(payload)
       .eq('id',company.id)
       .eq('owner_id',currentUser.id)
       .select()
       .single();
+
   }else{
+
     result = await db.from('companies')
-      .insert(payload)
+      .insert({
+        ...payload,
+        owner_id:currentUser.id
+      })
       .select()
       .single();
   }
@@ -195,24 +363,38 @@ document.getElementById('companyForm').addEventListener('submit',async e=>{
   button.disabled = false;
 
   if(result.error){
-    showMessage('لم يتم حفظ الشركة: '+result.error.message);
+    showMessage(
+      (isEnglish()?'Could not save: ':'لم يتم حفظ البيانات: ')+
+      result.error.message
+    );
     return;
   }
 
   company = result.data;
+
   document.getElementById('companyStatus').textContent =
-    'حالة الشركة: '+company.status;
+    (isEnglish()?'Account status: ':'حالة الحساب: ')+
+    statusLabel(company.status);
 
   document.getElementById('productSection').classList.remove('hidden');
   document.getElementById('productsSection').classList.remove('hidden');
-  showMessage('تم حفظ بيانات الشركة بنجاح.');
-  loadProducts();
+
+  showMessage(
+    isEnglish()?'Business profile saved.':'تم حفظ بيانات النشاط بنجاح.'
+  );
+
+  await loadProducts();
 });
 
-document.getElementById('productForm').addEventListener('submit',async e=>{
+document.getElementById('productForm')
+.addEventListener('submit',async e=>{
+
   e.preventDefault();
-  if(!company){
-    showMessage('أنشئ ملف الشركة أولاً.');
+
+  if(!company || !currentUser || profile.account_type === 'buyer'){
+    showMessage(
+      isEnglish()?'Create your business profile first.':'أنشئ ملف النشاط أولًا.'
+    );
     return;
   }
 
@@ -230,16 +412,24 @@ document.getElementById('productForm').addEventListener('submit',async e=>{
   button.disabled = false;
 
   if(error){
-    showMessage('لم تتم إضافة المنتج: '+error.message);
+    showMessage(
+      (isEnglish()?'Could not add product: ':'لم تتم إضافة المنتج: ')+
+      error.message
+    );
     return;
   }
 
   document.getElementById('productForm').reset();
-  showMessage('تم إرسال المنتج بنجاح، وهو بانتظار المراجعة.');
-  loadProducts();
+
+  showMessage(
+    isEnglish()?'Product submitted.':'تم إرسال المنتج بنجاح.'
+  );
+
+  await loadProducts();
 });
 
 async function loadProducts(){
+
   if(!company)return;
 
   const {data,error} = await db.from('products')
@@ -250,118 +440,298 @@ async function loadProducts(){
   const list = document.getElementById('productsList');
 
   if(error){
-    list.textContent = 'تعذر تحميل المنتجات: '+error.message;
+    list.textContent =
+      (isEnglish()?'Could not load products: ':'تعذر تحميل المنتجات: ')+
+      error.message;
     return;
   }
 
-  if(!data.length){
-    list.textContent = 'لم تضف أي منتجات حتى الآن.';
+  if(!data || !data.length){
+    list.textContent =
+      isEnglish()?'No products yet.':'لم تضف أي منتجات حتى الآن.';
     return;
   }
 
   list.innerHTML = '';
+
   data.forEach(p=>{
+
     const item = document.createElement('div');
     item.className = 'item';
+
     const title = document.createElement('strong');
     title.textContent = p.name;
+
     const detail = document.createElement('p');
-    detail.textContent = (p.category || '')+' — '+(p.description || '');
+    detail.textContent =
+      (p.category || '')+' — '+(p.description || '');
+
     const status = document.createElement('small');
-    const statusNames = {
-  pending: currentLanguage === 'en' ? 'Pending Review' : 'قيد المراجعة',
-  published: currentLanguage === 'en' ? 'Published' : 'منشور',
-  suspended: currentLanguage === 'en' ? 'Suspended' : 'موقوف'
-};
-status.textContent = (currentLanguage === 'en' ? 'Status: ' : 'الحالة: ') +
-  (statusNames[p.status] || p.status || statusNames.pending);
+    status.textContent =
+      (isEnglish()?'Status: ':'الحالة: ')+statusLabel(p.status);
+
     item.append(title,detail,status);
     list.appendChild(item);
   });
 }
 
+async function loadPublicProducts(){
+
+  const list = document.getElementById('publicProductsList');
+
+  list.textContent =
+    isEnglish()?'Loading products...':'جارٍ تحميل المنتجات...';
+
+  const {data,error} = await db.from('products')
+    .select('id,name,category,description,image_url,company_id,companies(name,country,city,email,phone,website)')
+    .eq('status','published')
+    .order('created_at',{ascending:false})
+    .limit(50);
+
+  if(error){
+    list.textContent =
+      (isEnglish()?'Could not load public products: ':'تعذر تحميل المنتجات المنشورة: ')+
+      error.message;
+    return;
+  }
+
+  if(!data || !data.length){
+    list.textContent =
+      isEnglish()?
+      'No published products are available yet.':
+      'لا توجد منتجات منشورة حاليًا.';
+    return;
+  }
+
+  list.innerHTML = '';
+
+  data.forEach(p=>{
+
+    const item = document.createElement('div');
+    item.className = 'item';
+
+    const title = document.createElement('strong');
+    title.textContent = p.name;
+
+    const c = Array.isArray(p.companies) ?
+      p.companies[0] : p.companies;
+
+    const companyLine = document.createElement('p');
+    companyLine.className = 'muted';
+    companyLine.textContent =
+      (c && c.name ? c.name : '')+
+      (c && c.country ? ' — '+c.country : '');
+
+    const detail = document.createElement('p');
+    detail.textContent =
+      (p.category || '')+' — '+(p.description || '');
+
+    item.append(title,companyLine,detail);
+
+    if(c){
+
+      const contact = document.createElement('p');
+      contact.className = 'muted';
+
+      const bits = [];
+
+      if(c.email) bits.push(
+        (isEnglish()?'Email: ':'البريد: ')+c.email
+      );
+
+      if(c.phone) bits.push(
+        (isEnglish()?'Phone: ':'الهاتف: ')+c.phone
+      );
+
+      if(c.website) bits.push(c.website);
+
+      contact.textContent = bits.join(' | ');
+      item.appendChild(contact);
+    }
+
+    list.appendChild(item);
+  });
+}
+
+async function loadPublicCompanies(){
+
+  const list = document.getElementById('publicCompaniesList');
+
+  list.textContent =
+    isEnglish()?'Loading companies...':'جارٍ تحميل الشركات...';
+
+  const {data,error} = await db.from('companies')
+    .select('id,name,country,city,sector,business_type,description,email,phone,website')
+    .eq('status','published')
+    .order('created_at',{ascending:false})
+    .limit(50);
+
+  if(error){
+    list.textContent =
+      (isEnglish()?'Could not load companies: ':'تعذر تحميل الشركات: ')+
+      error.message;
+    return;
+  }
+
+  if(!data || !data.length){
+    list.textContent =
+      isEnglish()?
+      'No published companies are available yet.':
+      'لا توجد شركات منشورة حاليًا.';
+    return;
+  }
+
+  list.innerHTML = '';
+
+  data.forEach(c=>{
+
+    const item = document.createElement('div');
+    item.className = 'item';
+
+    const title = document.createElement('strong');
+    title.textContent = c.name;
+
+    const info = document.createElement('p');
+    info.textContent =
+      [c.country,c.city,c.sector,c.business_type]
+      .filter(Boolean).join(' — ');
+
+    const desc = document.createElement('p');
+    desc.textContent = c.description || '';
+
+    const contact = document.createElement('p');
+    contact.className = 'muted';
+    contact.textContent =
+      [c.email,c.phone,c.website].filter(Boolean).join(' | ');
+
+    item.append(title,info,desc,contact);
+    list.appendChild(item);
+  });
+}
+
+function showBuyerTab(tab){
+
+  const products = tab === 'products';
+
+  document.getElementById('buyerProductsCard')
+    .classList.toggle('hidden',!products);
+
+  document.getElementById('buyerCompaniesCard')
+    .classList.toggle('hidden',products);
+
+  if(!products){
+    loadPublicCompanies();
+  }
+}
+
 async function logout(){
+
   await db.auth.signOut();
   window.location.href = './';
 }
-let currentLanguage = 'ar';
 
-function toggleLanguage() {
-  currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
-  const en = currentLanguage === 'en';
+function toggleLanguage(){
+
+  currentLanguage = isEnglish()?'ar':'en';
+
+  const en = isEnglish();
 
   document.documentElement.lang = currentLanguage;
-  document.documentElement.dir = en ? 'ltr' : 'rtl';
+  document.documentElement.dir = en?'ltr':'rtl';
 
-  const headerButtons = document.querySelectorAll('header button');
-  headerButtons[0].textContent = en ? 'العربية' : 'English';
-  headerButtons[1].textContent = en ? 'Log out' : 'تسجيل الخروج';
+  document.getElementById('languageButton').textContent =
+    en?'العربية':'English';
 
-  document.querySelector('#companySection h2').textContent =
-    en ? 'My Company Profile' : 'ملف شركتي';
+  document.getElementById('logoutButton').textContent =
+    en?'Log out':'تسجيل الخروج';
 
-  document.querySelector('#companySection p').textContent =
-    en ? 'Enter your company details. They will be reviewed before publication.' :
-    'أدخل بيانات شركتك. ستبقى قيد المراجعة قبل نشرها.';
+  if(profile){
+    renderAccountHeader();
+  }
 
-  document.querySelector('#productSection h2').textContent =
-    en ? 'Add a Product' : 'إضافة منتج';
+  document.getElementById('buyerTitle').textContent =
+    en?'Buyer Dashboard':'لوحة المشتري';
 
-  document.querySelector('#productSection p').textContent =
-    en ? 'You can add products after creating your company profile.' :
-    'لا يمكن إضافة المنتجات إلا بعد إنشاء ملف الشركة.';
+  document.getElementById('buyerIntro').textContent =
+    en?
+    'Browse published companies and products, then contact businesses directly.':
+    'تصفح الشركات والمنتجات المنشورة وتواصل مباشرة مع أصحابها.';
 
-  document.querySelector('#productsSection h2').textContent =
-    en ? 'My Products' : 'منتجات شركتي';
+  document.getElementById('productsTabButton').textContent =
+    en?'Browse Products':'تصفح المنتجات';
+
+  document.getElementById('companiesTabButton').textContent =
+    en?'Explore Companies':'استكشاف الشركات';
+
+  document.getElementById('publicProductsTitle').textContent =
+    en?'Published Products':'المنتجات المنشورة';
+
+  document.getElementById('publicCompaniesTitle').textContent =
+    en?'Published Companies':'الشركات المنشورة';
+
+  if(profile && profile.account_type !== 'buyer'){
+    document.getElementById('profileTitle').textContent =
+      profileTitles[profile.account_type][currentLanguage];
+  }
+
+  document.getElementById('profileIntro').textContent =
+    en?
+    'Manage your business details. Your account is reviewed before publication.':
+    'أدخل بيانات نشاطك. سيخضع الحساب للمراجعة قبل نشره.';
+
+  document.getElementById('addProductTitle').textContent =
+    en?'Add a Product':'إضافة منتج';
+
+  document.getElementById('productIntro').textContent =
+    en?'Add products offered by your business.':'أضف منتجات نشاطك التجاري.';
+
+  document.getElementById('myProductsTitle').textContent =
+    en?'My Products':'منتجات نشاطي';
 
   const placeholders = {
-    companyName: ['Company name', 'اسم الشركة'],
-    country: ['Country', 'الدولة'],
-    city: ['City', 'المدينة'],
-    sector: ['Sector', 'القطاع'],
-    businessType: ['Business type', 'نوع النشاط'],
-    description: ['Company description', 'نبذة عن الشركة'],
-    email: ['Email address', 'البريد الإلكتروني'],
-    phone: ['Phone number', 'رقم الهاتف'],
-    website: ['Website', 'الموقع الإلكتروني'],
-    productName: ['Product name', 'اسم المنتج'],
-    category: ['Category', 'التصنيف'],
-    productDescription: ['Product description', 'وصف المنتج'],
-    imageUrl: ['Product image URL (optional)', 'رابط صورة المنتج (اختياري)']
+    companyName:['Business name','اسم النشاط التجاري'],
+    country:['Country','الدولة'],
+    city:['City','المدينة'],
+    sector:['Sector','القطاع'],
+    businessType:['Business type','نوع النشاط'],
+    description:['Business description','نبذة عن النشاط'],
+    email:['Email','البريد الإلكتروني'],
+    phone:['Phone','رقم الهاتف'],
+    website:['Website','الموقع الإلكتروني'],
+    productName:['Product name','اسم المنتج'],
+    category:['Category','التصنيف'],
+    productDescription:['Product description','وصف المنتج'],
+    imageUrl:['Product image URL (optional)','رابط صورة المنتج (اختياري)']
   };
 
-  for (const id in placeholders) {
+  for(const id in placeholders){
     document.getElementById(id).placeholder =
-      placeholders[id][en ? 0 : 1];
+      placeholders[id][en?0:1];
   }
 
   document.getElementById('companyButton').textContent =
-    en ? (company ? 'Update Company Details' : 'Save Company Details') :
-    (company ? 'تحديث بيانات الشركة' : 'حفظ بيانات الشركة');
+    en?
+    (company?'Update details':'Save details'):
+    (company?'تحديث البيانات':'حفظ البيانات');
 
   document.getElementById('productButton').textContent =
-    en ? 'Add Product' : 'إضافة المنتج';
+    en?'Add Product':'إضافة المنتج';
 
-  const status = document.getElementById('companyStatus');
-  if (company) {
-    const labels = {
-      pending: en ? 'Pending Review' : 'قيد المراجعة',
-      published: en ? 'Published' : 'منشور',
-      suspended: en ? 'Suspended' : 'موقوف'
-    };
-    status.textContent = (en ? 'Company status: ' : 'حالة الشركة: ') +
-      (labels[company.status] || company.status);
+  if(company){
+    document.getElementById('companyStatus').textContent =
+      (en?'Account status: ':'حالة الحساب: ')+
+      statusLabel(company.status);
   }
 
-  const message = document.getElementById('message');
-    if (message.textContent.includes('مرحباً بك')) {
-    message.textContent = en
-      ? 'Welcome to your WASLA dashboard.'
-      : 'مرحباً بك في لوحة تحكم WASLA.';
+  if(profile && profile.account_type === 'buyer'){
+    loadPublicProducts();
   }
 
-  loadProducts();
+  if(company){
+    loadProducts();
+  }
 }
+
 start();
 </script>
 </body>
