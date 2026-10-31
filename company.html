@@ -115,7 +115,7 @@ async function loadCompany(){
 
   const {data:company,error} = await db
     .from('companies')
-    .select('id,name,country,city,sector,business_type,description,email,phone,website,status')
+    .select('id,name,country,city,sector,business_type,description,phone,website,status')
     .eq('id',companyId)
     .eq('status','published')
     .maybeSingle();
@@ -149,7 +149,6 @@ async function loadCompany(){
   addInfo('القطاع',company.sector);
   addInfo('نوع النشاط',company.business_type);
 
-  addContact('البريد الإلكتروني',company.email,'mailto:'+company.email);
   addContact('الهاتف',company.phone,'tel:'+company.phone);
 
   if(company.website){
