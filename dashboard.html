@@ -243,7 +243,7 @@ async function start(){
 
   const {data:profileData,error:profileError} = await db
     .from('profiles')
-    .select('id,name,account_type')
+    .select('id,full_name,account_type')
     .eq('id',currentUser.id)
     .maybeSingle();
 
