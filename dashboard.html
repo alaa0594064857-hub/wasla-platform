@@ -31,6 +31,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .company-link{color:#087f70;text-decoration:none;font-weight:bold;font-size:17px}
 .company-link:hover{text-decoration:underline}
 .open-company{display:inline-block;margin-top:8px;color:#087f70;text-decoration:none;font-weight:bold}
+.inquiry-item{padding:16px;border:1px solid #dce6eb;border-radius:12px;margin:12px 0;background:#fbfdfe}
+.inquiry-item p{line-height:1.8;overflow-wrap:anywhere}
+.inquiry-date{font-size:12px;color:#71818c}
+.inquiry-status{display:inline-block;padding:5px 10px;border-radius:20px;background:#fff2d8;color:#8a5b00;font-size:13px}
 @media(max-width:600px){
  .grid{grid-template-columns:1fr}
  header{align-items:flex-start;flex-direction:column}
@@ -129,6 +133,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div id="productsList" class="muted">جارٍ التحميل...</div>
 </section>
 
+<!-- صندوق الاستفسارات الجديد -->
+<section id="inquiriesSection" class="card hidden">
+<h2 id="inquiriesTitle">استفسارات المشترين</h2>
+<p id="inquiriesIntro" class="muted">
+هنا تظهر الرسائل التي يرسلها المشترون بخصوص منتجات نشاطك.
+</p>
+<div id="inquiriesList" class="muted">جارٍ تحميل الاستفسارات...</div>
+</section>
+
 </section>
 </main>
 
@@ -180,6 +193,21 @@ function statusLabel(status){
     suspended: isEnglish()?'Suspended':'موقوف'
   };
   return labels[status] || status || '';
+}
+
+function inquiryStatusLabel(status){
+  const labels = {
+    pending: isEnglish()?'New inquiry':'استفسار جديد',
+    responded: isEnglish()?'Responded':'تمت الإجابة',
+    closed: isEnglish()?'Closed':'مغلق'
+  };
+  return labels[status] || status || '';
+}
+
+function formatInquiryDate(date){
+  if(!date)return '';
+  const locale = isEnglish()?'en-GB':'ar';
+  return new Date(date).toLocaleString(locale);
 }
 
 async function start(){
@@ -271,8 +299,10 @@ async function loadBusinessDashboard(){
 
     document.getElementById('productSection').classList.remove('hidden');
     document.getElementById('productsSection').classList.remove('hidden');
+    document.getElementById('inquiriesSection').classList.remove('hidden');
 
     await loadProducts();
+    await loadInquiries();
 
   }else{
 
@@ -359,10 +389,12 @@ document.getElementById('companyForm')
 
   document.getElementById('productSection').classList.remove('hidden');
   document.getElementById('productsSection').classList.remove('hidden');
+  document.getElementById('inquiriesSection').classList.remove('hidden');
 
   showMessage(isEnglish()?'Business profile saved.':'تم حفظ بيانات النشاط بنجاح.');
 
   await loadProducts();
+  await loadInquiries();
 });
 
 document.getElementById('productForm')
@@ -438,6 +470,79 @@ async function loadProducts(){
     status.textContent = (isEnglish()?'Status: ':'الحالة: ')+statusLabel(p.status);
 
     item.append(title,detail,status);
+    list.appendChild(item);
+  });
+}
+
+/* تحميل استفسارات النشاط الحالي فقط */
+async function loadInquiries(){
+
+  const list = document.getElementById('inquiriesList');
+
+  if(!company){
+    list.textContent = isEnglish()?'Create your business profile first.':'أنشئ ملف نشاطك أولًا.';
+    return;
+  }
+
+  list.textContent = isEnglish()?'Loading inquiries...':'جارٍ تحميل الاستفسارات...';
+
+  const {data,error} = await db
+    .from('inquiries')
+    .select('id,product_id,quantity,message,status,created_at,products(name)')
+    .eq('company_id',company.id)
+    .order('created_at',{ascending:false});
+
+  if(error){
+    list.textContent =
+      (isEnglish()?'Could not load inquiries: ':'تعذر تحميل الاستفسارات: ')+error.message;
+    return;
+  }
+
+  if(!data || !data.length){
+    list.textContent = isEnglish()
+      ?'No inquiries have arrived yet.'
+      :'لا توجد استفسارات واردة حتى الآن.';
+    return;
+  }
+
+  list.innerHTML = '';
+
+  data.forEach(inquiry=>{
+
+    const item = document.createElement('div');
+    item.className = 'inquiry-item';
+
+    const product = document.createElement('strong');
+    const productData = Array.isArray(inquiry.products)
+      ? inquiry.products[0]
+      : inquiry.products;
+
+    product.textContent =
+      (isEnglish()?'Product: ':'المنتج: ')+
+      (productData && productData.name
+        ? productData.name
+        : (isEnglish()?'Unavailable':'غير متوفر'));
+
+    const quantity = document.createElement('p');
+    quantity.textContent =
+      (isEnglish()?'Requested quantity: ':'الكمية المطلوبة: ')+
+      (inquiry.quantity || (isEnglish()?'Not specified':'لم تُحدد'));
+
+    const message = document.createElement('p');
+    message.textContent =
+      (isEnglish()?'Buyer message: ':'رسالة المشتري: ')+inquiry.message;
+
+    const status = document.createElement('span');
+    status.className = 'inquiry-status';
+    status.textContent = inquiryStatusLabel(inquiry.status);
+
+    const date = document.createElement('p');
+    date.className = 'inquiry-date';
+    date.textContent =
+      (isEnglish()?'Received: ':'تاريخ الاستلام: ')+
+      formatInquiryDate(inquiry.created_at);
+
+    item.append(product,quantity,message,status,date);
     list.appendChild(item);
   });
 }
@@ -601,6 +706,12 @@ function toggleLanguage(){
   document.getElementById('productIntro').textContent = en?'Add products offered by your business.':'أضف منتجات نشاطك التجاري.';
   document.getElementById('myProductsTitle').textContent = en?'My Products':'منتجات نشاطي';
 
+  document.getElementById('inquiriesTitle').textContent =
+    en?'Buyer Inquiries':'استفسارات المشترين';
+
+  document.getElementById('inquiriesIntro').textContent =
+    en?'Messages sent by buyers about your products appear here.':'هنا تظهر الرسائل التي يرسلها المشترون بخصوص منتجات نشاطك.';
+
   const placeholders = {
     companyName:['Business name','اسم النشاط التجاري'],
     country:['Country','الدولة'],
@@ -637,6 +748,7 @@ function toggleLanguage(){
 
   if(company){
     loadProducts();
+    loadInquiries();
   }
 }
 
