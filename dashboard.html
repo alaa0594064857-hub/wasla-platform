@@ -278,7 +278,82 @@ async function logout(){
   await db.auth.signOut();
   window.location.href = './';
 }
+let currentLanguage = 'ar';
 
+function toggleLanguage() {
+  currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+  const en = currentLanguage === 'en';
+
+  document.documentElement.lang = currentLanguage;
+  document.documentElement.dir = en ? 'ltr' : 'rtl';
+
+  const headerButtons = document.querySelectorAll('header button');
+  headerButtons[0].textContent = en ? 'العربية' : 'English';
+  headerButtons[1].textContent = en ? 'Log out' : 'تسجيل الخروج';
+
+  document.querySelector('#companySection h2').textContent =
+    en ? 'My Company Profile' : 'ملف شركتي';
+
+  document.querySelector('#companySection p').textContent =
+    en ? 'Enter your company details. They will be reviewed before publication.' :
+    'أدخل بيانات شركتك. ستبقى قيد المراجعة قبل نشرها.';
+
+  document.querySelector('#productSection h2').textContent =
+    en ? 'Add a Product' : 'إضافة منتج';
+
+  document.querySelector('#productSection p').textContent =
+    en ? 'You can add products after creating your company profile.' :
+    'لا يمكن إضافة المنتجات إلا بعد إنشاء ملف الشركة.';
+
+  document.querySelector('#productsSection h2').textContent =
+    en ? 'My Products' : 'منتجات شركتي';
+
+  const placeholders = {
+    companyName: ['Company name', 'اسم الشركة'],
+    country: ['Country', 'الدولة'],
+    city: ['City', 'المدينة'],
+    sector: ['Sector', 'القطاع'],
+    businessType: ['Business type', 'نوع النشاط'],
+    description: ['Company description', 'نبذة عن الشركة'],
+    email: ['Email address', 'البريد الإلكتروني'],
+    phone: ['Phone number', 'رقم الهاتف'],
+    website: ['Website', 'الموقع الإلكتروني'],
+    productName: ['Product name', 'اسم المنتج'],
+    category: ['Category', 'التصنيف'],
+    productDescription: ['Product description', 'وصف المنتج'],
+    imageUrl: ['Product image URL (optional)', 'رابط صورة المنتج (اختياري)']
+  };
+
+  for (const id in placeholders) {
+    document.getElementById(id).placeholder =
+      placeholders[id][en ? 0 : 1];
+  }
+
+  document.getElementById('companyButton').textContent =
+    en ? (company ? 'Update Company Details' : 'Save Company Details') :
+    (company ? 'تحديث بيانات الشركة' : 'حفظ بيانات الشركة');
+
+  document.getElementById('productButton').textContent =
+    en ? 'Add Product' : 'إضافة المنتج';
+
+  const status = document.getElementById('companyStatus');
+  if (company) {
+    const labels = {
+      pending: en ? 'Pending Review' : 'قيد المراجعة',
+      published: en ? 'Published' : 'منشور',
+      suspended: en ? 'Suspended' : 'موقوف'
+    };
+    status.textContent = (en ? 'Company status: ' : 'حالة الشركة: ') +
+      (labels[company.status] || company.status);
+  }
+
+  const message = document.getElementById('message');
+  if (message.textContent.includes('مرحباً بك')) {
+    message.textContent = en
+      ? 'Welcome to your WASLA dashboard.'
+      : 'مرحباً بك في لوحة تحكم WASLA.';
+  }
+}
 start();
 </script>
 </body>
