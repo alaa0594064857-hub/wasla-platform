@@ -268,7 +268,13 @@ async function loadProducts(){
     const detail = document.createElement('p');
     detail.textContent = (p.category || '')+' — '+(p.description || '');
     const status = document.createElement('small');
-    status.textContent = 'الحالة: '+(p.status || 'قيد المراجعة');
+    const statusNames = {
+  pending: currentLanguage === 'en' ? 'Pending Review' : 'قيد المراجعة',
+  published: currentLanguage === 'en' ? 'Published' : 'منشور',
+  suspended: currentLanguage === 'en' ? 'Suspended' : 'موقوف'
+};
+status.textContent = (currentLanguage === 'en' ? 'Status: ' : 'الحالة: ') +
+  (statusNames[p.status] || p.status || statusNames.pending);
     item.append(title,detail,status);
     list.appendChild(item);
   });
