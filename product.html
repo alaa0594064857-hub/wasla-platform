@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WASLA | Product</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fa;color:#172b3a;font-family:Arial,sans-serif}
+header{background:#102b3f;color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:27px;font-weight:bold;color:#55d6b0}
+header a{color:white;text-decoration:none}
+main{max-width:900px;margin:30px auto;padding:0 16px}
+.card{background:white;padding:24px;border-radius:15px;margin-bottom:18px;box-shadow:0 3px 14px #0000000b}
+h1,h2{margin-top:0}
+h1{color:#087f70;font-size:28px}
+.muted{color:#657681;font-size:14px;line-height:1.8}
+#message{background:#eaf2f7;padding:14px;border-radius:9px;line-height:1.7}
+#productImage{width:100%;max-height:420px;object-fit:contain;border-radius:10px;margin:12px 0}
+.company-link{display:inline-block;color:#087f70;font-weight:bold;text-decoration:none;font-size:18px}
+.company-link:hover{text-decoration:underline}
+.contact a{display:block;color:#087f70;text-decoration:none;margin:12px 0;overflow-wrap:anywhere}
+.back-company{display:inline-block;margin-top:12px;color:#087f70;text-decoration:none}
+@media(max-width:600px){
+  header{align-items:flex-start;flex-direction:column}
+  .card{padding:18px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">WASLA</div>
+<a href="dashboard.html">العودة إلى لوحة التحكم ←</a>
+</header>
+
+<main>
+<div id="message">جارٍ تحميل بيانات المنتج...</div>
+
+<section id="productCard" class="card" style="display:none">
+<h1 id="productName"></h1>
+<p id="productCategory" class="muted"></p>
+<img id="productImage" alt="" style="display:none">
+<p id="productDescription" style="line-height:1.9"></p>
+</section>
+
+<section id="companyCard" class="card" style="display:none">
+<h2>الشركة المورّدة</h2>
+<a id="companyName" class="company-link"></a>
+<p id="companyLocation" class="muted"></p>
+<p id="companyDescription" class="muted"></p>
+<a id="companyPageLink" class="back-company">عرض صفحة الشركة ←</a>
+</section>
+
+<section id="contactCard" class="card" style="display:none">
+<h2>التواصل مع الشركة</h2>
+<div id="contactDetails" class="contact"></div>
+</section>
+</main>
+
+<script>
+const SUPABASE_URL = 'https://bzrcbodvcuujdjupfgzw.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u';
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+const productId = new URLSearchParams(window.location.search).get('id');
+
+function validUuid(value){
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value || '');
+}
+
+function showMessage(text){
+  document.getElementById('message').textContent = text;
+}
+
+function addContact(label,value,href){
+  if(!value)return;
+
+  const a = document.createElement('a');
+  a.textContent = label+': '+value;
+  a.href = href;
+
+  if(href.startsWith('http')){
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+  }
+
+  document.getElementById('contactDetails').appendChild(a);
+}
+
+async function loadProduct(){
+
+  if(!productId || !validUuid(productId)){
+    showMessage('رابط المنتج غير صحيح.');
+    return;
+  }
+
+  const {data:product,error} = await db
+    .from('products')
+    .select('id,company_id,name,description,category,image_url,status')
+    .eq('id',productId)
+    .eq('status','published')
+    .maybeSingle();
+
+  if(error){
+    showMessage('تعذر تحميل المنتج: '+error.message);
+    return;
+  }
+
+  if(!product){
+    showMessage('هذا المنتج غير موجود أو غير منشور حاليًا.');
+    return;
+  }
+
+  const {data:company,error:companyError} = await db
+    .from('companies')
+    .select('id,name,country,city,description,email,phone,website,status')
+    .eq('id',product.company_id)
+    .eq('status','published')
+    .maybeSingle();
+
+  if(companyError){
+    showMessage('تعذر تحميل بيانات الشركة: '+companyError.message);
+    return;
+  }
+
+  if(!company){
+    showMessage('الشركة المرتبطة بهذا المنتج غير منشورة حاليًا.');
+    return;
+  }
+
+  document.getElementById('message').style.display = 'none';
+  document.getElementById('productCard').style.display = 'block';
+  document.getElementById('companyCard').style.display = 'block';
+  document.getElementById('contactCard').style.display = 'block';
+
+  document.getElementById('productName').textContent =
+    product.name || '';
+
+  document.getElementById('productCategory').textContent =
+    product.category || '';
+
+  document.getElementById('productDescription').textContent =
+    product.description || 'لا يوجد وصف لهذا المنتج حاليًا.';
+
+  if(product.image_url){
+    const img = document.getElementById('productImage');
+    img.src = product.image_url;
+    img.alt = product.name || 'Product image';
+    img.style.display = 'block';
+
+    img.onerror = ()=>{
+      img.style.display = 'none';
+    };
+  }
+
+  const companyName = document.getElementById('companyName');
+  companyName.textContent = company.name || '';
+  companyName.href = 'company.html?id='+encodeURIComponent(company.id);
+
+  document.getElementById('companyPageLink').href = companyName.href;
+
+  document.getElementById('companyLocation').textContent =
+    [company.country,company.city].filter(Boolean).join(' — ');
+
+  document.getElementById('companyDescription').textContent =
+    company.description || '';
+
+  addContact('البريد الإلكتروني',company.email,'mailto:'+company.email);
+  addContact('الهاتف',company.phone,'tel:'+company.phone);
+
+  if(company.website){
+    let website = company.website.trim();
+
+    if(!/^https?:\/\//i.test(website)){
+      website = 'https://'+website;
+    }
+
+    addContact('الموقع الإلكتروني',website,website);
+  }
+}
+
+loadProduct();
+</script>
+</body>
+</html>
