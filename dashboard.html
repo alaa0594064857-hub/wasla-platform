@@ -19,6 +19,7 @@ input,textarea,button{width:100%;padding:12px;margin:7px 0;border:1px solid #d9e
 textarea{min-height:90px;resize:vertical}
 button{background:#087f70;color:white;border:0;font-weight:bold;cursor:pointer}
 button.secondary{background:#17394d}
+button.danger{background:#8b3940}
 button:disabled{opacity:.5;cursor:not-allowed}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .item{padding:14px;border:1px solid #e2e8ec;border-radius:10px;margin:10px 0}
@@ -35,6 +36,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .inquiry-item p{line-height:1.8;overflow-wrap:anywhere}
 .inquiry-date{font-size:12px;color:#71818c}
 .inquiry-status{display:inline-block;padding:5px 10px;border-radius:20px;background:#fff2d8;color:#8a5b00;font-size:13px}
+.inquiry-reply{background:#eaf6f2;padding:12px;border-radius:9px;margin-top:12px;line-height:1.8;overflow-wrap:anywhere}
+.reply-area{margin-top:14px;padding-top:12px;border-top:1px solid #e2e8ec}
 @media(max-width:600px){
  .grid{grid-template-columns:1fr}
  header{align-items:flex-start;flex-direction:column}
@@ -95,21 +98,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <form id="companyForm">
 <input id="companyName" placeholder="اسم النشاط التجاري" required>
-
 <div class="grid">
 <input id="country" placeholder="الدولة" required>
 <input id="city" placeholder="المدينة">
 <input id="sector" placeholder="القطاع">
 <input id="businessType" placeholder="نوع النشاط">
 </div>
-
 <textarea id="description" placeholder="نبذة عن النشاط"></textarea>
-
 <div class="grid">
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="phone" placeholder="رقم الهاتف">
 </div>
-
 <input id="website" placeholder="الموقع الإلكتروني">
 <button id="companyButton">حفظ البيانات</button>
 </form>
@@ -118,7 +117,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <section id="productSection" class="card hidden">
 <h2 id="addProductTitle">إضافة منتج</h2>
 <p id="productIntro" class="muted">أضف منتجات نشاطك التجاري.</p>
-
 <form id="productForm">
 <input id="productName" placeholder="اسم المنتج" required>
 <input id="category" placeholder="التصنيف">
@@ -133,7 +131,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div id="productsList" class="muted">جارٍ التحميل...</div>
 </section>
 
-<!-- صندوق الاستفسارات الجديد -->
 <section id="inquiriesSection" class="card hidden">
 <h2 id="inquiriesTitle">استفسارات المشترين</h2>
 <p id="inquiriesIntro" class="muted">
@@ -160,18 +157,18 @@ let company = null;
 let currentLanguage = 'ar';
 
 const accountNames = {
-  company: {ar:'شركة', en:'Company'},
-  manufacturer: {ar:'مصنع', en:'Manufacturer'},
-  brand: {ar:'علامة تجارية', en:'Brand'},
-  trader: {ar:'تاجر', en:'Trader'},
-  buyer: {ar:'مشتري', en:'Buyer'}
+  company:{ar:'شركة',en:'Company'},
+  manufacturer:{ar:'مصنع',en:'Manufacturer'},
+  brand:{ar:'علامة تجارية',en:'Brand'},
+  trader:{ar:'تاجر',en:'Trader'},
+  buyer:{ar:'مشتري',en:'Buyer'}
 };
 
 const profileTitles = {
-  company: {ar:'ملف شركتي', en:'My Company Profile'},
-  manufacturer: {ar:'ملف مصنعي', en:'My Factory Profile'},
-  brand: {ar:'ملف علامتي التجارية', en:'My Brand Profile'},
-  trader: {ar:'ملف نشاطي التجاري', en:'My Trading Profile'}
+  company:{ar:'ملف شركتي',en:'My Company Profile'},
+  manufacturer:{ar:'ملف مصنعي',en:'My Factory Profile'},
+  brand:{ar:'ملف علامتي التجارية',en:'My Brand Profile'},
+  trader:{ar:'ملف نشاطي التجاري',en:'My Trading Profile'}
 };
 
 function isEnglish(){
@@ -188,26 +185,25 @@ function showMessage(text){
 
 function statusLabel(status){
   const labels = {
-    pending: isEnglish()?'Pending review':'قيد المراجعة',
-    published: isEnglish()?'Published':'منشور',
-    suspended: isEnglish()?'Suspended':'موقوف'
+    pending:isEnglish()?'Pending review':'قيد المراجعة',
+    published:isEnglish()?'Published':'منشور',
+    suspended:isEnglish()?'Suspended':'موقوف'
   };
   return labels[status] || status || '';
 }
 
 function inquiryStatusLabel(status){
   const labels = {
-    pending: isEnglish()?'New inquiry':'استفسار جديد',
-    responded: isEnglish()?'Responded':'تمت الإجابة',
-    closed: isEnglish()?'Closed':'مغلق'
+    pending:isEnglish()?'New inquiry':'استفسار جديد',
+    responded:isEnglish()?'Responded':'تمت الإجابة',
+    closed:isEnglish()?'Closed':'مغلق'
   };
   return labels[status] || status || '';
 }
 
 function formatInquiryDate(date){
   if(!date)return '';
-  const locale = isEnglish()?'en-GB':'ar';
-  return new Date(date).toLocaleString(locale);
+  return new Date(date).toLocaleString(isEnglish()?'en-GB':'ar');
 }
 
 async function start(){
@@ -238,7 +234,6 @@ async function start(){
   }
 
   profile = profileData;
-
   renderAccountHeader();
 
   if(profile.account_type === 'buyer'){
@@ -249,7 +244,6 @@ async function start(){
   }
 
   document.getElementById('businessSection').classList.remove('hidden');
-
   document.getElementById('profileTitle').textContent =
     profileTitles[profile.account_type][currentLanguage];
 
@@ -259,7 +253,6 @@ async function start(){
 function renderAccountHeader(){
 
   document.getElementById('welcomeSection').classList.remove('hidden');
-
   document.getElementById('welcomeTitle').textContent =
     isEnglish()?'Welcome to WASLA':'مرحبًا بك في WASLA';
 
@@ -288,7 +281,6 @@ async function loadBusinessDashboard(){
   company = companies && companies.length ? companies[0] : null;
 
   if(company){
-
     fillCompany();
 
     document.getElementById('companyStatus').textContent =
@@ -305,7 +297,6 @@ async function loadBusinessDashboard(){
     await loadInquiries();
 
   }else{
-
     document.getElementById('companyStatus').textContent =
       isEnglish()?'No business profile has been created yet.':'لم يتم إنشاء ملف نشاط تجاري بعد.';
   }
@@ -337,9 +328,7 @@ document.getElementById('companyForm')
 
   e.preventDefault();
 
-  if(!currentUser || !profile || profile.account_type === 'buyer'){
-    return;
-  }
+  if(!currentUser || !profile || profile.account_type === 'buyer')return;
 
   const button = document.getElementById('companyButton');
   button.disabled = true;
@@ -359,16 +348,13 @@ document.getElementById('companyForm')
   let result;
 
   if(company){
-
     result = await db.from('companies')
       .update(payload)
       .eq('id',company.id)
       .eq('owner_id',currentUser.id)
       .select()
       .single();
-
   }else{
-
     result = await db.from('companies')
       .insert({...payload,owner_id:currentUser.id})
       .select()
@@ -426,9 +412,7 @@ document.getElementById('productForm')
   }
 
   document.getElementById('productForm').reset();
-
   showMessage(isEnglish()?'Product submitted.':'تم إرسال المنتج بنجاح.');
-
   await loadProducts();
 });
 
@@ -474,7 +458,7 @@ async function loadProducts(){
   });
 }
 
-/* تحميل استفسارات النشاط الحالي فقط */
+/* تحميل استفسارات النشاط الحالي */
 async function loadInquiries(){
 
   const list = document.getElementById('inquiriesList');
@@ -488,7 +472,7 @@ async function loadInquiries(){
 
   const {data,error} = await db
     .from('inquiries')
-    .select('id,product_id,quantity,message,status,created_at,products(name)')
+    .select('id,product_id,quantity,message,status,created_at,reply,responded_at,products(name)')
     .eq('company_id',company.id)
     .order('created_at',{ascending:false});
 
@@ -543,6 +527,136 @@ async function loadInquiries(){
       formatInquiryDate(inquiry.created_at);
 
     item.append(product,quantity,message,status,date);
+
+    if(inquiry.reply){
+
+      const replyBox = document.createElement('div');
+      replyBox.className = 'inquiry-reply';
+
+      const replyTitle = document.createElement('strong');
+      replyTitle.textContent = isEnglish()?'Company reply:':'رد الشركة:';
+
+      const replyText = document.createElement('p');
+      replyText.textContent = inquiry.reply;
+
+      const replyDate = document.createElement('small');
+      replyDate.textContent =
+        (isEnglish()?'Reply date: ':'تاريخ الرد: ')+
+        formatInquiryDate(inquiry.responded_at);
+
+      replyBox.append(replyTitle,replyText,replyDate);
+      item.appendChild(replyBox);
+    }
+
+    const replyArea = document.createElement('div');
+    replyArea.className = 'reply-area';
+
+    if(inquiry.status !== 'closed'){
+
+      const replyInput = document.createElement('textarea');
+      replyInput.placeholder = isEnglish()
+        ?'Write your reply to the buyer...'
+        :'اكتب ردك على المشتري هنا...';
+
+      replyInput.value = inquiry.reply || '';
+
+      const sendButton = document.createElement('button');
+      sendButton.textContent = inquiry.reply
+        ? (isEnglish()?'Update reply':'تحديث الرد')
+        : (isEnglish()?'Send reply':'إرسال الرد');
+
+      sendButton.addEventListener('click',async()=>{
+
+        const replyText = replyInput.value.trim();
+
+        if(!replyText){
+          alert(isEnglish()?'Please write a reply first.':'اكتب الرد أولًا.');
+          return;
+        }
+
+        sendButton.disabled = true;
+
+        const {data,error} = await db.from('inquiries')
+          .update({
+            reply:replyText,
+            status:'responded',
+            responded_at:new Date().toISOString()
+          })
+          .eq('id',inquiry.id)
+          .eq('company_id',company.id)
+          .select('id')
+          .maybeSingle();
+
+        sendButton.disabled = false;
+
+        if(error){
+          showMessage((isEnglish()?'Could not save reply: ':'تعذر حفظ الرد: ')+error.message);
+          return;
+        }
+
+        if(!data){
+          showMessage(isEnglish()
+            ?'The reply was not saved. Check your permissions.'
+            :'لم يتم حفظ الرد. تحقق من الصلاحيات.');
+          return;
+        }
+
+        showMessage(isEnglish()?'Reply saved successfully.':'تم حفظ الرد بنجاح.');
+        await loadInquiries();
+      });
+
+      replyArea.append(replyInput,sendButton);
+
+      const closeButton = document.createElement('button');
+      closeButton.className = 'danger';
+      closeButton.textContent = isEnglish()?'Close inquiry':'إغلاق الاستفسار';
+
+      closeButton.addEventListener('click',async()=>{
+
+        if(!confirm(isEnglish()
+          ?'Are you sure you want to close this inquiry?'
+          :'هل تريد إغلاق هذا الاستفسار؟'))return;
+
+        closeButton.disabled = true;
+
+        const {data,error} = await db.from('inquiries')
+          .update({status:'closed'})
+          .eq('id',inquiry.id)
+          .eq('company_id',company.id)
+          .select('id')
+          .maybeSingle();
+
+        closeButton.disabled = false;
+
+        if(error){
+          showMessage((isEnglish()?'Could not close inquiry: ':'تعذر إغلاق الاستفسار: ')+error.message);
+          return;
+        }
+
+        if(!data){
+          showMessage(isEnglish()
+            ?'The inquiry was not updated. Check your permissions.'
+            :'لم يتم تحديث الاستفسار. تحقق من الصلاحيات.');
+          return;
+        }
+
+        showMessage(isEnglish()?'Inquiry closed.':'تم إغلاق الاستفسار.');
+        await loadInquiries();
+      });
+
+      replyArea.appendChild(closeButton);
+
+    }else{
+
+      const closedNote = document.createElement('p');
+      closedNote.className = 'muted';
+      closedNote.textContent = isEnglish()
+        ?'This inquiry is closed.'
+        :'تم إغلاق هذا الاستفسار.';
+      replyArea.appendChild(closedNote);
+    }
+
+    item.appendChild(replyArea);
     list.appendChild(item);
   });
 }
@@ -550,11 +664,10 @@ async function loadInquiries(){
 async function loadPublicProducts(){
 
   const list = document.getElementById('publicProductsList');
-
   list.textContent = isEnglish()?'Loading products...':'جارٍ تحميل المنتجات...';
 
   const {data,error} = await db.from('products')
-    .select('id,name,category,description,image_url,company_id,companies(name,country,city,email,phone,website)')
+    .select('id,name,category,description,image_url,company_id,companies(name,country,city,phone,website)')
     .eq('status','published')
     .order('created_at',{ascending:false})
     .limit(50);
@@ -603,11 +716,10 @@ async function loadPublicProducts(){
 async function loadPublicCompanies(){
 
   const list = document.getElementById('publicCompaniesList');
-
   list.textContent = isEnglish()?'Loading companies...':'جارٍ تحميل الشركات...';
 
   const {data,error} = await db.from('companies')
-    .select('id,name,country,city,sector,business_type,description,email,phone,website')
+    .select('id,name,country,city,sector,business_type,description,phone,website')
     .eq('status','published')
     .order('created_at',{ascending:false})
     .limit(50);
@@ -658,13 +770,10 @@ function showBuyerTab(tab){
   document.getElementById('buyerProductsCard').classList.toggle('hidden',!products);
   document.getElementById('buyerCompaniesCard').classList.toggle('hidden',products);
 
-  if(!products){
-    loadPublicCompanies();
-  }
+  if(!products)loadPublicCompanies();
 }
 
 async function logout(){
-
   await db.auth.signOut();
   window.location.href = './';
 }
@@ -672,7 +781,6 @@ async function logout(){
 function toggleLanguage(){
 
   currentLanguage = isEnglish()?'ar':'en';
-
   const en = isEnglish();
 
   document.documentElement.lang = currentLanguage;
@@ -681,9 +789,7 @@ function toggleLanguage(){
   document.getElementById('languageButton').textContent = en?'العربية':'English';
   document.getElementById('logoutButton').textContent = en?'Log out':'تسجيل الخروج';
 
-  if(profile){
-    renderAccountHeader();
-  }
+  if(profile)renderAccountHeader();
 
   document.getElementById('buyerTitle').textContent = en?'Buyer Dashboard':'لوحة المشتري';
 
@@ -696,7 +802,8 @@ function toggleLanguage(){
   document.getElementById('publicCompaniesTitle').textContent = en?'Published Companies':'الشركات المنشورة';
 
   if(profile && profile.account_type !== 'buyer'){
-    document.getElementById('profileTitle').textContent = profileTitles[profile.account_type][currentLanguage];
+    document.getElementById('profileTitle').textContent =
+      profileTitles[profile.account_type][currentLanguage];
   }
 
   document.getElementById('profileIntro').textContent =
@@ -742,9 +849,7 @@ function toggleLanguage(){
       (en?'Account status: ':'حالة الحساب: ')+statusLabel(company.status);
   }
 
-  if(profile && profile.account_type === 'buyer'){
-    loadPublicProducts();
-  }
+  if(profile && profile.account_type === 'buyer')loadPublicProducts();
 
   if(company){
     loadProducts();
