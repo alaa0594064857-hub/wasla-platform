@@ -265,7 +265,7 @@ async function loadProducts(){
     const detail = document.createElement('p');
     detail.textContent = (p.category || '')+' — '+(p.description || '');
     const status = document.createElement('small');
-    status.textContent = 'الحالة: '+p.status;
+    status.textContent = 'الحالة: '+(p.status || 'قيد المراجعة');
     item.append(title,detail,status);
     list.appendChild(item);
   });
