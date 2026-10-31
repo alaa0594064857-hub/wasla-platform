@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -36,8 +35,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .inquiry-item p{line-height:1.8;overflow-wrap:anywhere}
 .inquiry-date{font-size:12px;color:#71818c}
 .inquiry-status{display:inline-block;padding:5px 10px;border-radius:20px;background:#fff2d8;color:#8a5b00;font-size:13px}
-.inquiry-reply{background:#eaf6f2;padding:12px;border-radius:9px;margin-top:12px;line-height:1.8;overflow-wrap:anywhere}
+.inquiry-reply{background:#eaf6f2;padding:14px;border:1px solid #d2ebe1;border-radius:10px;margin-top:12px;line-height:1.8;overflow-wrap:anywhere}
+.inquiry-reply strong{display:block;color:#087f70;margin-bottom:6px}
+.inquiry-reply p{margin:5px 0}
 .reply-area{margin-top:14px;padding-top:12px;border-top:1px solid #e2e8ec}
+.reply-editor{background:#f3f8fc;border:1px solid #dce6eb;border-radius:10px;padding:12px;margin-top:12px}
+.reply-editor textarea{background:white}
+.reply-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.reply-buttons button{width:auto;flex:1;min-width:110px}
+.closed-note{color:#8b3940;font-size:14px;margin-top:12px}
 @media(max-width:600px){
  .grid{grid-template-columns:1fr}
  header{align-items:flex-start;flex-direction:column}
@@ -528,6 +534,7 @@ async function loadInquiries(){
 
     item.append(product,quantity,message,status,date);
 
+    /* عرض الرد السابق بشكل مستقل */
     if(inquiry.reply){
 
       const replyBox = document.createElement('div');
@@ -541,7 +548,7 @@ async function loadInquiries(){
 
       const replyDate = document.createElement('small');
       replyDate.textContent =
-        (isEnglish()?'Reply date: ':'تاريخ الرد: ')+
+        (isEnglish()?'Last reply update: ':'آخر تحديث للرد: ')+
         formatInquiryDate(inquiry.responded_at);
 
       replyBox.append(replyTitle,replyText,replyDate);
@@ -551,111 +558,171 @@ async function loadInquiries(){
     const replyArea = document.createElement('div');
     replyArea.className = 'reply-area';
 
-    if(inquiry.status !== 'closed'){
-
-      const replyInput = document.createElement('textarea');
-      replyInput.placeholder = isEnglish()
-        ?'Write your reply to the buyer...'
-        :'اكتب ردك على المشتري هنا...';
-
-      replyInput.value = inquiry.reply || '';
-
-      const sendButton = document.createElement('button');
-      sendButton.textContent = inquiry.reply
-        ? (isEnglish()?'Update reply':'تحديث الرد')
-        : (isEnglish()?'Send reply':'إرسال الرد');
-
-      sendButton.addEventListener('click',async()=>{
-
-        const replyText = replyInput.value.trim();
-
-        if(!replyText){
-          alert(isEnglish()?'Please write a reply first.':'اكتب الرد أولًا.');
-          return;
-        }
-
-        sendButton.disabled = true;
-
-        const {data,error} = await db.from('inquiries')
-          .update({
-            reply:replyText,
-            status:'responded',
-            responded_at:new Date().toISOString()
-          })
-          .eq('id',inquiry.id)
-          .eq('company_id',company.id)
-          .select('id')
-          .maybeSingle();
-
-        sendButton.disabled = false;
-
-        if(error){
-          showMessage((isEnglish()?'Could not save reply: ':'تعذر حفظ الرد: ')+error.message);
-          return;
-        }
-
-        if(!data){
-          showMessage(isEnglish()
-            ?'The reply was not saved. Check your permissions.'
-            :'لم يتم حفظ الرد. تحقق من الصلاحيات.');
-          return;
-        }
-
-        showMessage(isEnglish()?'Reply saved successfully.':'تم حفظ الرد بنجاح.');
-        await loadInquiries();
-      });
-
-      replyArea.append(replyInput,sendButton);
-
-      const closeButton = document.createElement('button');
-      closeButton.className = 'danger';
-      closeButton.textContent = isEnglish()?'Close inquiry':'إغلاق الاستفسار';
-
-      closeButton.addEventListener('click',async()=>{
-
-        if(!confirm(isEnglish()
-          ?'Are you sure you want to close this inquiry?'
-          :'هل تريد إغلاق هذا الاستفسار؟'))return;
-
-        closeButton.disabled = true;
-
-        const {data,error} = await db.from('inquiries')
-          .update({status:'closed'})
-          .eq('id',inquiry.id)
-          .eq('company_id',company.id)
-          .select('id')
-          .maybeSingle();
-
-        closeButton.disabled = false;
-
-        if(error){
-          showMessage((isEnglish()?'Could not close inquiry: ':'تعذر إغلاق الاستفسار: ')+error.message);
-          return;
-        }
-
-        if(!data){
-          showMessage(isEnglish()
-            ?'The inquiry was not updated. Check your permissions.'
-            :'لم يتم تحديث الاستفسار. تحقق من الصلاحيات.');
-          return;
-        }
-
-        showMessage(isEnglish()?'Inquiry closed.':'تم إغلاق الاستفسار.');
-        await loadInquiries();
-      });
-
-      replyArea.appendChild(closeButton);
-
-    }else{
+    /* الاستفسار المغلق: عرض الحالة فقط دون محرر */
+    if(inquiry.status === 'closed'){
 
       const closedNote = document.createElement('p');
-      closedNote.className = 'muted';
+      closedNote.className = 'closed-note';
       closedNote.textContent = isEnglish()
         ?'This inquiry is closed.'
         :'تم إغلاق هذا الاستفسار.';
+
       replyArea.appendChild(closedNote);
+      item.appendChild(replyArea);
+      list.appendChild(item);
+      return;
     }
 
+    /* إنشاء محرر الرد */
+    const editor = document.createElement('div');
+    editor.className = 'reply-editor';
+
+    /* إذا كان هناك رد سابق، يكون المحرر مخفيًا */
+    editor.classList.toggle('hidden',Boolean(inquiry.reply));
+
+    const replyInput = document.createElement('textarea');
+    replyInput.value = '';
+    replyInput.placeholder = inquiry.reply
+      ? (isEnglish()?'Write the updated reply here...':'اكتب الرد المعدّل هنا...')
+      : (isEnglish()?'Write your reply to the buyer...':'اكتب ردك على المشتري هنا...');
+
+    const buttonsRow = document.createElement('div');
+    buttonsRow.className = 'reply-buttons';
+
+    const sendButton = document.createElement('button');
+    sendButton.textContent = inquiry.reply
+      ? (isEnglish()?'Save updated reply':'حفظ التعديل')
+      : (isEnglish()?'Send reply':'إرسال الرد');
+
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'secondary';
+    cancelButton.textContent = isEnglish()?'Cancel':'إلغاء';
+    cancelButton.classList.toggle('hidden',!inquiry.reply);
+
+    buttonsRow.append(sendButton,cancelButton);
+    editor.append(replyInput,buttonsRow);
+
+    /* زر تعديل الرد يظهر فقط عند وجود رد سابق */
+    let editButton = null;
+
+    if(inquiry.reply){
+
+      editButton = document.createElement('button');
+      editButton.className = 'secondary';
+      editButton.textContent = isEnglish()?'Edit reply':'تعديل الرد';
+
+      editButton.addEventListener('click',()=>{
+        editor.classList.remove('hidden');
+        editButton.classList.add('hidden');
+        cancelButton.classList.remove('hidden');
+        replyInput.focus();
+      });
+
+      cancelButton.addEventListener('click',()=>{
+        replyInput.value = '';
+        editor.classList.add('hidden');
+        editButton.classList.remove('hidden');
+        cancelButton.classList.add('hidden');
+      });
+
+      replyArea.appendChild(editButton);
+    }
+
+    sendButton.addEventListener('click',async()=>{
+
+      const replyText = replyInput.value.trim();
+
+      if(!replyText){
+        alert(isEnglish()?'Please write a reply first.':'اكتب الرد أولًا.');
+        replyInput.focus();
+        return;
+      }
+
+      sendButton.disabled = true;
+      sendButton.textContent = isEnglish()?'Saving...':'جارٍ الحفظ...';
+
+      const {data,error} = await db.from('inquiries')
+        .update({
+          reply:replyText,
+          status:'responded',
+          responded_at:new Date().toISOString()
+        })
+        .eq('id',inquiry.id)
+        .eq('company_id',company.id)
+        .select('id')
+        .maybeSingle();
+
+      if(error){
+        sendButton.disabled = false;
+        sendButton.textContent = inquiry.reply
+          ? (isEnglish()?'Save updated reply':'حفظ التعديل')
+          : (isEnglish()?'Send reply':'إرسال الرد');
+
+        showMessage((isEnglish()?'Could not save reply: ':'تعذر حفظ الرد: ')+error.message);
+        return;
+      }
+
+      if(!data){
+        sendButton.disabled = false;
+        sendButton.textContent = inquiry.reply
+          ? (isEnglish()?'Save updated reply':'حفظ التعديل')
+          : (isEnglish()?'Send reply':'إرسال الرد');
+
+        showMessage(isEnglish()
+          ?'The reply was not saved. Check your permissions.'
+          :'لم يتم حفظ الرد. تحقق من الصلاحيات.');
+        return;
+      }
+
+      showMessage(isEnglish()
+        ?'Reply saved successfully.'
+        :'تم حفظ الرد بنجاح.');
+
+      /* إعادة تحميل الاستفسارات لإخفاء المحرر وعرض الرد المحفوظ */
+      await loadInquiries();
+    });
+
+    replyArea.appendChild(editor);
+
+    /* زر إغلاق الاستفسار */
+    const closeButton = document.createElement('button');
+    closeButton.className = 'danger';
+    closeButton.textContent = isEnglish()?'Close inquiry':'إغلاق الاستفسار';
+
+    closeButton.addEventListener('click',async()=>{
+
+      if(!confirm(isEnglish()
+        ?'Are you sure you want to close this inquiry?'
+        :'هل تريد إغلاق هذا الاستفسار؟'))return;
+
+      closeButton.disabled = true;
+
+      const {data,error} = await db.from('inquiries')
+        .update({status:'closed'})
+        .eq('id',inquiry.id)
+        .eq('company_id',company.id)
+        .select('id')
+        .maybeSingle();
+
+      if(error){
+        closeButton.disabled = false;
+        showMessage((isEnglish()?'Could not close inquiry: ':'تعذر إغلاق الاستفسار: ')+error.message);
+        return;
+      }
+
+      if(!data){
+        closeButton.disabled = false;
+        showMessage(isEnglish()
+          ?'The inquiry was not updated. Check your permissions.'
+          :'لم يتم تحديث الاستفسار. تحقق من الصلاحيات.');
+        return;
+      }
+
+      showMessage(isEnglish()?'Inquiry closed.':'تم إغلاق الاستفسار.');
+      await loadInquiries();
+    });
+
+    replyArea.appendChild(closeButton);
     item.appendChild(replyArea);
     list.appendChild(item);
   });
