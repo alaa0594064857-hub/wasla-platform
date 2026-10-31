@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WASLA | لوحة تحكم الشركة</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6f8;color:#172b3a;font-family:Arial,sans-serif}
+header{background:#102b3f;color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center}
+header strong{font-size:24px;color:#55d6b0}
+main{max-width:950px;margin:30px auto;padding:0 16px}
+.card{background:white;padding:22px;border-radius:14px;margin-bottom:20px;box-shadow:0 3px 14px #0000000b}
+h2{margin-top:0}
+input,textarea,button{width:100%;padding:12px;margin:7px 0;border:1px solid #d9e0e5;border-radius:8px;font:inherit}
+textarea{min-height:90px}
+button{background:#087f70;color:white;border:0;font-weight:bold;cursor:pointer}
+button.secondary{background:#17394d}
+button:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{padding:12px;border:1px solid #e2e8ec;border-radius:9px;margin:10px 0}
+.muted{color:#657681;font-size:14px}
+#message{padding:12px;border-radius:8px;margin:12px 0;white-space:pre-wrap}
+.hidden{display:none}
+@media(max-width:600px){.grid{grid-template-columns:1fr}header{align-items:flex-start;gap:10px;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+<strong>WASLA</strong>
+<button class="secondary" style="width:auto" onclick="logout()">تسجيل الخروج</button>
+</header>
+
+<main>
+<div id="message">جارٍ التحقق من تسجيل الدخول...</div>
+
+<section id="companySection" class="card hidden">
+<h2>ملف شركتي</h2>
+<p class="muted">أدخل بيانات شركتك. ستبقى قيد المراجعة قبل نشرها.</p>
+<div id="companyStatus" class="muted"></div>
+<form id="companyForm">
+<input id="companyName" placeholder="اسم الشركة" required>
+<div class="grid">
+<input id="country" placeholder="الدولة" required>
+<input id="city" placeholder="المدينة">
+<input id="sector" placeholder="القطاع">
+<input id="businessType" placeholder="نوع النشاط">
+</div>
+<textarea id="description" placeholder="نبذة عن الشركة"></textarea>
+<div class="grid">
+<input id="email" type="email" placeholder="البريد الإلكتروني">
+<input id="phone" placeholder="رقم الهاتف">
+</div>
+<input id="website" placeholder="الموقع الإلكتروني">
+<button id="companyButton">حفظ بيانات الشركة</button>
+</form>
+</section>
+
+<section id="productSection" class="card hidden">
+<h2>إضافة منتج</h2>
+<p class="muted">لا يمكن إضافة المنتجات إلا بعد إنشاء ملف الشركة.</p>
+<form id="productForm">
+<input id="productName" placeholder="اسم المنتج" required>
+<input id="category" placeholder="التصنيف">
+<textarea id="productDescription" placeholder="وصف المنتج"></textarea>
+<input id="imageUrl" type="url" placeholder="رابط صورة المنتج (اختياري)">
+<button id="productButton">إضافة المنتج</button>
+</form>
+</section>
+
+<section id="productsSection" class="card hidden">
+<h2>منتجات شركتي</h2>
+<div id="productsList">جارٍ التحميل...</div>
+</section>
+</main>
+
+<script>
+const SUPABASE_URL = 'https://bzrcbodvcuujdjupfgzw.supabase.co';
+
+// ضع هنا نفس Publishable Key الموجود في index.html
+const SUPABASE_PUBLISHABLE_KEY = 'PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE';
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+let currentUser = null;
+let company = null;
+
+function showMessage(text){
+  document.getElementById('message').textContent = text;
+}
+
+function val(id){
+  return document.getElementById(id).value.trim();
+}
+
+async function start(){
+  if(SUPABASE_PUBLISHABLE_KEY.includes('PASTE_')){
+    showMessage('يجب وضع Publishable Key الموجود في ملف index.html أولاً.');
+    return;
+  }
+
+  const {data,error} = await db.auth.getUser();
+  if(error || !data.user){
+    showMessage('يجب تسجيل الدخول أولاً من الصفحة الرئيسية.');
+    return;
+  }
+
+  currentUser = data.user;
+  showMessage('مرحباً بك في لوحة تحكم WASLA.');
+
+  const {data:companies,error:companyError} = await db
+    .from('companies')
+    .select('*')
+    .eq('owner_id',currentUser.id)
+    .limit(1);
+
+  if(companyError){
+    showMessage('تعذر تحميل بيانات الشركة: '+companyError.message);
+    return;
+  }
+
+  company = companies && companies.length ? companies[0] : null;
+
+  document.getElementById('companySection').classList.remove('hidden');
+
+  if(company){
+    fillCompany();
+    document.getElementById('companyStatus').textContent =
+      'حالة الشركة: '+company.status;
+    document.getElementById('companyButton').textContent =
+      'تحديث بيانات الشركة';
+    document.getElementById('productSection').classList.remove('hidden');
+    document.getElementById('productsSection').classList.remove('hidden');
+    loadProducts();
+  }
+}
+
+function fillCompany(){
+  const fields = {
+    companyName:'name',
+    country:'country',
+    city:'city',
+    sector:'sector',
+    businessType:'business_type',
+    description:'description',
+    email:'email',
+    phone:'phone',
+    website:'website'
+  };
+  for(const id in fields){
+    document.getElementById(id).value = company[fields[id]] || '';
+  }
+}
+
+document.getElementById('companyForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const button = document.getElementById('companyButton');
+  button.disabled = true;
+
+  const payload = {
+    name:val('companyName'),
+    country:val('country'),
+    city:val('city'),
+    sector:val('sector'),
+    business_type:val('businessType'),
+    description:val('description'),
+    email:val('email'),
+    phone:val('phone'),
+    website:val('website')
+  };
+
+  let result;
+  if(company){
+    result = await db.from('companies')
+      .update(payload)
+      .eq('id',company.id)
+      .eq('owner_id',currentUser.id)
+      .select()
+      .single();
+  }else{
+    result = await db.from('companies')
+      .insert(payload)
+      .select()
+      .single();
+  }
+
+  button.disabled = false;
+
+  if(result.error){
+    showMessage('لم يتم حفظ الشركة: '+result.error.message);
+    return;
+  }
+
+  company = result.data;
+  document.getElementById('companyStatus').textContent =
+    'حالة الشركة: '+company.status;
+
+  document.getElementById('productSection').classList.remove('hidden');
+  document.getElementById('productsSection').classList.remove('hidden');
+  showMessage('تم حفظ بيانات الشركة بنجاح.');
+  loadProducts();
+});
+
+document.getElementById('productForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!company){
+    showMessage('أنشئ ملف الشركة أولاً.');
+    return;
+  }
+
+  const button = document.getElementById('productButton');
+  button.disabled = true;
+
+  const {error} = await db.from('products').insert({
+    company_id:company.id,
+    name:val('productName'),
+    category:val('category'),
+    description:val('productDescription'),
+    image_url:val('imageUrl')
+  });
+
+  button.disabled = false;
+
+  if(error){
+    showMessage('لم تتم إضافة المنتج: '+error.message);
+    return;
+  }
+
+  document.getElementById('productForm').reset();
+  showMessage('تم إرسال المنتج بنجاح، وهو بانتظار المراجعة.');
+  loadProducts();
+});
+
+async function loadProducts(){
+  if(!company)return;
+
+  const {data,error} = await db.from('products')
+    .select('id,name,category,description,status')
+    .eq('company_id',company.id)
+    .order('created_at',{ascending:false});
+
+  const list = document.getElementById('productsList');
+
+  if(error){
+    list.textContent = 'تعذر تحميل المنتجات: '+error.message;
+    return;
+  }
+
+  if(!data.length){
+    list.textContent = 'لم تضف أي منتجات حتى الآن.';
+    return;
+  }
+
+  list.innerHTML = '';
+  data.forEach(p=>{
+    const item = document.createElement('div');
+    item.className = 'item';
+    const title = document.createElement('strong');
+    title.textContent = p.name;
+    const detail = document.createElement('p');
+    detail.textContent = (p.category || '')+' — '+(p.description || '');
+    const status = document.createElement('small');
+    status.textContent = 'الحالة: '+p.status;
+    item.append(title,detail,status);
+    list.appendChild(item);
+  });
+}
+
+async function logout(){
+  await db.auth.signOut();
+  window.location.href = './';
+}
+
+start();
+</script>
+</body>
+</html>
