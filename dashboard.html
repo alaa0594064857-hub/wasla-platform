@@ -52,6 +52,23 @@ display:grid;place-items:center;color:var(--navy);
 font-weight:900;overflow:hidden;flex-shrink:0
 }
 .avatar img{width:100%;height:100%;object-fit:cover}
+
+/* زر الصورة الشخصية في الشريط العلوي */
+.top-avatar-button{
+padding:0;
+border:0;
+cursor:pointer;
+transition:transform .2s ease,box-shadow .2s ease;
+}
+.top-avatar-button:hover{
+transform:scale(1.06);
+box-shadow:0 0 0 3px #d9ad5840;
+}
+.top-avatar-button:focus-visible{
+outline:3px solid var(--gold);
+outline-offset:3px;
+}
+
 .sidebar-user{display:flex;align-items:center;gap:10px;padding-top:16px;margin-top:15px;border-top:1px solid #ffffff19}
 .sidebar-user strong{font-size:12px;display:block}
 .sidebar-user small{font-size:10px;color:#aebccc}
@@ -312,7 +329,11 @@ color:white;display:grid;place-items:center;cursor:pointer
 </button>
 
 <div class="top-profile">
-<div class="avatar" id="topAvatar">W</div>
+<button class="avatar top-avatar-button" id="topAvatar"
+type="button" title="الملف الشخصي"
+aria-label="فتح الملف الشخصي">
+W
+</button>
 <div class="profile-text">
 <strong id="topName">مرحباً بك في WASLA</strong>
 <small id="topCompany">مساحة أعمالك</small>
@@ -705,7 +726,7 @@ function setupDashboardHistory(){
  try{
   history.replaceState(initialState,"",location.href);
  }catch(error){
-  console.warn("تعذر تجهيز سجل لوحة التحكم:",error);
+  console.warn("تعذر تجهيز سجل التنقل:",error);
  }
 
  showDashboardPage("overview",false);
@@ -728,7 +749,7 @@ window.addEventListener("popstate",function(event){
  try{
   history.pushState(safeState,"",location.href);
  }catch(error){
-  console.warn("تعذر تثبيت سجل لوحة التحكم:",error);
+  console.warn("تعذر تثبيت سجل التنقل:",error);
   showDashboardPage("overview",false);
  }
 });
@@ -1444,6 +1465,11 @@ document.getElementById("profileForm").addEventListener("submit",async e=>{
 document.getElementById("menuToggle").addEventListener("click",toggleSidebar);
 
 document.getElementById("sidebarBackdrop").addEventListener("click",closeSidebar);
+
+/* فتح الملف الشخصي عند الضغط على الصورة في الشريط العلوي */
+document.getElementById("topAvatar").addEventListener("click",function(){
+ goTo("profile");
+});
 
 document.addEventListener("keydown",function(e){
  if(e.key==="Escape")closeSidebar();
