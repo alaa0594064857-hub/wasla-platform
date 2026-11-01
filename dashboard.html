@@ -1,2783 +1,558 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102b3f">
-<title>WASLA | مساحة أعمالك</title>
-
+<title>WASLA | لوحة التحكم</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 :root{
-  --navy:#102b3f;
-  --navy2:#173c52;
-  --teal:#13a889;
-  --mint:#dff6ef;
-  --ink:#172d3b;
-  --muted:#71818c;
-  --line:#e6edf0;
-  --bg:#f4f7f8;
-  --white:#fff;
-  --shadow:0 12px 35px #1834470b
+--navy:#0b1d38;--navy2:#173653;--gold:#d9ad58;
+--cream:#f7f4ed;--white:#fff;--text:#172b46;
+--muted:#7d8998;--border:#e9e5dc;--green:#16865c;
+--shadow:0 8px 30px rgba(18,38,64,.06)
 }
-
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--ink);
-  font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif
-}
-
-button,input,textarea,select{font:inherit}
-button{cursor:pointer;border:0}
-
-.shell{min-height:100vh}
-
-.top{
-  height:72px;
-  background:var(--navy);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 28px;
-  position:sticky;
-  top:0;
-  z-index:20;
-  box-shadow:0 5px 22px #102b3f20
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  font-weight:900;
-  font-size:23px;
-  letter-spacing:1px
-}
-
-.brandmark{
-  width:34px;
-  height:34px;
-  border-radius:11px;
-  background:linear-gradient(135deg,#53e0bd,#0c9b83);
-  display:grid;
-  place-items:center;
-  color:#103448;
-  font-size:19px
-}
-
-.brand small{
-  display:block;
-  font-size:9px;
-  letter-spacing:2px;
-  color:#b8d1d9;
-  margin-top:2px
-}
-
-.top-actions{
-  display:flex;
-  align-items:center;
-  gap:10px
-}
-
-.top button{
-  color:#fff;
-  background:#ffffff16;
-  border:1px solid #ffffff25;
-  padding:9px 13px;
-  border-radius:10px
-}
-
-.layout{
-  display:grid;
-  grid-template-columns:248px minmax(0,1fr);
-  max-width:1600px;
-  margin:auto;
-  min-height:calc(100vh - 72px)
-}
-
-aside{
-  background:#fff;
-  border-inline-end:1px solid var(--line);
-  padding:25px 16px
-}
-
-.userbox{
-  padding:14px;
-  border-radius:15px;
-  background:#f5f9fa;
-  margin-bottom:25px
-}
-
-.avatar{
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  background:var(--mint);
-  color:#087d68;
-  display:grid;
-  place-items:center;
-  font-weight:800;
-  font-size:17px
-}
-
-.userrow{
-  display:flex;
-  align-items:center;
-  gap:11px
-}
-
-.userbox strong{
-  display:block;
-  font-size:14px
-}
-
-.userbox small{
-  color:var(--muted);
-  font-size:11px
-}
-
-.navlabel{
-  font-size:10px;
-  color:#9aa8af;
-  font-weight:800;
-  padding:8px 12px 10px
-}
-
-.navbtn{
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px;
-  border-radius:11px;
-  background:transparent;
-  color:#536673;
-  text-align:start;
-  margin:3px 0;
-  font-weight:650
-}
-
-.navbtn .ico{
-  width:23px;
-  text-align:center;
-  font-size:17px
-}
-
-.navbtn.active{
-  background:#e8f7f3;
-  color:#087e69
-}
-
-.navbtn:hover{
-  background:#f3f8f8
-}
-
-.navfoot{
-  margin-top:28px;
-  border-top:1px solid var(--line);
-  padding-top:16px
-}
-
-.main{
-  padding:30px;
-  min-width:0
-}
-
-.pagehead{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:16px;
-  margin-bottom:24px
-}
-
-.eyebrow{
-  font-size:11px;
-  color:var(--teal);
-  font-weight:800;
-  letter-spacing:1px
-}
-
-.pagehead h1{
-  font-size:27px;
-  margin:6px 0
-}
-
-.sub{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.8;
-  margin:0
-}
-
-.btn{
-  padding:11px 16px;
-  border-radius:11px;
-  background:var(--teal);
-  color:#fff;
-  font-weight:750
-}
-
-.btn.secondary{
-  background:#edf3f5;
-  color:#294454
-}
-
-.btn.ghost{
-  background:#fff;
-  color:#37515f;
-  border:1px solid var(--line)
-}
-
-.btn.danger{
-  background:#fff0ef;
-  color:#b54742
-}
-
-.btn:disabled{
-  opacity:.55;
-  cursor:wait
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:16px
-}
-
-.card{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:17px;
-  padding:20px;
-  box-shadow:var(--shadow);
-  min-width:0
-}
-
-/* بطاقات الواجهة الرئيسية الجديدة */
-.quick-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:16px;
-  margin-top:16px
-}
-
-.quick-card{
-  position:relative;
-  min-height:145px;
-  padding:20px;
-  border:1px solid var(--line);
-  border-radius:17px;
-  background:#fff;
-  box-shadow:var(--shadow);
-  text-align:start;
-  transition:.18s ease;
-  cursor:pointer;
-  color:var(--ink)
-}
-
-.quick-card:hover{
-  transform:translateY(-3px);
-  border-color:#b8e5da;
-  box-shadow:0 16px 35px #18344718
-}
-
-.quick-card:active{
-  transform:translateY(0)
-}
-
-.quick-icon{
-  width:45px;
-  height:45px;
-  border-radius:14px;
-  background:#eaf7f3;
-  color:#0b987c;
-  display:grid;
-  place-items:center;
-  font-size:21px;
-  margin-bottom:17px
-}
-
-.quick-card h3{
-  margin:0 0 6px;
-  font-size:15px
-}
-
-.quick-card p{
-  margin:0;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.7
-}
-
-.quick-arrow{
-  position:absolute;
-  left:18px;
-  bottom:17px;
-  color:#0b987c;
-  font-size:17px
-}
-
-.stat{
-  display:flex;
-  align-items:center;
-  justify-content:space-between
-}
-
-.stat .number{
-  font-size:28px;
-  font-weight:850;
-  margin-top:12px
-}
-
-.stat .symbol{
-  width:42px;
-  height:42px;
-  border-radius:13px;
-  background:#eaf7f3;
-  color:#0b987c;
-  display:grid;
-  place-items:center;
-  font-size:20px
-}
-
-.sectiontitle{
-  font-size:17px;
-  margin:0 0 15px
-}
-
-.muted{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.8
-}
-
-.stack{
-  display:grid;
-  gap:15px
-}
-
-.row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px
-}
-
-.field{
-  width:100%;
-  padding:12px 13px;
-  border:1px solid #dfe8eb;
-  border-radius:10px;
-  background:#fff;
-  color:var(--ink);
-  outline:none
-}
-
-.field:focus{
-  border-color:#38b99e;
-  box-shadow:0 0 0 3px #13a88918
-}
-
-textarea.field{
-  min-height:105px;
-  resize:vertical
-}
-
-.formgrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px
-}
-
-.formgrid label{
-  display:grid;
-  gap:6px;
-  font-size:12px;
-  color:#526672
-}
-
-.full{
-  grid-column:1/-1
-}
-
-.notice{
-  padding:12px 14px;
-  border-radius:11px;
-  background:#eef7f5;
-  color:#176c5b;
-  font-size:13px;
-  margin-bottom:16px
-}
-
-.notice.error{
-  background:#fff0ef;
-  color:#a33d38
-}
-
-.hidden{
-  display:none!important
-}
-
-.list{
-  display:grid;
-  gap:10px
-}
-
-.entry{
-  border:1px solid var(--line);
-  border-radius:13px;
-  padding:15px;
-  background:#fff
-}
-
-.entry h3{
-  font-size:14px;
-  margin:0 0 6px
-}
-
-.entry p{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.8;
-  margin:5px 0
-}
-
-.tag{
-  display:inline-flex;
-  padding:5px 9px;
-  border-radius:30px;
-  background:#edf7f4;
-  color:#14836e;
-  font-size:11px
-}
-
-.toolbar{
-  display:flex;
-  gap:9px;
-  flex-wrap:wrap;
-  margin-bottom:15px
-}
-
-.toolbar .field{
-  max-width:360px
-}
-
-.inbox{
-  display:grid;
-  grid-template-columns:minmax(270px,350px) minmax(0,1fr);
-  min-height:590px;
-  overflow:hidden;
-  padding:0
-}
-
-.conversations{
-  border-inline-end:1px solid var(--line);
-  background:#fbfdfd
-}
-
-.inboxhead{
-  padding:19px;
-  border-bottom:1px solid var(--line)
-}
-
-.inboxhead h2{
-  margin:0 0 12px;
-  font-size:18px
-}
-
-.conversation{
-  width:100%;
-  border:0;
-  background:transparent;
-  text-align:start;
-  display:flex;
-  gap:11px;
-  padding:14px 16px;
-  border-bottom:1px solid #edf1f2;
-  color:var(--ink)
-}
-
-.conversation:hover,
-.conversation.selected{
-  background:#eaf7f3
-}
-
-.convavatar{
-  flex:0 0 40px;
-  height:40px;
-  border-radius:13px;
-  background:#e5eef2;
-  color:#31596b;
-  display:grid;
-  place-items:center;
-  font-weight:800
-}
-
-.convbody{
-  min-width:0;
-  flex:1
-}
-
-.convtop{
-  display:flex;
-  justify-content:space-between;
-  gap:8px
-}
-
-.convtop strong{
-  font-size:12px
-}
-
-.convtop time{
-  font-size:10px;
-  color:#87969e;
-  white-space:nowrap
-}
-
-.preview{
-  font-size:11px;
-  color:#77868e;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  margin-top:6px
-}
-
-.thread{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  background:#fff
-}
-
-.threadhead{
-  padding:17px 20px;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  gap:11px
-}
-
-.threadhead strong{
-  font-size:14px
-}
-
-.threadbody{
-  padding:22px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  flex:1;
-  min-height:350px;
-  max-height:490px;
-  overflow:auto;
-  background:linear-gradient(#fff,#fbfdfd)
-}
-
-.bubble{
-  max-width:min(78%,560px);
-  padding:11px 14px;
-  border-radius:15px;
-  background:#f0f4f6;
-  align-self:flex-start
-}
-
-.bubble.mine{
-  background:#dff6ef;
-  align-self:flex-end
-}
-
-.bubble p{
-  margin:0;
-  font-size:13px;
-  line-height:1.75;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere
-}
-
-.bubble time{
-  display:block;
-  text-align:end;
-  color:#819098;
-  font-size:10px;
-  margin-top:5px
-}
-
-.composer{
-  border-top:1px solid var(--line);
-  padding:15px;
-  display:flex;
-  gap:9px;
-  align-items:flex-end
-}
-
-.composer textarea{
-  min-height:44px;
-  max-height:120px
-}
-
-.empty{
-  height:100%;
-  min-height:300px;
-  display:grid;
-  place-items:center;
-  text-align:center;
-  color:#87969e;
-  padding:25px
-}
-
-.empty b{
-  display:block;
-  color:#385261;
-  margin-bottom:7px
-}
-
-.skeleton{
-  height:14px;
-  background:linear-gradient(90deg,#edf2f3,#f8fafa,#edf2f3);
-  background-size:200% 100%;
-  animation:shine 1.2s infinite;
-  border-radius:8px
-}
-
-@keyframes shine{
-  to{background-position:-200% 0}
-}
-
-.content{
-  animation:fade .16s ease
-}
-
-@keyframes fade{
-  from{opacity:.55;transform:translateY(3px)}
-  to{opacity:1;transform:none}
-}
-
-.mobilemenu{
-  display:none
-}
-
-.footerhint{
-  font-size:11px;
-  color:#9aa7ad;
-  line-height:1.7;
-  margin-top:25px
-}
-
-@media(max-width:1100px){
-  .quick-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
-  }
-}
-
-@media(max-width:900px){
-  .layout{
-    grid-template-columns:1fr
-  }
-
-  aside{
-    position:fixed;
-    z-index:30;
-    inset-block:72px;
-    inset-inline-start:0;
-    width:260px;
-    transform:translateX(110%);
-    transition:transform .2s;
-    box-shadow:0 15px 35px #102b3f20
-  }
-
-  .layout.menu-open aside{
-    transform:translateX(0)
-  }
-
-  .mobilemenu{
-    display:inline-block
-  }
-
-  .main{
-    padding:22px 16px
-  }
-
-  .grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
-  }
-}
-
-@media(max-width:620px){
-  .top{
-    padding:0 14px;
-    height:64px
-  }
-
-  .layout{
-    min-height:calc(100vh - 64px)
-  }
-
-  aside{
-    inset-block-start:64px
-  }
-
-  .main{
-    padding:18px 12px
-  }
-
-  .grid,
-  .quick-grid{
-    grid-template-columns:1fr
-  }
-
-  .pagehead{
-    align-items:flex-start
-  }
-
-  .pagehead h1{
-    font-size:22px
-  }
-
-  .inbox{
-    grid-template-columns:1fr;
-    min-height:0
-  }
-
-  .conversations{
-    border-inline-end:0
-  }
-
-  .thread{
-    min-height:520px
-  }
-
-  .conversation{
-    padding:12px
-  }
-
-  .formgrid{
-    grid-template-columns:1fr
-  }
-
-  .full{
-    grid-column:auto
-  }
-
-  .top-actions button{
-    padding:8px 9px;
-    font-size:11px
-  }
+body{margin:0;font-family:Cairo,sans-serif;background:var(--cream);color:var(--text)}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{
+width:250px;background:linear-gradient(180deg,#091a32,#132f50);
+color:white;position:fixed;right:0;top:0;bottom:0;z-index:20;
+padding:23px 16px;display:flex;flex-direction:column;
+overflow-y:auto;transition:.25s
+}
+.brand{text-align:center;padding:10px 0 25px;border-bottom:1px solid #ffffff19;margin-bottom:20px}
+.brand-mark{width:65px;height:65px;border:2px solid var(--gold);border-radius:19px;display:grid;place-items:center;margin:auto auto 8px;color:var(--gold);font-size:37px;font-weight:900}
+.brand h1{margin:0;font-size:27px;letter-spacing:2px;color:#f2d18e}
+.brand p{margin:0;color:#c3cbd5;font-size:10px;letter-spacing:1px}
+.nav-label{color:#8294aa;font-size:11px;padding:0 13px;margin:13px 0 8px}
+.nav-btn{border:0;background:transparent;color:#d5dce5;width:100%;display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:12px;text-align:right;font-size:13px;font-weight:700;margin-bottom:5px;transition:.2s}
+.nav-btn i{width:20px;text-align:center}
+.nav-btn:hover{background:#ffffff12;color:white}
+.nav-btn.active{color:#152744;background:linear-gradient(100deg,#f4d99e,#d8aa51)}
+.sidebar-bottom{margin-top:auto;padding-top:20px}
+.upgrade{border:1px solid #d9ad5870;border-radius:16px;padding:15px;text-align:center}
+.upgrade i{color:var(--gold);font-size:23px}
+.upgrade h3{margin:5px 0;color:#f1d28f;font-size:14px}
+.upgrade p{color:#c3cbd5;font-size:11px;line-height:1.8}
+.avatar{width:39px;height:39px;border-radius:50%;background:linear-gradient(140deg,#f4d99e,#c38b31);display:grid;place-items:center;color:var(--navy);font-weight:900}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding-top:16px;margin-top:15px;border-top:1px solid #ffffff19}
+.sidebar-user strong{font-size:12px;display:block}
+.sidebar-user small{font-size:10px;color:#aebccc}
+.main{margin-right:250px;width:calc(100% - 250px);min-width:0}
+.topbar{height:76px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 30px;position:sticky;top:0;z-index:10}
+.top-right,.top-left{display:flex;align-items:center;gap:15px}
+.search{background:#f5f6f8;border-radius:30px;padding:10px 15px;width:260px;display:flex;gap:10px}
+.search input{border:0;background:none;outline:none;width:100%;font-size:12px}
+.top-icon{width:39px;height:39px;border:0;border-radius:50%;background:#f3f5f7;color:var(--navy)}
+.top-profile{display:flex;align-items:center;gap:10px}
+.top-profile strong{display:block;font-size:12px}
+.top-profile small{font-size:10px;color:var(--muted)}
+.menu-toggle{display:none}
+.content{padding:27px 30px 45px;max-width:1600px;margin:auto}
+.page{display:none}
+.page.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.page-heading h2{font-size:22px;margin:0;font-weight:900}
+.page-heading p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.card{background:white;border:1px solid var(--border);border-radius:17px;box-shadow:var(--shadow)}
+.panel{padding:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}
+.panel-head h3{margin:0;font-size:15px;font-weight:900}
+.btn{border:0;border-radius:10px;padding:10px 17px;font-weight:800;font-size:12px;display:inline-flex;align-items:center;gap:8px}
+.btn-gold{background:linear-gradient(110deg,#f3d99f,#d5a54b);color:#182b45}
+.btn-dark{background:var(--navy);color:white}
+.btn-light{background:#f1f4f7;color:var(--navy)}
+.btn-danger{background:#fff0f0;color:#c94c4c}
+.muted{color:var(--muted)}
+.empty{text-align:center;padding:30px 15px;color:var(--muted)}
+.empty i{font-size:30px;color:#c6ced8;margin-bottom:10px}
+.empty p{font-size:12px}
+.welcome{border-radius:20px;overflow:hidden;background:radial-gradient(circle at 12% 15%,#3e6fa455,transparent 27%),linear-gradient(115deg,#0a1d38,#17395e);color:white;padding:30px 32px;min-height:185px;display:flex;align-items:center;justify-content:space-between;position:relative;margin-bottom:20px}
+.welcome:after{content:"W";position:absolute;left:35px;top:-55px;font-size:250px;font-weight:900;color:#ffffff08}
+.welcome-text{position:relative;z-index:1}
+.welcome .eyebrow{color:#f0cf8b;font-size:11px;font-weight:800}
+.welcome h2{font-size:24px;margin:7px 0 4px;font-weight:900}
+.welcome p{color:#d2dce8;font-size:12px;margin:0 0 16px}
+.welcome-art{position:relative;z-index:1;width:125px;height:110px;border:1px solid #ebca8b55;border-radius:24px;display:grid;place-items:center;background:#ffffff0d}
+.welcome-art i{font-size:55px;color:#e8c47e}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{padding:17px;display:flex;align-items:center;gap:12px;min-width:0}
+.stat-icon{width:49px;height:49px;flex-shrink:0;border-radius:15px;display:grid;place-items:center;font-size:19px}
+.ic-blue{background:#e9f1fc;color:#326db5}
+.ic-gold{background:#fbf1dd;color:#c28d31}
+.ic-green{background:#e4f4ed;color:#16865c}
+.ic-purple{background:#f0eafa;color:#7652b2}
+.stat small{color:var(--muted);font-size:10px}
+.stat strong{font-size:23px;display:block;line-height:1.5}
+.stat span{font-size:10px;color:var(--muted)}
+.grid-two{display:grid;grid-template-columns:1.1fr .9fr;gap:17px;margin-bottom:20px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.quick{border:1px solid var(--border);border-radius:13px;padding:13px 6px;text-align:center;background:white;color:var(--text)}
+.quick:hover{border-color:var(--gold);background:#fffaf0}
+.quick i{display:grid;place-items:center;width:41px;height:41px;border-radius:50%;background:#edf3fb;color:#316cac;margin:0 auto 8px}
+.quick strong{font-size:10px;display:block}
+.activity{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #f0eee9}
+.activity:last-child{border-bottom:0}
+.activity-icon{width:37px;height:37px;border-radius:12px;background:#edf3fb;color:#3976b8;display:grid;place-items:center}
+.activity strong{font-size:11px;display:block}
+.activity small{font-size:10px;color:var(--muted)}
+.text-link{border:0;background:none;color:#2865a5;font-weight:800;font-size:11px}
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.product-card{overflow:hidden}
+.product-image{height:145px;background:#f1f3f5;display:grid;place-items:center;overflow:hidden}
+.product-image img{width:100%;height:100%;object-fit:cover}
+.product-image i{font-size:35px;color:#b7c0ca}
+.product-info{padding:14px}
+.product-info h4{margin:0 0 5px;font-size:14px}
+.product-info p{font-size:11px;color:var(--muted);margin:0 0 12px;line-height:1.7}
+.company-tag{font-size:10px;color:#2865a5;font-weight:800;margin-bottom:5px}
+.product-actions{display:flex;gap:7px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:550px}
+th,td{text-align:right;padding:13px 11px;border-bottom:1px solid #f0eee9;font-size:12px}
+th{color:var(--muted);font-size:10px;background:#faf9f6}
+.pill{display:inline-block;border-radius:20px;padding:5px 10px;font-size:10px;font-weight:800}
+.pill-green{background:#e7f5ed;color:#16865c}
+.pill-orange{background:#fff2dc;color:#b57a20}
+.pill-red{background:#fff0f0;color:#c94c4c}
+.pill-gray{background:#eef1f4;color:#657384}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:11px;font-weight:800}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--border);background:#fcfbf8;border-radius:10px;padding:12px;outline:none;font-size:12px;color:var(--text)}
+.field input:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{min-height:100px;resize:vertical}
+.form-actions{display:flex;gap:10px;margin-top:17px}
+.discover-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.discover-bar input,.discover-bar select{border:1px solid var(--border);border-radius:10px;padding:10px;background:white;font-family:inherit;font-size:12px}
+.inbox-layout{display:grid;grid-template-columns:300px 1fr;gap:15px;min-height:480px}
+.inbox-list{padding:10px;max-height:600px;overflow:auto}
+.inbox-item{padding:13px;border-radius:12px;cursor:pointer;border-bottom:1px solid #f0eee9}
+.inbox-item:hover,.inbox-item.selected{background:#f5f3ed}
+.inbox-item strong{font-size:12px}
+.inbox-item small{display:block;color:var(--muted);font-size:10px}
+.chat-area{display:flex;flex-direction:column;min-height:480px}
+.chat-head{padding:16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800}
+.chat-messages{flex:1;padding:20px;overflow:auto;max-height:430px}
+.bubble{max-width:75%;padding:11px 14px;border-radius:14px;margin-bottom:10px;font-size:12px;line-height:1.8}
+.bubble.mine{background:#e9f1fc;margin-right:auto}
+.bubble.theirs{background:#f4f1e9;margin-left:auto}
+.bubble small{display:block;font-size:9px;color:var(--muted);margin-top:4px}
+.chat-compose{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border)}
+.chat-compose input{flex:1;min-width:0;border:1px solid var(--border);border-radius:25px;padding:11px 15px;outline:none}
+.chat-compose button{width:43px;border:0;border-radius:50%;background:var(--navy);color:white}
+.modal{display:none;position:fixed;inset:0;background:#05112099;z-index:50;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modal-box{background:white;border-radius:18px;padding:23px;width:100%;max-width:530px;max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h3{margin:0;font-size:17px}
+.modal-close{border:0;background:#f1f3f5;width:32px;height:32px;border-radius:50%}
+.toast{position:fixed;bottom:22px;left:22px;z-index:100;background:var(--navy);color:white;padding:13px 18px;border-radius:12px;font-size:12px;display:none;max-width:90%}
+.toast.show{display:block}
+.loading{padding:25px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){
+.sidebar{transform:translateX(100%)}
+.sidebar.open{transform:translateX(0)}
+.main{margin-right:0;width:100%}
+.menu-toggle{display:inline-grid;place-items:center}
+.topbar{padding:0 13px;height:65px}
+.search{width:40vw;padding:9px 10px}
+.top-profile .profile-text{display:none}
+.content{padding:19px 13px 35px}
+.welcome{padding:22px;min-height:165px}
+.welcome h2{font-size:18px}
+.welcome-art{width:75px;height:75px}
+.welcome-art i{font-size:32px}
+.grid-two{grid-template-columns:1fr}
+.inbox-layout{grid-template-columns:1fr}
+.inbox-list{max-height:210px}
+}
+@media(max-width:480px){
+.stats{gap:8px}
+.stat{padding:11px;gap:7px}
+.stat-icon{width:37px;height:37px;font-size:14px}
+.stat strong{font-size:19px}
+.stat small{font-size:9px}
+.product-grid{grid-template-columns:1fr}
+.form-grid{grid-template-columns:1fr}
+.field.full{grid-column:auto}
+.quick-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
-
 <body>
-
-<div class="shell">
-
-<header class="top">
-
-  <div class="brand">
-    <span class="brandmark">W</span>
-    <span>
-      WASLA
-      <small>GLOBAL BUSINESS NETWORK</small>
-    </span>
-  </div>
-
-  <div class="top-actions">
-    <button class="mobilemenu" id="menuBtn">☰</button>
-    <button id="langBtn">English</button>
-    <button id="logoutBtn">تسجيل الخروج</button>
-  </div>
-
-</header>
-
-<div class="layout" id="layout">
-
-<aside>
-
-  <div class="userbox">
-    <div class="userrow">
-      <div class="avatar" id="avatar">W</div>
-
-      <div>
-        <strong id="userName">جارٍ التحميل…</strong>
-        <small id="userType">WASLA member</small>
-      </div>
-    </div>
-  </div>
-
-  <div class="navlabel">مساحة العمل</div>
-
-  <nav id="nav">
-
-    <button class="navbtn active" data-page="overview">
-      <span class="ico">◫</span>
-      <span>نظرة عامة</span>
-    </button>
-
-    <button class="navbtn" data-page="discover">
-      <span class="ico">⌕</span>
-      <span>استكشاف السوق</span>
-    </button>
-
-    <button class="navbtn business-only" data-page="products">
-      <span class="ico">▦</span>
-      <span>منتجاتي</span>
-    </button>
-
-    <button class="navbtn" data-page="inbox">
-      <span class="ico">✉</span>
-      <span>صندوق الوارد</span>
-    </button>
-
-    <button class="navbtn" data-page="company">
-      <span class="ico">▤</span>
-      <span>ملف النشاط</span>
-    </button>
-
-  </nav>
-
-  <div class="navfoot">
-
-    <button class="navbtn" data-page="settings">
-      <span class="ico">⚙</span>
-      <span>الإعدادات</span>
-    </button>
-
-  </div>
-
-  <p class="footerhint">
-    WASLA · Business, Connected.<br>
-    نسخة تشغيلية مرتبطة بقاعدة بياناتك الحالية.
-  </p>
-
+<div class="app">
+<aside class="sidebar" id="sidebar">
+<div class="brand">
+<div class="brand-mark">W</div><h1>WASLA</h1><p>CONNECT · TRADE · GROW</p>
+</div>
+<div class="nav-label">مساحة العمل</div>
+<button class="nav-btn active" data-page="overview"><i class="fa-solid fa-house"></i> الرئيسية</button>
+<button class="nav-btn" data-page="company"><i class="fa-solid fa-building"></i> شركتي</button>
+<button class="nav-btn" data-page="products"><i class="fa-solid fa-box-open"></i> منتجاتي</button>
+<button class="nav-btn" data-page="discover"><i class="fa-solid fa-compass"></i> اكتشف المنتجات</button>
+<div class="nav-label">التواصل والتجارة</div>
+<button class="nav-btn" data-page="inquiries"><i class="fa-solid fa-file-invoice"></i> الاستفسارات</button>
+<button class="nav-btn" data-page="inbox"><i class="fa-solid fa-comments"></i> المحادثات</button>
+<div class="nav-label">حسابك</div>
+<button class="nav-btn" data-page="profile"><i class="fa-solid fa-user"></i> الملف الشخصي</button>
+<button class="nav-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+<div class="sidebar-bottom">
+<div class="upgrade"><i class="fa-solid fa-crown"></i><h3>WASLA Business</h3><p>مساحة واحدة لإدارة حضورك التجاري والتواصل مع شركائك.</p></div>
+<div class="sidebar-user"><div class="avatar" id="sideAvatar">W</div><div><strong id="sideName">مستخدم WASLA</strong><small id="sideType">حساب تجاري</small></div></div>
+</div>
 </aside>
 
 <main class="main">
+<header class="topbar">
+<div class="top-right">
+<button class="top-icon menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+<div class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="globalSearch" placeholder="ابحث في المنتجات..."></div>
+</div>
+<div class="top-left">
+<button class="top-icon" onclick="goTo('inquiries')"><i class="fa-regular fa-bell"></i></button>
+<div class="top-profile"><div class="avatar" id="topAvatar">W</div><div class="profile-text"><strong id="topName">مرحباً بك في WASLA</strong><small id="topCompany">مساحة أعمالك</small></div></div>
+</div>
+</header>
 
-  <div id="notice" class="notice hidden" role="status"></div>
+<div class="content">
+<section class="page active" id="page-overview">
+<div class="welcome">
+<div class="welcome-text"><div class="eyebrow">WASLA BUSINESS PLATFORM</div><h2>أهلاً بك في عالم الأعمال والتجارة</h2><p>اكتشف منتجات جديدة، اعرض أعمالك، وابنِ علاقات تجارية تتجاوز الحدود.</p><button class="btn btn-gold" onclick="goTo('discover')"><i class="fa-solid fa-arrow-left"></i> اكتشف الفرص التجارية</button></div>
+<div class="welcome-art"><i class="fa-solid fa-handshake"></i></div>
+</div>
+<div class="stats">
+<div class="card stat"><div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div><div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div></div>
+<div class="card stat"><div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div><div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div></div>
+<div class="card stat"><div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div><div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div></div>
+<div class="card stat"><div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div><div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div></div>
+</div>
+<div class="grid-two">
+<div class="card panel"><div class="panel-head"><h3>الوصول السريع</h3></div><div class="quick-grid">
+<button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
+<button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الشركة</strong></button>
+<button class="quick" onclick="goTo('discover')"><i class="fa-solid fa-magnifying-glass"></i><strong>تصفح المنتجات</strong></button>
+<button class="quick" onclick="goTo('inquiries')"><i class="fa-solid fa-envelope"></i><strong>الاستفسارات</strong></button>
+</div></div>
+<div class="card panel"><div class="panel-head"><h3>آخر الاستفسارات</h3><button class="text-link" onclick="goTo('inquiries')">عرض الكل ←</button></div><div id="recentInquiries"><div class="loading">جارٍ تحميل البيانات...</div></div></div>
+</div>
+<div class="card panel"><div class="panel-head"><h3>أحدث منتجاتك</h3><button class="text-link" onclick="goTo('products')">عرض الكل ←</button></div><div id="recentProducts" class="product-grid"></div></div>
+</section>
 
-  <div id="page" class="content">
+<section class="page" id="page-company">
+<div class="page-heading"><div><h2>ملف شركتي</h2><p>أدر معلومات شركتك التي تظهر في WASLA.</p></div></div>
+<div class="card panel"><div class="panel-head"><h3>المعلومات التجارية</h3></div>
+<form id="companyForm"><div class="form-grid">
+<div class="field full"><label>اسم الشركة أو النشاط التجاري</label><input id="companyName" required placeholder="اسم الشركة"></div>
+<div class="field"><label>الدولة</label><input id="companyCountry" placeholder="الدولة"></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ التغييرات</button></div></form>
+</div></section>
 
-    <div class="card">
-      <div class="skeleton" style="width:35%"></div>
-      <br>
-      <div class="skeleton" style="width:75%"></div>
-    </div>
+<section class="page" id="page-products">
+<div class="page-heading"><div><h2>منتجاتي</h2><p>إدارة المنتجات التي تعرضها في منصة WASLA.</p></div><button class="btn btn-gold" onclick="openProductModal()"><i class="fa-solid fa-plus"></i> إضافة منتج</button></div>
+<div id="myProducts" class="product-grid"></div>
+</section>
 
-  </div>
+<section class="page" id="page-discover">
+<div class="page-heading"><div><h2>اكتشف المنتجات</h2><p>تصفح المنتجات المنشورة من الشركات على WASLA.</p></div></div>
+<div class="discover-bar"><input id="discoverSearch" placeholder="ابحث عن منتج أو وصف..."><select id="discoverCategory"><option value="">كل التصنيفات</option></select><button class="btn btn-dark" onclick="loadDiscover()">بحث</button></div>
+<div id="discoverProducts" class="product-grid"></div>
+</section>
 
+<section class="page" id="page-inquiries">
+<div class="page-heading"><div><h2>الاستفسارات التجارية</h2><p>تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.</p></div></div>
+<div class="card panel"><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="inquiriesTable"></tbody></table></div></div>
+</section>
+
+<section class="page" id="page-inbox">
+<div class="page-heading"><div><h2>المحادثات</h2><p>تواصل مع الأطراف المرتبطة باستفساراتك.</p></div></div>
+<div class="inbox-layout"><div class="card inbox-list" id="inboxList"></div>
+<div class="card chat-area"><div class="chat-head" id="chatTitle">اختر استفساراً لعرض المحادثة</div><div class="chat-messages" id="chatMessages"><div class="empty">ستظهر الرسائل هنا</div></div>
+<form class="chat-compose" id="chatForm"><input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button></form></div></div>
+</section>
+
+<section class="page" id="page-profile">
+<div class="page-heading"><div><h2>الملف الشخصي</h2><p>إدارة بيانات حسابك الشخصي.</p></div></div>
+<div class="card panel"><form id="profileForm"><div class="form-grid">
+<div class="field full"><label>الاسم الكامل</label><input id="fullName" required></div>
+<div class="field full"><label>البريد الإلكتروني</label><input id="email" disabled></div>
+<div class="field full"><label>نوع الحساب</label><input id="accountType" disabled></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ الملف الشخصي</button></div></form></div>
+</section>
+</div>
 </main>
+</div>
 
-</div>
-</div>
+<div class="modal" id="productModal"><div class="modal-box">
+<div class="modal-head"><h3 id="productModalTitle">إضافة منتج جديد</h3><button class="modal-close" onclick="closeProductModal()">×</button></div>
+<form id="productForm"><input type="hidden" id="productId"><div class="form-grid">
+<div class="field full"><label>اسم المنتج</label><input id="productName" required></div>
+<div class="field full"><label>التصنيف</label><input id="productCategory"></div>
+<div class="field full"><label>وصف المنتج</label><textarea id="productDescription"></textarea></div>
+<div class="field full"><label>رابط صورة المنتج</label><input id="productImage" type="url"></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ المنتج</button><button class="btn btn-light" type="button" onclick="closeProductModal()">إلغاء</button></div></form>
+</div></div>
+
+<div class="modal" id="inquiryModal"><div class="modal-box">
+<div class="modal-head"><h3>إرسال استفسار تجاري</h3><button class="modal-close" onclick="closeInquiryModal()">×</button></div>
+<form id="inquiryForm"><input type="hidden" id="inquiryProductId"><div class="form-grid">
+<div class="field full"><label>الكمية المطلوبة</label><input id="inquiryQuantity" required></div>
+<div class="field full"><label>رسالتك</label><textarea id="inquiryMessage" required></textarea></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">إرسال الاستفسار</button></div></form>
+</div></div>
+<div class="toast" id="toast"></div>
 
 <script>
-'use strict';
+const SUPABASE_URL="https://bzrcbodvcuujdjupfgzw.supabase.co";
+const SUPABASE_KEY="sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const SUPABASE_URL='https://bzrcbodvcuujdjupfgzw.supabase.co';
+let currentUser=null,currentProfile=null,currentCompany=null;
+let products=[],inquiries=[],selectedInquiry=null,messagesChannel=null;
 
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u';
+function showToast(message){
+ const toast=document.getElementById("toast");
+ toast.textContent=message;toast.classList.add("show");
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>toast.classList.remove("show"),3500);
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+function dateText(v){if(!v)return "—";const d=new Date(v);return isNaN(d)?"—":d.toLocaleDateString("ar");}
+function accountLabel(t){return({company:"شركة",manufacturer:"مصنّع",brand:"علامة تجارية",trader:"تاجر",buyer:"مشتري"})[t]||t||"حساب WASLA";}
+function statusLabel(s){return({pending:"قيد الانتظار",open:"مفتوح",accepted:"مقبول",rejected:"مرفوض",completed:"مكتمل",closed:"مغلق"})[s]||s||"غير محدد";}
+function statusClass(s){if(["accepted","completed"].includes(s))return "pill-green";if(["pending","open"].includes(s))return "pill-orange";if(["rejected","closed"].includes(s))return "pill-red";return "pill-gray";}
 
-const db=window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
-
-let user=null;
-let profile=null;
-let company=null;
-let lang='ar';
-let page='overview';
-let products=[];
-let inquiries=[];
-let activeInquiry=null;
-let messages=[];
-
-const $=id=>document.getElementById(id);
-
-const esc=s=>String(s??'').replace(
-  /[&<>"']/g,
-  c=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[c])
-);
-
-const t=(a,e)=>lang==='ar'?a:e;
-
-const rel=x=>Array.isArray(x)?x[0]:x;
-
-function notify(msg,error=false){
-  $('notice').textContent=msg;
-  $('notice').classList.toggle('error',error);
-  $('notice').classList.remove('hidden');
+/* التنقل الموحد بين جميع أقسام اللوحة */
+function goTo(page){
+ const target=document.getElementById("page-"+page);
+ if(!target){showToast("القسم المطلوب غير موجود.");return;}
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ target.classList.add("active");
+ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ document.getElementById("sidebar").classList.remove("open");
+ window.scrollTo({top:0,behavior:"smooth"});
+ if(page==="discover")loadDiscover();
+ if(page==="inbox")loadInbox();
+ if(page==="inquiries")renderInquiries();
 }
 
-function hideNotice(){
-  $('notice').classList.add('hidden');
+/* استقبال الضغط على القائمة حتى لو ضغطت على الأيقونة أو النص */
+document.addEventListener("click",function(e){
+ const button=e.target.closest("[data-page]");
+ if(button){e.preventDefault();goTo(button.dataset.page);}
+});
+
+async function init(){
+ const {data,error}=await db.auth.getSession();
+ if(error||!data.session){location.href="index.html";return;}
+ currentUser=data.session.user;
+ document.getElementById("email").value=currentUser.email||"";
+ await loadAccountData();
 }
-
-function date(v){
-  return v
-    ? new Date(v).toLocaleString(
-        lang==='ar'?'ar':'en-GB',
-        {
-          dateStyle:'medium',
-          timeStyle:'short'
-        }
-      )
-    : '';
-}
-
-function typeName(v){
-  return (
-    {
-      buyer:['مشتري','Buyer'],
-      company:['شركة','Company'],
-      manufacturer:['مصنّع','Manufacturer'],
-      brand:['علامة تجارية','Brand'],
-      trader:['تاجر','Trader']
-    }[v]||[v||'عضو','Member']
-  )[lang==='ar'?0:1];
-}
-
-function status(v){
-  return (
-    {
-      pending:['قيد المراجعة','Pending review'],
-      published:['منشور','Published'],
-      suspended:['موقوف','Suspended'],
-      responded:['تم الرد','Responded'],
-      closed:['مغلق','Closed']
-    }[v]||[v||'—',v||'—']
-  )[lang==='ar'?0:1];
-}
-
-async function boot(){
-
-  const {
-    data:{user:u},
-    error
-  }=await db.auth.getUser();
-
-  if(error||!u){
-
-    $('page').innerHTML=`
-      <div class="card empty">
-        <div>
-          <b>${t('يلزم تسجيل الدخول','Sign in required')}</b>
-          ${t(
-            'سجّل الدخول من صفحة WASLA الرئيسية ثم افتح لوحة التحكم.',
-            'Sign in from the WASLA home page, then open the dashboard.'
-          )}
-        </div>
-      </div>
-    `;
-
-    return;
-  }
-
-  user=u;
-
-  const r=await db
-    .from('profiles')
-    .select('id,full_name,account_type')
-    .eq('id',u.id)
-    .maybeSingle();
-
-  if(r.error||!r.data){
-
-    notify(
-      r.error?.message||'لا يوجد ملف مستخدم في profiles',
-      true
-    );
-
-    return;
-  }
-
-  profile=r.data;
-
-  $('userName').textContent=
-    profile.full_name||u.email;
-
-  $('userType').textContent=
-    typeName(profile.account_type);
-
-  $('avatar').textContent=
-    (profile.full_name||u.email||'W')
-      .trim()
-      .charAt(0)
-      .toUpperCase();
-
-  if(profile.account_type==='buyer'){
-
-    document
-      .querySelectorAll('.business-only')
-      .forEach(x=>x.classList.add('hidden'));
-
-  }
-
-  await loadCompany();
-
-  await navigate('overview');
+async function loadAccountData(){
+ const {data,error}=await db.from("profiles").select("id,full_name,account_type").eq("id",currentUser.id).maybeSingle();
+ if(error){showToast("تعذر تحميل الملف الشخصي: "+error.message);return;}
+ if(!data){showToast("لم يتم العثور على ملف شخصي لهذا الحساب في Supabase.");return;}
+ currentProfile=data;
+ const name=data.full_name||"مستخدم WASLA",initial=name.trim().charAt(0)||"W",type=accountLabel(data.account_type);
+ document.getElementById("topName").textContent="مرحباً، "+name;
+ document.getElementById("sideName").textContent=name;
+ document.getElementById("topCompany").textContent=type;
+ document.getElementById("sideType").textContent=type;
+ document.getElementById("topAvatar").textContent=initial;
+ document.getElementById("sideAvatar").textContent=initial;
+ document.getElementById("fullName").value=data.full_name||"";
+ document.getElementById("accountType").value=type;
+ await Promise.all([loadCompany(),loadMyProducts(),loadMyInquiries()]);
+ renderOverview();setupRealtime();
 }
 
 async function loadCompany(){
+ const {data,error}=await db.from("companies").select("owner_id,name,country").eq("owner_id",currentUser.id).maybeSingle();
+ if(error){console.error(error);return;}
+ currentCompany=data;
+ document.getElementById("companyName").value=data?.name||"";
+ document.getElementById("companyCountry").value=data?.country||"";
+ document.getElementById("statCompany").textContent=data?.name?"مضاف":"غير مضاف";
+}
+document.getElementById("companyForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const name=document.getElementById("companyName").value.trim();
+ const country=document.getElementById("companyCountry").value.trim();
+ if(!name)return showToast("يرجى إدخال اسم الشركة.");
+ let result=currentCompany
+ ?await db.from("companies").update({name,country}).eq("owner_id",currentUser.id)
+ :await db.from("companies").insert({owner_id:currentUser.id,name,country});
+ if(result.error)return showToast("تعذر حفظ الشركة: "+result.error.message);
+ showToast("تم حفظ بيانات الشركة.");await loadCompany();renderOverview();
+});
 
-  if(profile.account_type==='buyer') return;
-
-  const r=await db
-    .from('companies')
-    .select('*')
-    .eq('owner_id',user.id)
-    .limit(1);
-
-  if(r.error){
-
-    notify(
-      'تعذر تحميل ملف النشاط: '+r.error.message,
-      true
-    );
-
-    return;
-  }
-
-  company=r.data?.[0]||null;
+async function loadMyProducts(){
+ const {data,error}=await db.from("products").select("id,company_id,name,description,category,image_url,status,created_at").eq("company_id",currentUser.id).order("created_at",{ascending:false});
+ if(error){console.error(error);products=[];document.getElementById("myProducts").innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
+ products=data||[];renderMyProducts();
+}
+function productCard(p,owner=false){
+ return `<article class="card product-card">
+ <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
+ <div class="product-info"><div class="company-tag">${esc(p.category||"عام")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج حتى الآن.")}</p>
+ ${owner?`<div class="product-actions"><button class="btn btn-light" onclick="editProduct('${p.id}')">تعديل</button><button class="btn btn-danger" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button></div>`:`<button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>`}
+ </div></article>`;
+}
+function renderMyProducts(){
+ const container=document.getElementById("myProducts"),recent=document.getElementById("recentProducts");
+ if(!products.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-box-open"></i><p>لم تضف أي منتجات بعد.</p><button class="btn btn-gold" onclick="openProductModal()">أضف أول منتج</button></div>';recent.innerHTML='<div class="empty">ستظهر منتجاتك هنا بعد إضافتها.</div>';return;}
+ container.innerHTML=products.map(p=>productCard(p,true)).join("");
+ recent.innerHTML=products.slice(0,3).map(p=>productCard(p,true)).join("");
+}
+function openProductModal(){
+ document.getElementById("productForm").reset();document.getElementById("productId").value="";
+ document.getElementById("productModalTitle").textContent="إضافة منتج جديد";
+ document.getElementById("productModal").classList.add("show");
+}
+function closeProductModal(){document.getElementById("productModal").classList.remove("show");}
+function editProduct(id){
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return;
+ document.getElementById("productId").value=p.id;
+ document.getElementById("productName").value=p.name||"";
+ document.getElementById("productCategory").value=p.category||"";
+ document.getElementById("productDescription").value=p.description||"";
+ document.getElementById("productImage").value=p.image_url||"";
+ document.getElementById("productModalTitle").textContent="تعديل المنتج";
+ document.getElementById("productModal").classList.add("show");
+}
+document.getElementById("productForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!currentCompany){showToast("أضف بيانات شركتك أولاً.");closeProductModal();goTo("company");return;}
+ const id=document.getElementById("productId").value;
+ const payload={company_id:currentUser.id,name:document.getElementById("productName").value.trim(),category:document.getElementById("productCategory").value.trim(),description:document.getElementById("productDescription").value.trim(),image_url:document.getElementById("productImage").value.trim()||null};
+ if(!payload.name)return showToast("اسم المنتج مطلوب.");
+ const result=id?await db.from("products").update(payload).eq("id",id).eq("company_id",currentUser.id):await db.from("products").insert(payload);
+ if(result.error)return showToast("تعذر حفظ المنتج: "+result.error.message);
+ closeProductModal();showToast("تم حفظ المنتج بنجاح.");await loadMyProducts();renderOverview();
+});
+async function deleteProduct(id){
+ if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
+ const {error}=await db.from("products").delete().eq("id",id).eq("company_id",currentUser.id);
+ if(error)return showToast("تعذر حذف المنتج: "+error.message);
+ showToast("تم حذف المنتج.");await loadMyProducts();renderOverview();
 }
 
-function navEvents(){
-
-  document
-    .querySelectorAll('[data-page]')
-    .forEach(b=>{
-      b.addEventListener(
-        'click',
-        ()=>{
-          navigate(b.dataset.page);
-        }
-      );
-    });
-
-  $('menuBtn').onclick=()=>{
-    $('layout').classList.toggle('menu-open');
-  };
-
-  $('langBtn').onclick=toggleLang;
-
-  $('logoutBtn').onclick=async()=>{
-    await db.auth.signOut();
-    location.href='./';
-  };
+async function loadDiscover(){
+ const container=document.getElementById("discoverProducts");
+ container.innerHTML='<div class="loading">جارٍ البحث...</div>';
+ const search=document.getElementById("discoverSearch").value.trim();
+ const category=document.getElementById("discoverCategory").value;
+ let query=db.from("products").select("id,company_id,name,description,category,image_url,status,created_at,companies(name,country)").eq("status","published").neq("company_id",currentUser.id).order("created_at",{ascending:false}).limit(60);
+ if(search)query=query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+ if(category)query=query.eq("category",category);
+ const {data,error}=await query;
+ if(error){container.innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
+ if(!data?.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-magnifying-glass"></i><p>لا توجد منتجات منشورة مطابقة لبحثك.</p></div>';return;}
+ const categories=[...new Set(data.map(p=>p.category).filter(Boolean))],select=document.getElementById("discoverCategory"),old=select.value;
+ select.innerHTML='<option value="">كل التصنيفات</option>'+categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+ select.value=old;
+ container.innerHTML=data.map(p=>`<article class="card product-card"><div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div><div class="product-info"><div class="company-tag">${esc(p.companies?.name||"شركة على WASLA")} · ${esc(p.companies?.country||"")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p><button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button></div></article>`).join("");
 }
 
-async function navigate(next){
-
-  page=next;
-
-  hideNotice();
-
-  $('layout')
-    .classList
-    .remove('menu-open');
-
-  document
-    .querySelectorAll('.navbtn[data-page]')
-    .forEach(b=>{
-      b.classList.toggle(
-        'active',
-        b.dataset.page===next
-      );
-    });
-
-  $('page').innerHTML=`
-    <div class="card">
-      <div class="skeleton" style="width:30%"></div>
-      <br>
-      <div class="skeleton" style="width:80%"></div>
-      <br>
-      <div class="skeleton" style="width:65%"></div>
-    </div>
-  `;
-
-  await new Promise(
-    r=>requestAnimationFrame(r)
-  );
-
-  if(next==='overview')
-    await renderOverview();
-
-  else if(next==='discover')
-    await renderDiscover();
-
-  else if(next==='products')
-    await renderProducts();
-
-  else if(next==='inbox')
-    await renderInbox();
-
-  else if(next==='company')
-    renderCompany();
-
-  else
-    renderSettings();
+async function loadMyInquiries(){
+ const {data,error}=await db.from("inquiries").select("id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)").or(`buyer_id.eq.${currentUser.id},company_id.eq.${currentUser.id}`).order("created_at",{ascending:false});
+ if(error){console.error(error);inquiries=[];return;}
+ inquiries=data||[];renderInquiries();
+}
+function renderInquiries(){
+ const body=document.getElementById("inquiriesTable");if(!body)return;
+ if(!inquiries.length){body.innerHTML='<tr><td colspan="5"><div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد استفسارات حتى الآن.</p></div></td></tr>';return;}
+ body.innerHTML=inquiries.map(i=>`<tr><td>${esc(i.products?.name||"منتج")}</td><td>${esc(i.quantity||"—")}</td><td><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></td><td>${dateText(i.created_at)}</td><td><button class="btn btn-light" onclick="openChat('${i.id}')">فتح المحادثة</button></td></tr>`).join("");
+}
+function renderOverview(){
+ document.getElementById("statProducts").textContent=products.length;
+ document.getElementById("statInquiries").textContent=inquiries.length;
+ document.getElementById("statOpen").textContent=inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status)).length;
+ document.getElementById("statCompany").textContent=currentCompany?.name?"مضاف":"غير مضاف";
+ const recent=document.getElementById("recentInquiries");
+ recent.innerHTML=inquiries.length?inquiries.slice(0,4).map(i=>`<div class="activity"><div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div><div><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${dateText(i.created_at)}</small></div><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></div>`).join(""):'<div class="empty"><i class="fa-regular fa-envelope"></i><p>لا توجد استفسارات حتى الآن.</p></div>';
 }
 
-function head(title,desc,action=''){
-
-  return `
-    <div class="pagehead">
-
-      <div>
-
-        <div class="eyebrow">
-          WASLA WORKSPACE
-        </div>
-
-        <h1>${title}</h1>
-
-        <p class="sub">
-          ${desc}
-        </p>
-
-      </div>
-
-      ${action}
-
-    </div>
-  `;
+function openInquiryModal(id){
+ if(currentProfile?.account_type!=="buyer"){showToast("إرسال الاستفسارات متاح لحسابات المشترين.");return;}
+ document.getElementById("inquiryForm").reset();document.getElementById("inquiryProductId").value=id;
+ document.getElementById("inquiryModal").classList.add("show");
 }
-
-/* الواجهة الرئيسية */
-async function renderOverview(){
-
-  let pCount=0;
-  let iCount=0;
-
-  if(company){
-
-    const [
-      p,
-      i
-    ]=await Promise.all([
-
-      db
-        .from('products')
-        .select('id',{count:'exact',head:true})
-        .eq('company_id',company.id),
-
-      db
-        .from('inquiries')
-        .select('id',{count:'exact',head:true})
-        .eq('company_id',company.id)
-
-    ]);
-
-    pCount=p.count||0;
-    iCount=i.count||0;
-
-  }
-
-  else if(profile.account_type==='buyer'){
-
-    const i=await db
-      .from('inquiries')
-      .select('id',{count:'exact',head:true})
-      .eq('buyer_id',user.id);
-
-    iCount=i.count||0;
-  }
-
-  $('page').innerHTML=`
-
-    ${head(
-      t('مرحبًا بعودتك','Welcome back'),
-      t(
-        'مساحة واحدة لإدارة علاقاتك التجارية ونشاطك على WASLA.',
-        'One workspace for your business relationships and activity.'
-      )
-    )}
-
-    <div class="grid">
-
-      <div class="card">
-
-        <div class="stat">
-          <span class="muted">
-            ${t('نوع الحساب','Account type')}
-          </span>
-
-          <span class="symbol">◉</span>
-        </div>
-
-        <div class="stat">
-          <div class="number" style="font-size:20px">
-            ${typeName(profile.account_type)}
-          </div>
-        </div>
-
-        <p class="muted">
-          ${t('حسابك الحالي','Your current account')}
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <div class="stat">
-          <span class="muted">
-            ${t('المنتجات','Products')}
-          </span>
-
-          <span class="symbol">▦</span>
-        </div>
-
-        <div class="number">
-          ${pCount}
-        </div>
-
-        <p class="muted">
-          ${t(
-            'منتجات نشاطك',
-            'Your business products'
-          )}
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <div class="stat">
-          <span class="muted">
-            ${t('الاستفسارات','Inquiries')}
-          </span>
-
-          <span class="symbol">✉</span>
-        </div>
-
-        <div class="number">
-          ${iCount}
-        </div>
-
-        <p class="muted">
-          ${t(
-            'طلبات التواصل المرتبطة بالمنتجات',
-            'Product-related inquiries'
-          )}
-        </p>
-
-      </div>
-
-    </div>
-
-    <!-- الأربع خانات الجديدة -->
-    <div class="quick-grid">
-
-      <button
-        type="button"
-        class="quick-card"
-        onclick="navigate('products')"
-      >
-
-        <div class="quick-icon">
-          ▦
-        </div>
-
-        <h3>
-          ${t('منتجاتي','My products')}
-        </h3>
-
-        <p>
-          ${t(
-            'إدارة المنتجات وإضافة منتجات جديدة.',
-            'Manage your products and add new ones.'
-          )}
-        </p>
-
-        <span class="quick-arrow">←</span>
-
-      </button>
-
-
-      <button
-        type="button"
-        class="quick-card"
-        onclick="navigate('inbox')"
-      >
-
-        <div class="quick-icon">
-          ✉
-        </div>
-
-        <h3>
-          ${t('الاستفسارات','Inquiries')}
-        </h3>
-
-        <p>
-          ${t(
-            'عرض الاستفسارات والتواصل مع العملاء.',
-            'View inquiries and communicate with customers.'
-          )}
-        </p>
-
-        <span class="quick-arrow">←</span>
-
-      </button>
-
-
-      <button
-        type="button"
-        class="quick-card"
-        onclick="navigate('inbox')"
-      >
-
-        <div class="quick-icon">
-          ◉
-        </div>
-
-        <h3>
-          ${t('الاستفسارات المفتوحة','Open inquiries')}
-        </h3>
-
-        <p>
-          ${t(
-            'فتح صندوق الاستفسارات ومتابعة المحادثات.',
-            'Open the inquiry inbox and follow conversations.'
-          )}
-        </p>
-
-        <span class="quick-arrow">←</span>
-
-      </button>
-
-
-      <button
-        type="button"
-        class="quick-card"
-        onclick="navigate('company')"
-      >
-
-        <div class="quick-icon">
-          ▤
-        </div>
-
-        <h3>
-          ${t('ملف الشركة','Business profile')}
-        </h3>
-
-        <p>
-          ${t(
-            'عرض وتحديث بيانات نشاطك التجاري.',
-            'View and update your business information.'
-          )}
-        </p>
-
-        <span class="quick-arrow">←</span>
-
-      </button>
-
-    </div>
-
-
-    <div class="card" style="margin-top:16px">
-
-      <h2 class="sectiontitle">
-        ${t('ابدأ من هنا','Quick access')}
-      </h2>
-
-      <div class="toolbar">
-
-        <button
-          class="btn"
-          onclick="navigate('inbox')"
-        >
-          ${t(
-            'فتح صندوق الوارد',
-            'Open inbox'
-          )}
-        </button>
-
-        <button
-          class="btn secondary"
-          onclick="navigate('discover')"
-        >
-          ${t(
-            'استكشاف السوق',
-            'Explore market'
-          )}
-        </button>
-
-        ${
-          company
-          ?
-          `<button
-            class="btn secondary"
-            onclick="navigate('products')"
-          >
-            ${t(
-              'إدارة المنتجات',
-              'Manage products'
-            )}
-          </button>`
-          :
-          ''
-        }
-
-      </div>
-
-      <p class="muted">
-
-        ${
-          company
-          ?
-          `${t(
-            'النشاط الحالي:',
-            'Current business:'
-          )}
-          <b>${esc(company.name)}</b>
-          ·
-          ${status(company.status)}`
-          :
-          t(
-            'أكمل ملف نشاطك التجاري لبدء عرض منتجاتك.',
-            'Complete your business profile to start listing products.'
-          )
-        }
-
-      </p>
-
-    </div>
-  `;
+function closeInquiryModal(){document.getElementById("inquiryModal").classList.remove("show");}
+document.getElementById("inquiryForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const productId=document.getElementById("inquiryProductId").value;
+ const product=await db.from("products").select("id,company_id").eq("id",productId).maybeSingle();
+ if(product.error||!product.data)return showToast("لم نتمكن من العثور على المنتج.");
+ const {error}=await db.from("inquiries").insert({product_id:productId,company_id:product.data.company_id,buyer_id:currentUser.id,quantity:document.getElementById("inquiryQuantity").value.trim(),message:document.getElementById("inquiryMessage").value.trim(),status:"pending"});
+ if(error)return showToast("تعذر إرسال الاستفسار: "+error.message);
+ closeInquiryModal();showToast("تم إرسال الاستفسار بنجاح.");await loadMyInquiries();renderOverview();
+});
+
+async function loadInbox(){
+ const list=document.getElementById("inboxList");
+ if(!inquiries.length){list.innerHTML='<div class="empty"><i class="fa-regular fa-comments"></i><p>لا توجد محادثات بعد.</p></div>';return;}
+ list.innerHTML=inquiries.map(i=>`<div class="inbox-item ${String(selectedInquiry)===String(i.id)?"selected":""}" onclick="openChat('${i.id}')"><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${esc(i.companies?.name||"محادثة تجارية")}</small><small>${dateText(i.created_at)} · ${esc(statusLabel(i.status))}</small></div>`).join("");
 }
-
-async function renderDiscover(){
-
-  const [
-    pr,
-    cr
-  ]=await Promise.all([
-
-    db
-      .from('products')
-      .select(
-        'id,name,category,description,image_url,company_id,companies(name,country,city)'
-      )
-      .eq('status','published')
-      .order('created_at',{ascending:false})
-      .limit(60),
-
-    db
-      .from('companies')
-      .select(
-        'id,name,country,city,sector,business_type,description'
-      )
-      .eq('status','published')
-      .order('created_at',{ascending:false})
-      .limit(60)
-
-  ]);
-
-  if(pr.error||cr.error){
-
-    $('page').innerHTML=
-      head(
-        t('استكشاف السوق','Discover'),
-        t(
-          'المنتجات والشركات المنشورة',
-          'Published products and companies'
-        )
-      )
-      +
-      `
-        <div class="notice error">
-          ${esc(
-            pr.error?.message||
-            cr.error?.message
-          )}
-        </div>
-      `;
-
-    return;
-  }
-
-  let products=pr.data||[];
-  let companies=cr.data||[];
-
-  $('page').innerHTML=
-    head(
-      t('استكشاف السوق','Discover'),
-      t(
-        'اكتشف المنتجات والشركات المنشورة وتواصل مع أصحابها عبر الاستفسارات.',
-        'Explore published products and companies.'
-      )
-    )
-    +
-
-    `
-    <div class="card">
-
-      <h2 class="sectiontitle">
-        ${t(
-          'المنتجات المنشورة',
-          'Published products'
-        )}
-      </h2>
-
-      <div class="list">
-
-        ${
-          products.length
-
-          ?
-
-          products.map(p=>`
-
-            <article class="entry">
-
-              <h3>
-                ${esc(p.name)}
-              </h3>
-
-              <p>
-                ${esc(p.category||'')}
-                ·
-                ${esc(
-                  rel(p.companies)?.name||''
-                )}
-              </p>
-
-              <p>
-                ${esc(p.description||'')}
-              </p>
-
-              <button
-                class="btn"
-                onclick="startInquiry('${p.id}')"
-              >
-                ${t(
-                  'إرسال استفسار',
-                  'Send inquiry'
-                )}
-              </button>
-
-            </article>
-
-          `).join('')
-
-          :
-
-          `
-          <p class="muted">
-            ${t(
-              'لا توجد منتجات منشورة حاليًا.',
-              'No published products yet.'
-            )}
-          </p>
-          `
-        }
-
-      </div>
-
-    </div>
-
-    <div
-      class="card"
-      style="margin-top:16px"
-    >
-
-      <h2 class="sectiontitle">
-        ${t(
-          'الشركات المنشورة',
-          'Published companies'
-        )}
-      </h2>
-
-      <div class="grid">
-
-        ${
-          companies.map(c=>`
-
-            <article class="entry">
-
-              <h3>
-                ${esc(c.name)}
-              </h3>
-
-              <p>
-                ${esc(
-                  [
-                    c.country,
-                    c.city,
-                    c.sector
-                  ]
-                  .filter(Boolean)
-                  .join(' · ')
-                )}
-              </p>
-
-              <p>
-                ${esc(c.description||'')}
-              </p>
-
-              <a
-                href="company.html?id=${encodeURIComponent(c.id)}"
-              >
-                ${t(
-                  'عرض الملف',
-                  'View profile'
-                )}
-                ←
-              </a>
-
-            </article>
-
-          `).join('')
-
-          ||
-
-          `
-          <p class="muted">
-            ${t(
-              'لا توجد شركات منشورة.',
-              'No published companies.'
-            )}
-          </p>
-          `
-        }
-
-      </div>
-
-    </div>
-    `;
+async function openChat(id){
+ selectedInquiry=id;goTo("inbox");await loadInbox();
+ const inquiry=inquiries.find(i=>String(i.id)===String(id));if(!inquiry)return;
+ document.getElementById("chatTitle").textContent="محادثة: "+(inquiry.products?.name||"استفسار تجاري");
+ document.getElementById("chatInput").disabled=false;document.getElementById("chatSend").disabled=false;
+ await loadMessages(id);
 }
-
-async function startInquiry(productId){
-
-  const msg=prompt(
-    t(
-      'اكتب رسالتك للشركة:',
-      'Write your message to the company:'
-    )
-  );
-
-  if(!msg?.trim()) return;
-
-  const {
-    data:p,
-    error
-  }=await db
-    .from('products')
-    .select('company_id')
-    .eq('id',productId)
-    .single();
-
-  if(error){
-
-    notify(error.message,true);
-
-    return;
-  }
-
-  const {error:e}=await db
-    .from('inquiries')
-    .insert({
-      product_id:productId,
-      company_id:p.company_id,
-      buyer_id:user.id,
-      message:msg.trim(),
-      status:'pending'
-    });
-
-  if(e)
-
-    notify(
-      'تعذر إرسال الاستفسار: '+e.message,
-      true
-    );
-
-  else
-
-    notify(
-      t(
-        'تم إرسال الاستفسار. ستظهر المحادثة في صندوق الوارد.',
-        'Inquiry sent. It will appear in your inbox.'
-      )
-    );
+async function loadMessages(id){
+ const container=document.getElementById("chatMessages");
+ const {data,error}=await db.from("inquiry_messages").select("id,inquiry_id,sender_id,message,created_at").eq("inquiry_id",id).order("created_at",{ascending:true});
+ if(error){container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';return;}
+ container.innerHTML=data?.length?data.map(m=>`<div class="bubble ${m.sender_id===currentUser.id?"mine":"theirs"}">${esc(m.message)}<small>${dateText(m.created_at)}</small></div>`).join(""):'<div class="empty"><i class="fa-regular fa-message"></i><p>لا توجد رسائل في هذه المحادثة بعد.</p></div>';
+ container.scrollTop=container.scrollHeight;
 }
+document.getElementById("chatForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!selectedInquiry)return;
+ const input=document.getElementById("chatInput"),message=input.value.trim();if(!message)return;
+ const {error}=await db.from("inquiry_messages").insert({inquiry_id:selectedInquiry,sender_id:currentUser.id,message});
+ if(error)return showToast("تعذر إرسال الرسالة: "+error.message);
+ input.value="";await loadMessages(selectedInquiry);
+});
 
-async function renderProducts(){
+document.getElementById("profileForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const full_name=document.getElementById("fullName").value.trim();if(!full_name)return showToast("يرجى إدخال الاسم.");
+ const {error}=await db.from("profiles").update({full_name}).eq("id",currentUser.id);
+ if(error)return showToast("تعذر تحديث الملف: "+error.message);
+ currentProfile.full_name=full_name;
+ document.getElementById("topName").textContent="مرحباً، "+full_name;
+ document.getElementById("sideName").textContent=full_name;
+ document.getElementById("topAvatar").textContent=full_name.charAt(0);
+ document.getElementById("sideAvatar").textContent=full_name.charAt(0);
+ showToast("تم تحديث الملف الشخصي.");
+});
 
-  if(!company){
-
-    $('page').innerHTML=
-      head(
-        t('منتجاتي','My products'),
-        t(
-          'أضف ملف نشاطك أولًا.',
-          'Create your business profile first.'
-        )
-      )
-      +
-      `
-      <div class="card">
-        ${t(
-          'لا يوجد ملف نشاط مرتبط بحسابك.',
-          'No business profile is linked to your account.'
-        )}
-      </div>
-      `;
-
-    return;
-  }
-
-  const r=await db
-    .from('products')
-    .select(
-      'id,name,category,description,status,created_at'
-    )
-    .eq('company_id',company.id)
-    .order('created_at',{ascending:false});
-
-  products=r.data||[];
-
-  $('page').innerHTML=
-    head(
-      t('منتجاتي','My products'),
-      t(
-        'إدارة المنتجات التابعة لنشاطك التجاري.',
-        'Manage products belonging to your business.'
-      ),
-      `
-      <button
-        class="btn"
-        id="addToggle"
-      >
-        ＋ ${t('إضافة منتج','Add product')}
-      </button>
-      `
-    )
-    +
-
-    `
-    <div
-      class="card hidden"
-      id="addPanel"
-    >
-
-      <h2 class="sectiontitle">
-        ${t('منتج جديد','New product')}
-      </h2>
-
-      <form
-        id="productForm"
-        class="formgrid"
-      >
-
-        <label>
-          ${t('اسم المنتج','Product name')}
-
-          <input
-            class="field"
-            name="name"
-            required
-          >
-        </label>
-
-        <label>
-          ${t('التصنيف','Category')}
-
-          <input
-            class="field"
-            name="category"
-          >
-        </label>
-
-        <label class="full">
-
-          ${t('الوصف','Description')}
-
-          <textarea
-            class="field"
-            name="description"
-          ></textarea>
-
-        </label>
-
-        <label class="full">
-
-          ${t('رابط الصورة','Image URL')}
-
-          <input
-            class="field"
-            name="image_url"
-            type="url"
-          >
-
-        </label>
-
-        <div class="full">
-
-          <button class="btn">
-            ${t(
-              'حفظ المنتج',
-              'Save product'
-            )}
-          </button>
-
-        </div>
-
-      </form>
-
-    </div>
-
-    <div
-      class="card"
-      style="margin-top:16px"
-    >
-
-      <div class="list">
-
-        ${
-          products.map(p=>`
-
-            <article class="entry">
-
-              <div class="row">
-
-                <h3>
-                  ${esc(p.name)}
-                </h3>
-
-                <span class="tag">
-                  ${status(p.status)}
-                </span>
-
-              </div>
-
-              <p>
-                ${esc(p.category||'')}
-                ·
-                ${esc(p.description||'')}
-              </p>
-
-            </article>
-
-          `).join('')
-
-          ||
-
-          `
-          <p class="muted">
-            ${t(
-              'لم تضف منتجات بعد.',
-              'No products added yet.'
-            )}
-          </p>
-          `
-        }
-
-      </div>
-
-    </div>
-    `;
-
-  $('addToggle').onclick=()=>{
-    $('addPanel')
-      .classList
-      .toggle('hidden');
-  };
-
-  $('productForm').onsubmit=async e=>{
-
-    e.preventDefault();
-
-    const data=Object.fromEntries(
-      new FormData(e.target)
-    );
-
-    const {error}=await db
-      .from('products')
-      .insert({
-        ...data,
-        company_id:company.id
-      });
-
-    if(error)
-
-      notify(
-        error.message,
-        true
-      );
-
-    else{
-
-      notify(
-        t(
-          'تمت إضافة المنتج.',
-          'Product added.'
-        )
-      );
-
-      renderProducts();
-    }
-  };
+document.getElementById("menuToggle").addEventListener("click",()=>document.getElementById("sidebar").classList.toggle("open"));
+document.getElementById("discoverSearch").addEventListener("keydown",e=>{if(e.key==="Enter")loadDiscover();});
+document.getElementById("globalSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){document.getElementById("discoverSearch").value=e.target.value;goTo("discover");}});
+document.getElementById("logoutBtn").addEventListener("click",async()=>{
+ const {error}=await db.auth.signOut();if(error)return showToast("تعذر تسجيل الخروج.");
+ location.href="index.html";
+});
+function setupRealtime(){
+ if(messagesChannel)db.removeChannel(messagesChannel);
+ messagesChannel=db.channel("wasla-inquiry-messages").on("postgres_changes",{event:"INSERT",schema:"public",table:"inquiry_messages"},payload=>{
+ if(selectedInquiry&&String(payload.new.inquiry_id)===String(selectedInquiry))loadMessages(selectedInquiry);
+ }).subscribe();
 }
-
-async function renderInbox(){
-
-  const buyer=
-    profile.account_type==='buyer';
-
-  let q=db
-    .from('inquiries')
-    .select(
-      'id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)'
-    )
-    .order(
-      'created_at',
-      {ascending:false}
-    )
-    .limit(100);
-
-  q=buyer
-
-    ? q.eq('buyer_id',user.id)
-
-    : q.eq(
-        'company_id',
-        company?.id||
-        '00000000-0000-0000-0000-000000000000'
-      );
-
-  const r=await q;
-
-  inquiries=r.data||[];
-
-  if(r.error){
-
-    $('page').innerHTML=
-      head(
-        t('صندوق الوارد','Inbox'),
-        t(
-          'مراسلاتك التجارية في مكان واحد.',
-          'Your business conversations in one place.'
-        )
-      )
-      +
-      `
-      <div class="notice error">
-        ${esc(r.error.message)}
-      </div>
-      `;
-
-    return;
-  }
-
-  const list=inquiries.map(i=>{
-
-    const c=rel(i.companies);
-    const p=rel(i.products);
-
-    const name=
-      buyer
-      ?
-      (
-        c?.name||
-        t('الشركة','Company')
-      )
-      :
-      (
-        t('مشتري','Buyer')
-        +
-        ' · '+
-        i.buyer_id.slice(0,8)
-      );
-
-    return `
-
-      <button
-        class="conversation ${
-          activeInquiry===i.id
-          ?
-          'selected'
-          :
-          ''
-        }"
-        data-inquiry="${i.id}"
-      >
-
-        <span class="convavatar">
-          ${esc(name.charAt(0))}
-        </span>
-
-        <span class="convbody">
-
-          <span class="convtop">
-
-            <strong>
-              ${esc(name)}
-            </strong>
-
-            <time>
-              ${date(i.created_at)}
-            </time>
-
-          </span>
-
-          <span class="preview">
-            ${esc(
-              i.reply||
-              i.message||
-              p?.name||
-              ''
-            )}
-          </span>
-
-        </span>
-
-      </button>
-    `;
-
-  }).join('');
-
-  $('page').innerHTML=
-    head(
-      t('صندوق الوارد','Inbox'),
-      t(
-        'كل استفسار يفتح كسجل محادثة مستقل مع سياق المنتج والشركة.',
-        'Each inquiry opens as its own conversation with product and company context.'
-      )
-    )
-    +
-
-    `
-    <div class="card inbox">
-
-      <div class="conversations">
-
-        <div class="inboxhead">
-
-          <h2>
-
-            ${t(
-              'المحادثات',
-              'Conversations'
-            )}
-
-            <span class="tag">
-              ${inquiries.length}
-            </span>
-
-          </h2>
-
-          <input
-            class="field"
-            id="convSearch"
-            placeholder="${t(
-              'بحث في المحادثات',
-              'Search conversations'
-            )}"
-          >
-
-        </div>
-
-        <div id="convList">
-
-          ${
-            list
-
-            ||
-
-            `
-            <div class="empty">
-
-              <div>
-
-                <b>
-                  ${t(
-                    'لا توجد محادثات بعد',
-                    'No conversations yet'
-                  )}
-                </b>
-
-                ${t(
-                  'ستظهر هنا استفسارات المنتجات والردود.',
-                  'Product inquiries and replies will appear here.'
-                )}
-
-              </div>
-
-            </div>
-            `
-          }
-
-        </div>
-
-      </div>
-
-      <section
-        class="thread"
-        id="thread"
-      >
-
-        <div class="empty">
-
-          <div>
-
-            <b>
-              ${t(
-                'اختر محادثة',
-                'Select a conversation'
-              )}
-            </b>
-
-            ${t(
-              'اختر اسمًا من القائمة لعرض تفاصيل التواصل.',
-              'Choose a conversation to view its details.'
-            )}
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </div>
-    `;
-
-  $('convSearch').oninput=e=>{
-
-    const s=e.target.value.toLowerCase();
-
-    document
-      .querySelectorAll('[data-inquiry]')
-      .forEach(b=>{
-        b.classList.toggle(
-          'hidden',
-          !b.innerText
-            .toLowerCase()
-            .includes(s)
-        );
-      });
-  };
-
-  document
-    .querySelectorAll('[data-inquiry]')
-    .forEach(b=>{
-
-      b.onclick=()=>openInquiry(
-        b.dataset.inquiry
-      );
-
-    });
-
-  if(
-    activeInquiry&&
-    inquiries.some(
-      i=>i.id===activeInquiry
-    )
-  )
-
-    await openInquiry(
-      activeInquiry
-    );
-}
-
-async function openInquiry(id){
-
-  activeInquiry=id;
-
-  const i=inquiries.find(
-    x=>x.id===id
-  );
-
-  if(!i)return;
-
-  document
-    .querySelectorAll('[data-inquiry]')
-    .forEach(b=>{
-      b.classList.toggle(
-        'selected',
-        b.dataset.inquiry===id
-      );
-    });
-
-  const companyName=
-    rel(i.companies)?.name||
-    t('الشركة','Company');
-
-  const productName=
-    rel(i.products)?.name||
-    t('استفسار منتج','Product inquiry');
-
-  $('thread').innerHTML=`
-
-    <div class="threadhead">
-
-      <span class="convavatar">
-        ${esc(
-          companyName.charAt(0)
-        )}
-      </span>
-
-      <div>
-
-        <strong>
-          ${esc(companyName)}
-        </strong>
-
-        <div class="muted">
-          ${esc(productName)}
-          ·
-          ${status(i.status)}
-        </div>
-
-      </div>
-
-    </div>
-
-    <div
-      class="threadbody"
-      id="threadBody"
-    >
-
-      <div
-        class="bubble ${
-          profile.account_type==='buyer'
-          ?
-          'mine'
-          :
-          ''
-        }"
-      >
-
-        <p>
-          ${esc(i.message||'')}
-        </p>
-
-        <time>
-          ${date(i.created_at)}
-          ·
-          ${t(
-            'رسالة الاستفسار',
-            'Inquiry message'
-          )}
-        </time>
-
-      </div>
-
-      ${
-        i.reply
-
-        ?
-
-        `
-        <div
-          class="bubble ${
-            profile.account_type==='buyer'
-            ?
-            ''
-            :
-            'mine'
-          }"
-        >
-
-          <p>
-            ${esc(i.reply)}
-          </p>
-
-          <time>
-            ${date(i.responded_at)}
-            ·
-            ${t(
-              'رد الشركة',
-              'Company reply'
-            )}
-          </time>
-
-        </div>
-        `
-
-        :
-
-        ''
-      }
-
-    </div>
-
-    <div class="composer">
-
-      <textarea
-        class="field"
-        id="replyText"
-        placeholder="${t(
-          'اكتب ردًا أو رسالة متابعة…',
-          'Write a reply or follow-up…'
-        )}"
-        ${
-          i.status==='closed'
-          ?
-          'disabled'
-          :
-          ''
-        }
-      ></textarea>
-
-      <button
-        class="btn"
-        id="sendReply"
-        ${
-          i.status==='closed'
-          ?
-          'disabled'
-          :
-          ''
-        }
-      >
-        ${
-          i.reply
-          ?
-          t(
-            'تحديث الرد',
-            'Update reply'
-          )
-          :
-          t(
-            'إرسال الرد',
-            'Send reply'
-          )
-        }
-      </button>
-
-    </div>
-  `;
-
-  $('sendReply').onclick=async()=>{
-
-    const text=
-      $('replyText')
-      .value
-      .trim();
-
-    if(!text){
-
-      notify(
-        t(
-          'اكتب الرسالة أولًا.',
-          'Write a message first.'
-        ),
-        true
-      );
-
-      return;
-    }
-
-    if(profile.account_type==='buyer'){
-
-      notify(
-        t(
-          'المتابعة النصية المستقلة تحتاج تفعيل جدول المحادثات الجديد. يمكنك متابعة الرد من هذا السجل.',
-          'Independent buyer follow-ups require the new conversations schema. You can view company replies here.'
-        ),
-        true
-      );
-
-      return;
-    }
-
-    const {
-      data,
-      error
-    }=await db
-      .from('inquiries')
-      .update({
-        reply:text,
-        status:'responded',
-        responded_at:new Date().toISOString()
-      })
-      .eq('id',i.id)
-      .eq('company_id',company.id)
-      .select('id')
-      .maybeSingle();
-
-    if(error||!data){
-
-      return notify(
-        t(
-          'تعذر إرسال الرد: ',
-          'Could not send reply: '
-        )
-        +
-        (
-          error?.message||
-          'permission denied'
-        ),
-        true
-      );
-    }
-
-    notify(
-      t(
-        'تم حفظ الرد بنجاح.',
-        'Reply saved.'
-      )
-    );
-
-    await renderInbox();
-  };
-}
-
-function renderCompany(){
-
-  const buyer=
-    profile.account_type==='buyer';
-
-  $('page').innerHTML=
-    head(
-      t(
-        'ملف النشاط',
-        'Business profile'
-      ),
-      t(
-        'إدارة بيانات النشاط التجاري المرتبط بحسابك.',
-        'Manage the business profile linked to your account.'
-      )
-    )
-    +
-
-    (
-      buyer
-
-      ?
-
-      `
-      <div class="card">
-
-        <h2 class="sectiontitle">
-          ${t(
-            'ملف المشتري',
-            'Buyer profile'
-          )}
-        </h2>
-
-        <p class="muted">
-          ${esc(
-            profile.full_name||
-            user.email
-          )}
-        </p>
-
-        <p class="muted">
-          ${t(
-            'يمكنك استكشاف السوق وإرسال استفسارات للشركات من حسابك.',
-            'You can explore the market and send inquiries to businesses.'
-          )}
-        </p>
-
-      </div>
-      `
-
-      :
-
-      !company
-
-      ?
-
-      `
-      <div class="card">
-
-        <p class="muted">
-          ${t(
-            'لا يوجد ملف نشاط بعد.',
-            'No business profile yet.'
-          )}
-        </p>
-
-        ${companyForm()}
-
-      </div>
-      `
-
-      :
-
-      `
-      <div class="card">
-
-        <div class="row">
-
-          <div>
-
-            <h2 class="sectiontitle">
-              ${esc(company.name)}
-            </h2>
-
-            <span class="tag">
-              ${status(company.status)}
-            </span>
-
-          </div>
-
-        </div>
-
-        ${companyForm(company)}
-
-      </div>
-      `
-    );
-
-  const f=$('companyForm');
-
-  if(f)
-
-    f.onsubmit=async e=>{
-
-      e.preventDefault();
-
-      const d=
-        Object.fromEntries(
-          new FormData(f)
-        );
-
-      let r=
-        company
-
-        ?
-
-        await db
-          .from('companies')
-          .update(d)
-          .eq('id',company.id)
-          .eq('owner_id',user.id)
-          .select()
-          .single()
-
-        :
-
-        await db
-          .from('companies')
-          .insert({
-            ...d,
-            owner_id:user.id
-          })
-          .select()
-          .single();
-
-      if(r.error)
-
-        return notify(
-          r.error.message,
-          true
-        );
-
-      company=r.data;
-
-      notify(
-        t(
-          'تم حفظ ملف النشاط.',
-          'Business profile saved.'
-        )
-      );
-
-      renderCompany();
-    };
-}
-
-function companyForm(c={}){
-
-  const fields=[
-    ['name','اسم النشاط / Business name'],
-    ['country','الدولة / Country'],
-    ['city','المدينة / City'],
-    ['sector','القطاع / Sector'],
-    ['business_type','نوع النشاط / Business type'],
-    ['email','البريد الإلكتروني / Email'],
-    ['phone','الهاتف / Phone'],
-    ['website','الموقع / Website']
-  ];
-
-  return `
-
-    <form
-      id="companyForm"
-      class="formgrid"
-    >
-
-      ${
-        fields.map(
-          ([k,l])=>`
-
-            <label>
-
-              ${l}
-
-              <input
-                class="field"
-                name="${k}"
-                value="${esc(c[k]||'')}"
-                ${
-                  ['name','country']
-                    .includes(k)
-                  ?
-                  'required'
-                  :
-                  ''
-                }
-              >
-
-            </label>
-
-          `
-        ).join('')
-      }
-
-      <label class="full">
-
-        ${t(
-          'نبذة عن النشاط',
-          'Business description'
-        )}
-
-        <textarea
-          class="field"
-          name="description"
-        >${esc(c.description||'')}</textarea>
-
-      </label>
-
-      <div class="full">
-
-        <button class="btn">
-
-          ${t(
-            'حفظ التغييرات',
-            'Save changes'
-          )}
-
-        </button>
-
-      </div>
-
-    </form>
-
-  `;
-}
-
-function renderSettings(){
-
-  $('page').innerHTML=
-    head(
-      t(
-        'الإعدادات',
-        'Settings'
-      ),
-      t(
-        'تفضيلات مساحة العمل.',
-        'Workspace preferences.'
-      )
-    )
-    +
-
-    `
-    <div class="card">
-
-      <h2 class="sectiontitle">
-        ${t(
-          'اللغة',
-          'Language'
-        )}
-      </h2>
-
-      <p class="muted">
-        ${t(
-          'يمكنك التبديل بين العربية والإنجليزية من الشريط العلوي.',
-          'Switch between Arabic and English from the top bar.'
-        )}
-      </p>
-
-      <button
-        class="btn secondary"
-        onclick="toggleLang()"
-      >
-        ${t(
-          'تغيير اللغة',
-          'Change language'
-        )}
-      </button>
-
-      <hr
-        style="
-          border:0;
-          border-top:1px solid var(--line);
-          margin:22px 0
-        "
-      >
-
-      <h2 class="sectiontitle">
-        ${t(
-          'الحساب',
-          'Account'
-        )}
-      </h2>
-
-      <p class="muted">
-        ${esc(user.email||'')}
-        ·
-        ${typeName(profile.account_type)}
-      </p>
-
-      <button
-        class="btn danger"
-        onclick="document.getElementById('logoutBtn').click()"
-      >
-        ${t(
-          'تسجيل الخروج',
-          'Sign out'
-        )}
-      </button>
-
-    </div>
-    `;
-}
-
-function toggleLang(){
-
-  lang=
-    lang==='ar'
-    ?
-    'en'
-    :
-    'ar';
-
-  document.documentElement.lang=lang;
-
-  document.documentElement.dir=
-    lang==='ar'
-    ?
-    'rtl'
-    :
-    'ltr';
-
-  $('langBtn').textContent=
-    lang==='ar'
-    ?
-    'English'
-    :
-    'العربية';
-
-  navigate(page);
-}
-
-navEvents();
-boot();
-
+init();
 </script>
-
 </body>
 </html>
