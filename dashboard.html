@@ -197,6 +197,24 @@ function typeName(type){
   return value?t(value[0],value[1]):(type||'Member');
 }
 
+/* إصلاح الدوال الناقصة */
+function rel(value){
+  if(Array.isArray(value)) return value[0] || null;
+  return value || null;
+}
+
+function status(value){
+  const names={
+    published:['منشور','Published'],
+    draft:['مسودة','Draft'],
+    pending:['قيد الانتظار','Pending'],
+    active:['نشط','Active'],
+    inactive:['غير نشط','Inactive'],
+    archived:['مؤرشف','Archived']
+  };
+  return names[value]?t(names[value][0],names[value][1]):(value||'');
+}
+
 function formatDate(value){
   if(!value)return '';
   return new Intl.DateTimeFormat(lang==='ar'?'ar':'en',{
