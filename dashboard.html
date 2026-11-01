@@ -2,54 +2,36 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>WASLA | لوحة التحكم</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
-:root {
-  --navy:#0b1d38;
-  --navy2:#173653;
-  --gold:#d9ad58;
-  --cream:#f7f4ed;
-  --white:#fff;
-  --text:#172b46;
-  --muted:#7d8998;
-  --border:#e9e5dc;
-  --green:#16865c;
-  --shadow:0 8px 30px rgba(18,38,64,.06);
+:root{
+--navy:#0b1d38;--navy2:#173653;--gold:#d9ad58;
+--cream:#f7f4ed;--white:#fff;--text:#172b46;
+--muted:#7d8998;--border:#e9e5dc;--green:#16865c;
+--shadow:0 8px 30px rgba(18,38,64,.06)
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:'Cairo',sans-serif;background:var(--cream);color:var(--text)}
+body{margin:0;font-family:Cairo,sans-serif;background:var(--cream);color:var(--text)}
 button,input,select,textarea{font-family:inherit}
 button{cursor:pointer}
 .app{display:flex;min-height:100vh}
-
-/* القائمة الجانبية */
 .sidebar{
- width:250px;background:linear-gradient(180deg,#091a32,#132f50);
- color:white;position:fixed;right:0;top:0;bottom:0;
- z-index:20;padding:23px 16px;display:flex;flex-direction:column;
- overflow-y:auto;transition:.25s
+width:250px;background:linear-gradient(180deg,#091a32,#132f50);
+color:white;position:fixed;right:0;top:0;bottom:0;z-index:20;
+padding:23px 16px;display:flex;flex-direction:column;
+overflow-y:auto;transition:.25s
 }
 .brand{text-align:center;padding:10px 0 25px;border-bottom:1px solid #ffffff19;margin-bottom:20px}
-.brand-mark{
- width:65px;height:65px;border:2px solid var(--gold);
- border-radius:19px;display:grid;place-items:center;margin:auto auto 8px;
- color:var(--gold);font-size:37px;font-weight:900
-}
+.brand-mark{width:65px;height:65px;border:2px solid var(--gold);border-radius:19px;display:grid;place-items:center;margin:auto auto 8px;color:var(--gold);font-size:37px;font-weight:900}
 .brand h1{margin:0;font-size:27px;letter-spacing:2px;color:#f2d18e}
 .brand p{margin:0;color:#c3cbd5;font-size:10px;letter-spacing:1px}
 .nav-label{color:#8294aa;font-size:11px;padding:0 13px;margin:13px 0 8px}
-.nav-btn{
- border:0;background:transparent;color:#d5dce5;width:100%;
- display:flex;align-items:center;gap:13px;padding:12px 14px;
- border-radius:12px;text-align:right;font-size:13px;font-weight:700;
- margin-bottom:5px;transition:.2s
-}
+.nav-btn{border:0;background:transparent;color:#d5dce5;width:100%;display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:12px;text-align:right;font-size:13px;font-weight:700;margin-bottom:5px;transition:.2s}
 .nav-btn i{width:20px;text-align:center}
 .nav-btn:hover{background:#ffffff12;color:white}
 .nav-btn.active{color:#152744;background:linear-gradient(100deg,#f4d99e,#d8aa51)}
@@ -58,22 +40,12 @@ button{cursor:pointer}
 .upgrade i{color:var(--gold);font-size:23px}
 .upgrade h3{margin:5px 0;color:#f1d28f;font-size:14px}
 .upgrade p{color:#c3cbd5;font-size:11px;line-height:1.8}
-.avatar{
- width:39px;height:39px;border-radius:50%;
- background:linear-gradient(140deg,#f4d99e,#c38b31);
- display:grid;place-items:center;color:var(--navy);font-weight:900
-}
+.avatar{width:39px;height:39px;border-radius:50%;background:linear-gradient(140deg,#f4d99e,#c38b31);display:grid;place-items:center;color:var(--navy);font-weight:900}
 .sidebar-user{display:flex;align-items:center;gap:10px;padding-top:16px;margin-top:15px;border-top:1px solid #ffffff19}
 .sidebar-user strong{font-size:12px;display:block}
 .sidebar-user small{font-size:10px;color:#aebccc}
-
-/* المنطقة الرئيسية */
 .main{margin-right:250px;width:calc(100% - 250px);min-width:0}
-.topbar{
- height:76px;background:white;border-bottom:1px solid var(--border);
- display:flex;align-items:center;justify-content:space-between;
- padding:0 30px;position:sticky;top:0;z-index:10
-}
+.topbar{height:76px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 30px;position:sticky;top:0;z-index:10}
 .top-right,.top-left{display:flex;align-items:center;gap:15px}
 .search{background:#f5f6f8;border-radius:30px;padding:10px 15px;width:260px;display:flex;gap:10px}
 .search input{border:0;background:none;outline:none;width:100%;font-size:12px}
@@ -82,10 +54,10 @@ button{cursor:pointer}
 .top-profile strong{display:block;font-size:12px}
 .top-profile small{font-size:10px;color:var(--muted)}
 .menu-toggle{display:none}
-
 .content{padding:27px 30px 45px;max-width:1600px;margin:auto}
 .page{display:none}
-.page.active{display:block}
+.page.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .page-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
 .page-heading h2{font-size:22px;margin:0;font-weight:900}
 .page-heading p{font-size:12px;color:var(--muted);margin:3px 0 0}
@@ -102,28 +74,14 @@ button{cursor:pointer}
 .empty{text-align:center;padding:30px 15px;color:var(--muted)}
 .empty i{font-size:30px;color:#c6ced8;margin-bottom:10px}
 .empty p{font-size:12px}
-
-/* الواجهة الرئيسية */
-.welcome{
- border-radius:20px;overflow:hidden;
- background:radial-gradient(circle at 12% 15%,#3e6fa455,transparent 27%),linear-gradient(115deg,#0a1d38,#17395e);
- color:white;padding:30px 32px;min-height:185px;
- display:flex;align-items:center;justify-content:space-between;
- position:relative;margin-bottom:20px
-}
+.welcome{border-radius:20px;overflow:hidden;background:radial-gradient(circle at 12% 15%,#3e6fa455,transparent 27%),linear-gradient(115deg,#0a1d38,#17395e);color:white;padding:30px 32px;min-height:185px;display:flex;align-items:center;justify-content:space-between;position:relative;margin-bottom:20px}
 .welcome:after{content:"W";position:absolute;left:35px;top:-55px;font-size:250px;font-weight:900;color:#ffffff08}
 .welcome-text{position:relative;z-index:1}
 .welcome .eyebrow{color:#f0cf8b;font-size:11px;font-weight:800}
 .welcome h2{font-size:24px;margin:7px 0 4px;font-weight:900}
 .welcome p{color:#d2dce8;font-size:12px;margin:0 0 16px}
-.welcome-art{
- position:relative;z-index:1;width:125px;height:110px;
- border:1px solid #ebca8b55;border-radius:24px;
- display:grid;place-items:center;background:#ffffff0d
-}
+.welcome-art{position:relative;z-index:1;width:125px;height:110px;border:1px solid #ebca8b55;border-radius:24px;display:grid;place-items:center;background:#ffffff0d}
 .welcome-art i{font-size:55px;color:#e8c47e}
-
-/* الإحصائيات */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .stat{padding:17px;display:flex;align-items:center;gap:12px;min-width:0}
 .stat-icon{width:49px;height:49px;flex-shrink:0;border-radius:15px;display:grid;place-items:center;font-size:19px}
@@ -134,7 +92,6 @@ button{cursor:pointer}
 .stat small{color:var(--muted);font-size:10px}
 .stat strong{font-size:23px;display:block;line-height:1.5}
 .stat span{font-size:10px;color:var(--muted)}
-
 .grid-two{display:grid;grid-template-columns:1.1fr .9fr;gap:17px;margin-bottom:20px}
 .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .quick{border:1px solid var(--border);border-radius:13px;padding:13px 6px;text-align:center;background:white;color:var(--text)}
@@ -147,8 +104,6 @@ button{cursor:pointer}
 .activity strong{font-size:11px;display:block}
 .activity small{font-size:10px;color:var(--muted)}
 .text-link{border:0;background:none;color:#2865a5;font-weight:800;font-size:11px}
-
-/* المنتجات */
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
 .product-card{overflow:hidden}
 .product-image{height:145px;background:#f1f3f5;display:grid;place-items:center;overflow:hidden}
@@ -159,8 +114,6 @@ button{cursor:pointer}
 .product-info p{font-size:11px;color:var(--muted);margin:0 0 12px;line-height:1.7}
 .company-tag{font-size:10px;color:#2865a5;font-weight:800;margin-bottom:5px}
 .product-actions{display:flex;gap:7px}
-
-/* الجداول */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:550px}
 th,td{text-align:right;padding:13px 11px;border-bottom:1px solid #f0eee9;font-size:12px}
@@ -170,25 +123,16 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 .pill-orange{background:#fff2dc;color:#b57a20}
 .pill-red{background:#fff0f0;color:#c94c4c}
 .pill-gray{background:#eef1f4;color:#657384}
-
-/* النماذج */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field.full{grid-column:1/-1}
 .field label{font-size:11px;font-weight:800}
-.field input,.field select,.field textarea{
- width:100%;border:1px solid var(--border);background:#fcfbf8;
- border-radius:10px;padding:12px;outline:none;font-size:12px;color:var(--text)
-}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--border);background:#fcfbf8;border-radius:10px;padding:12px;outline:none;font-size:12px;color:var(--text)}
 .field input:focus,.field textarea:focus{border-color:var(--gold)}
 .field textarea{min-height:100px;resize:vertical}
 .form-actions{display:flex;gap:10px;margin-top:17px}
-
-/* الاكتشاف */
 .discover-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
 .discover-bar input,.discover-bar select{border:1px solid var(--border);border-radius:10px;padding:10px;background:white;font-family:inherit;font-size:12px}
-
-/* المحادثات */
 .inbox-layout{display:grid;grid-template-columns:300px 1fr;gap:15px;min-height:480px}
 .inbox-list{padding:10px;max-height:600px;overflow:auto}
 .inbox-item{padding:13px;border-radius:12px;cursor:pointer;border-bottom:1px solid #f0eee9}
@@ -205,8 +149,6 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 .chat-compose{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border)}
 .chat-compose input{flex:1;min-width:0;border:1px solid var(--border);border-radius:25px;padding:11px 15px;outline:none}
 .chat-compose button{width:43px;border:0;border-radius:50%;background:var(--navy);color:white}
-
-/* النوافذ */
 .modal{display:none;position:fixed;inset:0;background:#05112099;z-index:50;align-items:center;justify-content:center;padding:15px}
 .modal.show{display:flex}
 .modal-box{background:white;border-radius:18px;padding:23px;width:100%;max-width:530px;max-height:90vh;overflow:auto}
@@ -216,239 +158,401 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 .toast{position:fixed;bottom:22px;left:22px;z-index:100;background:var(--navy);color:white;padding:13px 18px;border-radius:12px;font-size:12px;display:none;max-width:90%}
 .toast.show{display:block}
 .loading{padding:25px;text-align:center;color:var(--muted);font-size:12px}
-
-@media(max-width:1100px){
- .stats{grid-template-columns:repeat(2,1fr)}
- .product-grid{grid-template-columns:repeat(2,1fr)}
-}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){
- .sidebar{transform:translateX(100%)}
- .sidebar.open{transform:translateX(0)}
- .main{margin-right:0;width:100%}
- .menu-toggle{display:inline-grid;place-items:center}
- .topbar{padding:0 13px;height:65px}
- .search{width:40vw;padding:9px 10px}
- .top-profile .profile-text{display:none}
- .content{padding:19px 13px 35px}
- .welcome{padding:22px;min-height:165px}
- .welcome h2{font-size:18px}
- .welcome-art{width:75px;height:75px}
- .welcome-art i{font-size:32px}
- .grid-two{grid-template-columns:1fr}
- .inbox-layout{grid-template-columns:1fr}
- .inbox-list{max-height:210px}
+.sidebar{transform:translateX(100%)}
+.sidebar.open{transform:translateX(0)}
+.main{margin-right:0;width:100%}
+.menu-toggle{display:inline-grid;place-items:center}
+.topbar{padding:0 13px;height:65px}
+.search{width:40vw;padding:9px 10px}
+.top-profile .profile-text{display:none}
+.content{padding:19px 13px 35px}
+.welcome{padding:22px;min-height:165px}
+.welcome h2{font-size:18px}
+.welcome-art{width:75px;height:75px}
+.welcome-art i{font-size:32px}
+.grid-two{grid-template-columns:1fr}
+.inbox-layout{grid-template-columns:1fr}
+.inbox-list{max-height:210px}
 }
 @media(max-width:480px){
- .stats{gap:8px}
- .stat{padding:11px;gap:7px}
- .stat-icon{width:37px;height:37px;font-size:14px}
- .stat strong{font-size:19px}
- .stat small{font-size:9px}
- .product-grid{grid-template-columns:1fr}
- .form-grid{grid-template-columns:1fr}
- .field.full{grid-column:auto}
- .quick-grid{grid-template-columns:repeat(2,1fr)}
+.stats{gap:8px}
+.stat{padding:11px;gap:7px}
+.stat-icon{width:37px;height:37px;font-size:14px}
+.stat strong{font-size:19px}
+.stat small{font-size:9px}
+.product-grid{grid-template-columns:1fr}
+.form-grid{grid-template-columns:1fr}
+.field.full{grid-column:auto}
+.quick-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
-
 <body>
 <div class="app">
-
 <aside class="sidebar" id="sidebar">
- <div class="brand">
-  <div class="brand-mark">W</div>
-  <h1>WASLA</h1>
-  <p>CONNECT · TRADE · GROW</p>
- </div>
-
- <div class="nav-label">مساحة العمل</div>
- <button class="nav-btn active" data-page="overview"><i class="fa-solid fa-house"></i> الرئيسية</button>
- <button class="nav-btn" data-page="company"><i class="fa-solid fa-building"></i> شركتي</button>
- <button class="nav-btn" data-page="products"><i class="fa-solid fa-box-open"></i> منتجاتي</button>
- <button class="nav-btn" data-page="discover"><i class="fa-solid fa-compass"></i> اكتشف المنتجات</button>
-
- <div class="nav-label">التواصل والتجارة</div>
- <button class="nav-btn" data-page="inquiries"><i class="fa-solid fa-file-invoice"></i> الاستفسارات</button>
- <button class="nav-btn" data-page="inbox"><i class="fa-solid fa-comments"></i> المحادثات</button>
-
- <div class="nav-label">حسابك</div>
- <button class="nav-btn" data-page="profile"><i class="fa-solid fa-user"></i> الملف الشخصي</button>
- <button class="nav-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
-
- <div class="sidebar-bottom">
-  <div class="upgrade">
-   <i class="fa-solid fa-crown"></i>
-   <h3>WASLA Business</h3>
-   <p>مساحة واحدة لإدارة حضورك التجاري والتواصل مع شركائك.</p>
-   <button class="btn btn-gold" onclick="showToast('سيتم الإعلان عن تفاصيل الباقات لاحقاً.')">اكتشف المزيد</button>
-  </div>
-  <div class="sidebar-user">
-   <div class="avatar" id="sideAvatar">W</div>
-   <div><strong id="sideName">مستخدم WASLA</strong><small id="sideType">حساب تجاري</small></div>
-  </div>
- </div>
+<div class="brand">
+<div class="brand-mark">W</div><h1>WASLA</h1><p>CONNECT · TRADE · GROW</p>
+</div>
+<div class="nav-label">مساحة العمل</div>
+<button class="nav-btn active" data-page="overview"><i class="fa-solid fa-house"></i> الرئيسية</button>
+<button class="nav-btn" data-page="company"><i class="fa-solid fa-building"></i> شركتي</button>
+<button class="nav-btn" data-page="products"><i class="fa-solid fa-box-open"></i> منتجاتي</button>
+<button class="nav-btn" data-page="discover"><i class="fa-solid fa-compass"></i> اكتشف المنتجات</button>
+<div class="nav-label">التواصل والتجارة</div>
+<button class="nav-btn" data-page="inquiries"><i class="fa-solid fa-file-invoice"></i> الاستفسارات</button>
+<button class="nav-btn" data-page="inbox"><i class="fa-solid fa-comments"></i> المحادثات</button>
+<div class="nav-label">حسابك</div>
+<button class="nav-btn" data-page="profile"><i class="fa-solid fa-user"></i> الملف الشخصي</button>
+<button class="nav-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+<div class="sidebar-bottom">
+<div class="upgrade"><i class="fa-solid fa-crown"></i><h3>WASLA Business</h3><p>مساحة واحدة لإدارة حضورك التجاري والتواصل مع شركائك.</p></div>
+<div class="sidebar-user"><div class="avatar" id="sideAvatar">W</div><div><strong id="sideName">مستخدم WASLA</strong><small id="sideType">حساب تجاري</small></div></div>
+</div>
 </aside>
 
 <main class="main">
 <header class="topbar">
- <div class="top-right">
-  <button class="top-icon menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
-  <div class="search">
-   <i class="fa-solid fa-magnifying-glass"></i>
-   <input id="globalSearch" placeholder="ابحث في المنتجات...">
-  </div>
- </div>
- <div class="top-left">
-  <button class="top-icon" onclick="goTo('inquiries')"><i class="fa-regular fa-bell"></i></button>
-  <div class="top-profile">
-   <div class="avatar" id="topAvatar">W</div>
-   <div class="profile-text">
-    <strong id="topName">مرحباً بك في WASLA</strong>
-    <small id="topCompany">مساحة أعمالك</small>
-   </div>
-  </div>
- </div>
+<div class="top-right">
+<button class="top-icon menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+<div class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="globalSearch" placeholder="ابحث في المنتجات..."></div>
+</div>
+<div class="top-left">
+<button class="top-icon" onclick="goTo('inquiries')"><i class="fa-regular fa-bell"></i></button>
+<div class="top-profile"><div class="avatar" id="topAvatar">W</div><div class="profile-text"><strong id="topName">مرحباً بك في WASLA</strong><small id="topCompany">مساحة أعمالك</small></div></div>
+</div>
 </header>
 
 <div class="content">
-
 <section class="page active" id="page-overview">
- <div class="welcome">
-  <div class="welcome-text">
-   <div class="eyebrow">WASLA BUSINESS PLATFORM</div>
-   <h2>أهلاً بك في عالم الأعمال والتجارة</h2>
-   <p>اكتشف منتجات جديدة، اعرض أعمالك، وابنِ علاقات تجارية تتجاوز الحدود.</p>
-   <button class="btn btn-gold" onclick="goTo('discover')">
-    <i class="fa-solid fa-arrow-left"></i> اكتشف الفرص التجارية
-   </button>
-  </div>
-  <div class="welcome-art"><i class="fa-solid fa-handshake"></i></div>
- </div>
-
- <div class="stats">
-  <div class="card stat">
-   <div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div>
-   <div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div>
-  </div>
-  <div class="card stat">
-   <div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div>
-   <div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div>
-  </div>
-  <div class="card stat">
-   <div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div>
-   <div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div>
-  </div>
-  <div class="card stat">
-   <div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div>
-   <div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div>
-  </div>
- </div>
-
- <div class="grid-two">
-  <div class="card panel">
-   <div class="panel-head"><h3>الوصول السريع</h3></div>
-   <div class="quick-grid">
-    <button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
-    <button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الشركة</strong></button>
-    <button class="quick" onclick="goTo('discover')"><i class="fa-solid fa-magnifying-glass"></i><strong>تصفح المنتجات</strong></button>
-    <button class="quick" onclick="goTo('inquiries')"><i class="fa-solid fa-envelope"></i><strong>الاستفسارات</strong></button>
-   </div>
-  </div>
-  <div class="card panel">
-   <div class="panel-head">
-    <h3>آخر الاستفسارات</h3>
-    <button class="text-link" onclick="goTo('inquiries')">عرض الكل ←</button>
-   </div>
-   <div id="recentInquiries"><div class="loading">جارٍ تحميل البيانات...</div></div>
-  </div>
- </div>
-
- <div class="card panel">
-  <div class="panel-head">
-   <h3>أحدث منتجاتك</h3>
-   <button class="text-link" onclick="goTo('products')">عرض الكل ←</button>
-  </div>
-  <div id="recentProducts" class="product-grid"></div>
- </div>
+<div class="welcome">
+<div class="welcome-text"><div class="eyebrow">WASLA BUSINESS PLATFORM</div><h2>أهلاً بك في عالم الأعمال والتجارة</h2><p>اكتشف منتجات جديدة، اعرض أعمالك، وابنِ علاقات تجارية تتجاوز الحدود.</p><button class="btn btn-gold" onclick="goTo('discover')"><i class="fa-solid fa-arrow-left"></i> اكتشف الفرص التجارية</button></div>
+<div class="welcome-art"><i class="fa-solid fa-handshake"></i></div>
+</div>
+<div class="stats">
+<div class="card stat"><div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div><div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div></div>
+<div class="card stat"><div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div><div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div></div>
+<div class="card stat"><div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div><div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div></div>
+<div class="card stat"><div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div><div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div></div>
+</div>
+<div class="grid-two">
+<div class="card panel"><div class="panel-head"><h3>الوصول السريع</h3></div><div class="quick-grid">
+<button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
+<button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الشركة</strong></button>
+<button class="quick" onclick="goTo('discover')"><i class="fa-solid fa-magnifying-glass"></i><strong>تصفح المنتجات</strong></button>
+<button class="quick" onclick="goTo('inquiries')"><i class="fa-solid fa-envelope"></i><strong>الاستفسارات</strong></button>
+</div></div>
+<div class="card panel"><div class="panel-head"><h3>آخر الاستفسارات</h3><button class="text-link" onclick="goTo('inquiries')">عرض الكل ←</button></div><div id="recentInquiries"><div class="loading">جارٍ تحميل البيانات...</div></div></div>
+</div>
+<div class="card panel"><div class="panel-head"><h3>أحدث منتجاتك</h3><button class="text-link" onclick="goTo('products')">عرض الكل ←</button></div><div id="recentProducts" class="product-grid"></div></div>
 </section>
 
 <section class="page" id="page-company">
- <div class="page-heading">
-  <div><h2>ملف شركتي</h2><p>أدر معلومات شركتك التي تظهر في WASLA.</p></div>
- </div>
- <div class="card panel">
-  <div class="panel-head"><h3>المعلومات التجارية</h3></div>
-  <form id="companyForm">
-   <div class="form-grid">
-    <div class="field full">
-     <label>اسم الشركة أو النشاط التجاري</label>
-     <input id="companyName" required placeholder="اسم الشركة">
-    </div>
-    <div class="field">
-     <label>الدولة</label>
-     <input id="companyCountry" placeholder="الدولة">
-    </div>
-   </div>
-   <div class="form-actions"><button class="btn btn-gold" type="submit">حفظ التغييرات</button></div>
-  </form>
- </div>
-</section>
+<div class="page-heading"><div><h2>ملف شركتي</h2><p>أدر معلومات شركتك التي تظهر في WASLA.</p></div></div>
+<div class="card panel"><div class="panel-head"><h3>المعلومات التجارية</h3></div>
+<form id="companyForm"><div class="form-grid">
+<div class="field full"><label>اسم الشركة أو النشاط التجاري</label><input id="companyName" required placeholder="اسم الشركة"></div>
+<div class="field"><label>الدولة</label><input id="companyCountry" placeholder="الدولة"></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ التغييرات</button></div></form>
+</div></section>
 
 <section class="page" id="page-products">
- <div class="page-heading">
-  <div><h2>منتجاتي</h2><p>إدارة المنتجات التي تعرضها في منصة WASLA.</p></div>
-  <button class="btn btn-gold" onclick="openProductModal()"><i class="fa-solid fa-plus"></i> إضافة منتج</button>
- </div>
- <div id="myProducts" class="product-grid"></div>
+<div class="page-heading"><div><h2>منتجاتي</h2><p>إدارة المنتجات التي تعرضها في منصة WASLA.</p></div><button class="btn btn-gold" onclick="openProductModal()"><i class="fa-solid fa-plus"></i> إضافة منتج</button></div>
+<div id="myProducts" class="product-grid"></div>
 </section>
 
 <section class="page" id="page-discover">
- <div class="page-heading">
-  <div><h2>اكتشف المنتجات</h2><p>تصفح المنتجات المنشورة من الشركات على WASLA.</p></div>
- </div>
- <div class="discover-bar">
-  <input id="discoverSearch" placeholder="ابحث عن منتج أو وصف...">
-  <select id="discoverCategory"><option value="">كل التصنيفات</option></select>
-  <button class="btn btn-dark" onclick="loadDiscover()">بحث</button>
- </div>
- <div id="discoverProducts" class="product-grid"></div>
+<div class="page-heading"><div><h2>اكتشف المنتجات</h2><p>تصفح المنتجات المنشورة من الشركات على WASLA.</p></div></div>
+<div class="discover-bar"><input id="discoverSearch" placeholder="ابحث عن منتج أو وصف..."><select id="discoverCategory"><option value="">كل التصنيفات</option></select><button class="btn btn-dark" onclick="loadDiscover()">بحث</button></div>
+<div id="discoverProducts" class="product-grid"></div>
 </section>
 
 <section class="page" id="page-inquiries">
- <div class="page-heading">
-  <div><h2>الاستفسارات التجارية</h2><p>تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.</p></div>
- </div>
- <div class="card panel">
-  <div class="table-wrap">
-   <table>
-    <thead><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead>
-    <tbody id="inquiriesTable"></tbody>
-   </table>
-  </div>
- </div>
+<div class="page-heading"><div><h2>الاستفسارات التجارية</h2><p>تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.</p></div></div>
+<div class="card panel"><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="inquiriesTable"></tbody></table></div></div>
 </section>
 
 <section class="page" id="page-inbox">
- <div class="page-heading">
-  <div><h2>المحادثات</h2><p>تواصل مع الأطراف المرتبطة باستفساراتك.</p></div>
- </div>
- <div class="inbox-layout">
-  <div class="card inbox-list" id="inboxList"></div>
-  <div class="card chat-area">
-   <div class="chat-head" id="chatTitle">اختر استفساراً لعرض المحادثة</div>
-   <div class="chat-messages" id="chatMessages"><div class="empty">ستظهر الرسائل هنا</div></div>
-   <form class="chat-compose" id="chatForm">
-    <input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off">
-    <button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button>
-   </form>
-  </div>
- </div>
+<div class="page-heading"><div><h2>المحادثات</h2><p>تواصل مع الأطراف المرتبطة باستفساراتك.</p></div></div>
+<div class="inbox-layout"><div class="card inbox-list" id="inboxList"></div>
+<div class="card chat-area"><div class="chat-head" id="chatTitle">اختر استفساراً لعرض المحادثة</div><div class="chat-messages" id="chatMessages"><div class="empty">ستظهر الرسائل هنا</div></div>
+<form class="chat-compose" id="chatForm"><input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button></form></div></div>
 </section>
 
 <section class="page" id="page-profile">
- <div class="page-heading">
-  <div><h2>الملف الشخصي</h2><p>إدارة بيانات حسابك الشخصي.</p></div>
- </div>
- <div class="card panel">
-  <form 
+<div class="page-heading"><div><h2>الملف الشخصي</h2><p>إدارة بيانات حسابك الشخصي.</p></div></div>
+<div class="card panel"><form id="profileForm"><div class="form-grid">
+<div class="field full"><label>الاسم الكامل</label><input id="fullName" required></div>
+<div class="field full"><label>البريد الإلكتروني</label><input id="email" disabled></div>
+<div class="field full"><label>نوع الحساب</label><input id="accountType" disabled></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ الملف الشخصي</button></div></form></div>
+</section>
+</div>
+</main>
+</div>
+
+<div class="modal" id="productModal"><div class="modal-box">
+<div class="modal-head"><h3 id="productModalTitle">إضافة منتج جديد</h3><button class="modal-close" onclick="closeProductModal()">×</button></div>
+<form id="productForm"><input type="hidden" id="productId"><div class="form-grid">
+<div class="field full"><label>اسم المنتج</label><input id="productName" required></div>
+<div class="field full"><label>التصنيف</label><input id="productCategory"></div>
+<div class="field full"><label>وصف المنتج</label><textarea id="productDescription"></textarea></div>
+<div class="field full"><label>رابط صورة المنتج</label><input id="productImage" type="url"></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ المنتج</button><button class="btn btn-light" type="button" onclick="closeProductModal()">إلغاء</button></div></form>
+</div></div>
+
+<div class="modal" id="inquiryModal"><div class="modal-box">
+<div class="modal-head"><h3>إرسال استفسار تجاري</h3><button class="modal-close" onclick="closeInquiryModal()">×</button></div>
+<form id="inquiryForm"><input type="hidden" id="inquiryProductId"><div class="form-grid">
+<div class="field full"><label>الكمية المطلوبة</label><input id="inquiryQuantity" required></div>
+<div class="field full"><label>رسالتك</label><textarea id="inquiryMessage" required></textarea></div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">إرسال الاستفسار</button></div></form>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL="https://bzrcbodvcuujdjupfgzw.supabase.co";
+const SUPABASE_KEY="sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let currentUser=null,currentProfile=null,currentCompany=null;
+let products=[],inquiries=[],selectedInquiry=null,messagesChannel=null;
+
+function showToast(message){
+ const toast=document.getElementById("toast");
+ toast.textContent=message;toast.classList.add("show");
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>toast.classList.remove("show"),3500);
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+function dateText(v){if(!v)return "—";const d=new Date(v);return isNaN(d)?"—":d.toLocaleDateString("ar");}
+function accountLabel(t){return({company:"شركة",manufacturer:"مصنّع",brand:"علامة تجارية",trader:"تاجر",buyer:"مشتري"})[t]||t||"حساب WASLA";}
+function statusLabel(s){return({pending:"قيد الانتظار",open:"مفتوح",accepted:"مقبول",rejected:"مرفوض",completed:"مكتمل",closed:"مغلق"})[s]||s||"غير محدد";}
+function statusClass(s){if(["accepted","completed"].includes(s))return "pill-green";if(["pending","open"].includes(s))return "pill-orange";if(["rejected","closed"].includes(s))return "pill-red";return "pill-gray";}
+
+/* التنقل الموحد بين جميع أقسام اللوحة */
+function goTo(page){
+ const target=document.getElementById("page-"+page);
+ if(!target){showToast("القسم المطلوب غير موجود.");return;}
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ target.classList.add("active");
+ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ document.getElementById("sidebar").classList.remove("open");
+ window.scrollTo({top:0,behavior:"smooth"});
+ if(page==="discover")loadDiscover();
+ if(page==="inbox")loadInbox();
+ if(page==="inquiries")renderInquiries();
+}
+
+/* استقبال الضغط على القائمة حتى لو ضغطت على الأيقونة أو النص */
+document.addEventListener("click",function(e){
+ const button=e.target.closest("[data-page]");
+ if(button){e.preventDefault();goTo(button.dataset.page);}
+});
+
+async function init(){
+ const {data,error}=await db.auth.getSession();
+ if(error||!data.session){location.href="index.html";return;}
+ currentUser=data.session.user;
+ document.getElementById("email").value=currentUser.email||"";
+ await loadAccountData();
+}
+async function loadAccountData(){
+ const {data,error}=await db.from("profiles").select("id,full_name,account_type").eq("id",currentUser.id).maybeSingle();
+ if(error){showToast("تعذر تحميل الملف الشخصي: "+error.message);return;}
+ if(!data){showToast("لم يتم العثور على ملف شخصي لهذا الحساب في Supabase.");return;}
+ currentProfile=data;
+ const name=data.full_name||"مستخدم WASLA",initial=name.trim().charAt(0)||"W",type=accountLabel(data.account_type);
+ document.getElementById("topName").textContent="مرحباً، "+name;
+ document.getElementById("sideName").textContent=name;
+ document.getElementById("topCompany").textContent=type;
+ document.getElementById("sideType").textContent=type;
+ document.getElementById("topAvatar").textContent=initial;
+ document.getElementById("sideAvatar").textContent=initial;
+ document.getElementById("fullName").value=data.full_name||"";
+ document.getElementById("accountType").value=type;
+ await Promise.all([loadCompany(),loadMyProducts(),loadMyInquiries()]);
+ renderOverview();setupRealtime();
+}
+
+async function loadCompany(){
+ const {data,error}=await db.from("companies").select("owner_id,name,country").eq("owner_id",currentUser.id).maybeSingle();
+ if(error){console.error(error);return;}
+ currentCompany=data;
+ document.getElementById("companyName").value=data?.name||"";
+ document.getElementById("companyCountry").value=data?.country||"";
+ document.getElementById("statCompany").textContent=data?.name?"مضاف":"غير مضاف";
+}
+document.getElementById("companyForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const name=document.getElementById("companyName").value.trim();
+ const country=document.getElementById("companyCountry").value.trim();
+ if(!name)return showToast("يرجى إدخال اسم الشركة.");
+ let result=currentCompany
+ ?await db.from("companies").update({name,country}).eq("owner_id",currentUser.id)
+ :await db.from("companies").insert({owner_id:currentUser.id,name,country});
+ if(result.error)return showToast("تعذر حفظ الشركة: "+result.error.message);
+ showToast("تم حفظ بيانات الشركة.");await loadCompany();renderOverview();
+});
+
+async function loadMyProducts(){
+ const {data,error}=await db.from("products").select("id,company_id,name,description,category,image_url,status,created_at").eq("company_id",currentUser.id).order("created_at",{ascending:false});
+ if(error){console.error(error);products=[];document.getElementById("myProducts").innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
+ products=data||[];renderMyProducts();
+}
+function productCard(p,owner=false){
+ return `<article class="card product-card">
+ <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
+ <div class="product-info"><div class="company-tag">${esc(p.category||"عام")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج حتى الآن.")}</p>
+ ${owner?`<div class="product-actions"><button class="btn btn-light" onclick="editProduct('${p.id}')">تعديل</button><button class="btn btn-danger" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button></div>`:`<button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>`}
+ </div></article>`;
+}
+function renderMyProducts(){
+ const container=document.getElementById("myProducts"),recent=document.getElementById("recentProducts");
+ if(!products.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-box-open"></i><p>لم تضف أي منتجات بعد.</p><button class="btn btn-gold" onclick="openProductModal()">أضف أول منتج</button></div>';recent.innerHTML='<div class="empty">ستظهر منتجاتك هنا بعد إضافتها.</div>';return;}
+ container.innerHTML=products.map(p=>productCard(p,true)).join("");
+ recent.innerHTML=products.slice(0,3).map(p=>productCard(p,true)).join("");
+}
+function openProductModal(){
+ document.getElementById("productForm").reset();document.getElementById("productId").value="";
+ document.getElementById("productModalTitle").textContent="إضافة منتج جديد";
+ document.getElementById("productModal").classList.add("show");
+}
+function closeProductModal(){document.getElementById("productModal").classList.remove("show");}
+function editProduct(id){
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return;
+ document.getElementById("productId").value=p.id;
+ document.getElementById("productName").value=p.name||"";
+ document.getElementById("productCategory").value=p.category||"";
+ document.getElementById("productDescription").value=p.description||"";
+ document.getElementById("productImage").value=p.image_url||"";
+ document.getElementById("productModalTitle").textContent="تعديل المنتج";
+ document.getElementById("productModal").classList.add("show");
+}
+document.getElementById("productForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!currentCompany){showToast("أضف بيانات شركتك أولاً.");closeProductModal();goTo("company");return;}
+ const id=document.getElementById("productId").value;
+ const payload={company_id:currentUser.id,name:document.getElementById("productName").value.trim(),category:document.getElementById("productCategory").value.trim(),description:document.getElementById("productDescription").value.trim(),image_url:document.getElementById("productImage").value.trim()||null};
+ if(!payload.name)return showToast("اسم المنتج مطلوب.");
+ const result=id?await db.from("products").update(payload).eq("id",id).eq("company_id",currentUser.id):await db.from("products").insert(payload);
+ if(result.error)return showToast("تعذر حفظ المنتج: "+result.error.message);
+ closeProductModal();showToast("تم حفظ المنتج بنجاح.");await loadMyProducts();renderOverview();
+});
+async function deleteProduct(id){
+ if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
+ const {error}=await db.from("products").delete().eq("id",id).eq("company_id",currentUser.id);
+ if(error)return showToast("تعذر حذف المنتج: "+error.message);
+ showToast("تم حذف المنتج.");await loadMyProducts();renderOverview();
+}
+
+async function loadDiscover(){
+ const container=document.getElementById("discoverProducts");
+ container.innerHTML='<div class="loading">جارٍ البحث...</div>';
+ const search=document.getElementById("discoverSearch").value.trim();
+ const category=document.getElementById("discoverCategory").value;
+ let query=db.from("products").select("id,company_id,name,description,category,image_url,status,created_at,companies(name,country)").eq("status","published").neq("company_id",currentUser.id).order("created_at",{ascending:false}).limit(60);
+ if(search)query=query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+ if(category)query=query.eq("category",category);
+ const {data,error}=await query;
+ if(error){container.innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
+ if(!data?.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-magnifying-glass"></i><p>لا توجد منتجات منشورة مطابقة لبحثك.</p></div>';return;}
+ const categories=[...new Set(data.map(p=>p.category).filter(Boolean))],select=document.getElementById("discoverCategory"),old=select.value;
+ select.innerHTML='<option value="">كل التصنيفات</option>'+categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+ select.value=old;
+ container.innerHTML=data.map(p=>`<article class="card product-card"><div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div><div class="product-info"><div class="company-tag">${esc(p.companies?.name||"شركة على WASLA")} · ${esc(p.companies?.country||"")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p><button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button></div></article>`).join("");
+}
+
+async function loadMyInquiries(){
+ const {data,error}=await db.from("inquiries").select("id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)").or(`buyer_id.eq.${currentUser.id},company_id.eq.${currentUser.id}`).order("created_at",{ascending:false});
+ if(error){console.error(error);inquiries=[];return;}
+ inquiries=data||[];renderInquiries();
+}
+function renderInquiries(){
+ const body=document.getElementById("inquiriesTable");if(!body)return;
+ if(!inquiries.length){body.innerHTML='<tr><td colspan="5"><div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد استفسارات حتى الآن.</p></div></td></tr>';return;}
+ body.innerHTML=inquiries.map(i=>`<tr><td>${esc(i.products?.name||"منتج")}</td><td>${esc(i.quantity||"—")}</td><td><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></td><td>${dateText(i.created_at)}</td><td><button class="btn btn-light" onclick="openChat('${i.id}')">فتح المحادثة</button></td></tr>`).join("");
+}
+function renderOverview(){
+ document.getElementById("statProducts").textContent=products.length;
+ document.getElementById("statInquiries").textContent=inquiries.length;
+ document.getElementById("statOpen").textContent=inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status)).length;
+ document.getElementById("statCompany").textContent=currentCompany?.name?"مضاف":"غير مضاف";
+ const recent=document.getElementById("recentInquiries");
+ recent.innerHTML=inquiries.length?inquiries.slice(0,4).map(i=>`<div class="activity"><div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div><div><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${dateText(i.created_at)}</small></div><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></div>`).join(""):'<div class="empty"><i class="fa-regular fa-envelope"></i><p>لا توجد استفسارات حتى الآن.</p></div>';
+}
+
+function openInquiryModal(id){
+ if(currentProfile?.account_type!=="buyer"){showToast("إرسال الاستفسارات متاح لحسابات المشترين.");return;}
+ document.getElementById("inquiryForm").reset();document.getElementById("inquiryProductId").value=id;
+ document.getElementById("inquiryModal").classList.add("show");
+}
+function closeInquiryModal(){document.getElementById("inquiryModal").classList.remove("show");}
+document.getElementById("inquiryForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const productId=document.getElementById("inquiryProductId").value;
+ const product=await db.from("products").select("id,company_id").eq("id",productId).maybeSingle();
+ if(product.error||!product.data)return showToast("لم نتمكن من العثور على المنتج.");
+ const {error}=await db.from("inquiries").insert({product_id:productId,company_id:product.data.company_id,buyer_id:currentUser.id,quantity:document.getElementById("inquiryQuantity").value.trim(),message:document.getElementById("inquiryMessage").value.trim(),status:"pending"});
+ if(error)return showToast("تعذر إرسال الاستفسار: "+error.message);
+ closeInquiryModal();showToast("تم إرسال الاستفسار بنجاح.");await loadMyInquiries();renderOverview();
+});
+
+async function loadInbox(){
+ const list=document.getElementById("inboxList");
+ if(!inquiries.length){list.innerHTML='<div class="empty"><i class="fa-regular fa-comments"></i><p>لا توجد محادثات بعد.</p></div>';return;}
+ list.innerHTML=inquiries.map(i=>`<div class="inbox-item ${String(selectedInquiry)===String(i.id)?"selected":""}" onclick="openChat('${i.id}')"><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${esc(i.companies?.name||"محادثة تجارية")}</small><small>${dateText(i.created_at)} · ${esc(statusLabel(i.status))}</small></div>`).join("");
+}
+async function openChat(id){
+ selectedInquiry=id;goTo("inbox");await loadInbox();
+ const inquiry=inquiries.find(i=>String(i.id)===String(id));if(!inquiry)return;
+ document.getElementById("chatTitle").textContent="محادثة: "+(inquiry.products?.name||"استفسار تجاري");
+ document.getElementById("chatInput").disabled=false;document.getElementById("chatSend").disabled=false;
+ await loadMessages(id);
+}
+async function loadMessages(id){
+ const container=document.getElementById("chatMessages");
+ const {data,error}=await db.from("inquiry_messages").select("id,inquiry_id,sender_id,message,created_at").eq("inquiry_id",id).order("created_at",{ascending:true});
+ if(error){container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';return;}
+ container.innerHTML=data?.length?data.map(m=>`<div class="bubble ${m.sender_id===currentUser.id?"mine":"theirs"}">${esc(m.message)}<small>${dateText(m.created_at)}</small></div>`).join(""):'<div class="empty"><i class="fa-regular fa-message"></i><p>لا توجد رسائل في هذه المحادثة بعد.</p></div>';
+ container.scrollTop=container.scrollHeight;
+}
+document.getElementById("chatForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!selectedInquiry)return;
+ const input=document.getElementById("chatInput"),message=input.value.trim();if(!message)return;
+ const {error}=await db.from("inquiry_messages").insert({inquiry_id:selectedInquiry,sender_id:currentUser.id,message});
+ if(error)return showToast("تعذر إرسال الرسالة: "+error.message);
+ input.value="";await loadMessages(selectedInquiry);
+});
+
+document.getElementById("profileForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const full_name=document.getElementById("fullName").value.trim();if(!full_name)return showToast("يرجى إدخال الاسم.");
+ const {error}=await db.from("profiles").update({full_name}).eq("id",currentUser.id);
+ if(error)return showToast("تعذر تحديث الملف: "+error.message);
+ currentProfile.full_name=full_name;
+ document.getElementById("topName").textContent="مرحباً، "+full_name;
+ document.getElementById("sideName").textContent=full_name;
+ document.getElementById("topAvatar").textContent=full_name.charAt(0);
+ document.getElementById("sideAvatar").textContent=full_name.charAt(0);
+ showToast("تم تحديث الملف الشخصي.");
+});
+
+document.getElementById("menuToggle").addEventListener("click",()=>document.getElementById("sidebar").classList.toggle("open"));
+document.getElementById("discoverSearch").addEventListener("keydown",e=>{if(e.key==="Enter")loadDiscover();});
+document.getElementById("globalSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){document.getElementById("discoverSearch").value=e.target.value;goTo("discover");}});
+document.getElementById("logoutBtn").addEventListener("click",async()=>{
+ const {error}=await db.auth.signOut();if(error)return showToast("تعذر تسجيل الخروج.");
+ location.href="index.html";
+});
+function setupRealtime(){
+ if(messagesChannel)db.removeChannel(messagesChannel);
+ messagesChannel=db.channel("wasla-inquiry-messages").on("postgres_changes",{event:"INSERT",schema:"public",table:"inquiry_messages"},payload=>{
+ if(selectedInquiry&&String(payload.new.inquiry_id)===String(selectedInquiry))loadMessages(selectedInquiry);
+ }).subscribe();
+}
+init();
+</script>
+</body>
+</html>
