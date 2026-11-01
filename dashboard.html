@@ -84,6 +84,22 @@ overflow-y:auto;transition:.25s
 .welcome-art i{font-size:55px;color:#e8c47e}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .stat{padding:17px;display:flex;align-items:center;gap:12px;min-width:0}
+
+/* تعديل مربعات الإحصائيات لتصبح قابلة للضغط */
+.stat-clickable{
+cursor:pointer;
+transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.stat-clickable:hover{
+transform:translateY(-3px);
+border-color:var(--gold);
+box-shadow:0 10px 25px rgba(18,38,64,.11);
+}
+.stat-clickable:focus-visible{
+outline:3px solid var(--gold);
+outline-offset:3px;
+}
+
 .stat-icon{width:49px;height:49px;flex-shrink:0;border-radius:15px;display:grid;place-items:center;font-size:19px}
 .ic-blue{background:#e9f1fc;color:#326db5}
 .ic-gold{background:#fbf1dd;color:#c28d31}
@@ -230,12 +246,40 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 <div class="welcome-text"><div class="eyebrow">WASLA BUSINESS PLATFORM</div><h2>أهلاً بك في عالم الأعمال والتجارة</h2><p>اكتشف منتجات جديدة، اعرض أعمالك، وابنِ علاقات تجارية تتجاوز الحدود.</p><button class="btn btn-gold" onclick="goTo('discover')"><i class="fa-solid fa-arrow-left"></i> اكتشف الفرص التجارية</button></div>
 <div class="welcome-art"><i class="fa-solid fa-handshake"></i></div>
 </div>
+
 <div class="stats">
-<div class="card stat"><div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div><div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div></div>
-<div class="card stat"><div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div><div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div></div>
-<div class="card stat"><div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div><div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div></div>
-<div class="card stat"><div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div><div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div></div>
+
+<div class="card stat stat-clickable"
+data-page="products" role="button" tabindex="0"
+aria-label="فتح منتجاتي">
+<div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div>
+<div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div>
 </div>
+
+<div class="card stat stat-clickable"
+data-page="inquiries" role="button" tabindex="0"
+aria-label="فتح جميع الاستفسارات">
+<div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div>
+<div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div>
+</div>
+
+<div class="card stat stat-clickable"
+data-page="inquiries" data-open-only="true"
+role="button" tabindex="0"
+aria-label="فتح الاستفسارات المفتوحة">
+<div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div>
+<div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div>
+</div>
+
+<div class="card stat stat-clickable"
+data-page="company" role="button" tabindex="0"
+aria-label="فتح ملف الشركة">
+<div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div>
+<div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div>
+</div>
+
+</div>
+
 <div class="grid-two">
 <div class="card panel"><div class="panel-head"><h3>الوصول السريع</h3></div><div class="quick-grid">
 <button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
@@ -269,7 +313,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 </section>
 
 <section class="page" id="page-inquiries">
-<div class="page-heading"><div><h2>الاستفسارات التجارية</h2><p>تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.</p></div></div>
+<div class="page-heading"><div><h2>الاستفسارات التجارية</h2><p id="inquiriesDescription">تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.</p></div></div>
 <div class="card panel"><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="inquiriesTable"></tbody></table></div></div>
 </section>
 
@@ -319,51 +363,124 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,currentProfile=null,currentCompany=null;
 let products=[],inquiries=[],selectedInquiry=null,messagesChannel=null;
 
+/* رسائل التنبيه */
 function showToast(message){
  const toast=document.getElementById("toast");
  toast.textContent=message;toast.classList.add("show");
  clearTimeout(window.toastTimer);
  window.toastTimer=setTimeout(()=>toast.classList.remove("show"),3500);
 }
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
-function dateText(v){if(!v)return "—";const d=new Date(v);return isNaN(d)?"—":d.toLocaleDateString("ar");}
-function accountLabel(t){return({company:"شركة",manufacturer:"مصنّع",brand:"علامة تجارية",trader:"تاجر",buyer:"مشتري"})[t]||t||"حساب WASLA";}
-function statusLabel(s){return({pending:"قيد الانتظار",open:"مفتوح",accepted:"مقبول",rejected:"مرفوض",completed:"مكتمل",closed:"مغلق"})[s]||s||"غير محدد";}
-function statusClass(s){if(["accepted","completed"].includes(s))return "pill-green";if(["pending","open"].includes(s))return "pill-orange";if(["rejected","closed"].includes(s))return "pill-red";return "pill-gray";}
 
-/* التنقل الموحد بين جميع أقسام اللوحة */
-function goTo(page){
+function esc(v){
+ return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+
+function dateText(v){
+ if(!v)return "—";
+ const d=new Date(v);
+ return isNaN(d)?"—":d.toLocaleDateString("ar");
+}
+
+function accountLabel(t){
+ return({company:"شركة",manufacturer:"مصنّع",brand:"علامة تجارية",trader:"تاجر",buyer:"مشتري"})[t]||t||"حساب WASLA";
+}
+
+function statusLabel(s){
+ return({pending:"قيد الانتظار",open:"مفتوح",accepted:"مقبول",rejected:"مرفوض",completed:"مكتمل",closed:"مغلق"})[s]||s||"غير محدد";
+}
+
+function statusClass(s){
+ if(["accepted","completed"].includes(s))return "pill-green";
+ if(["pending","open"].includes(s))return "pill-orange";
+ if(["rejected","closed"].includes(s))return "pill-red";
+ return "pill-gray";
+}
+
+/* التنقل بين أقسام اللوحة */
+function goTo(page,openOnly=false){
  const target=document.getElementById("page-"+page);
- if(!target){showToast("القسم المطلوب غير موجود.");return;}
+
+ if(!target){
+  showToast("القسم المطلوب غير موجود.");
+  return;
+ }
+
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  target.classList.add("active");
- document.querySelectorAll(".nav-btn[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+
+ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{
+  b.classList.toggle("active",b.dataset.page===page);
+ });
+
  document.getElementById("sidebar").classList.remove("open");
+
  window.scrollTo({top:0,behavior:"smooth"});
+
  if(page==="discover")loadDiscover();
  if(page==="inbox")loadInbox();
- if(page==="inquiries")renderInquiries();
+
+ if(page==="inquiries"){
+  renderInquiries(openOnly);
+ }
 }
 
-/* استقبال الضغط على القائمة حتى لو ضغطت على الأيقونة أو النص */
+/* الضغط على مربعات الإحصائيات والقائمة */
 document.addEventListener("click",function(e){
  const button=e.target.closest("[data-page]");
- if(button){e.preventDefault();goTo(button.dataset.page);}
+
+ if(button){
+  e.preventDefault();
+  goTo(button.dataset.page,button.dataset.openOnly==="true");
+ }
 });
 
+/* دعم الضغط بلوحة المفاتيح على مربعات الإحصائيات */
+document.addEventListener("keydown",function(e){
+ const card=e.target.closest(".stat-clickable");
+
+ if(card&&(e.key==="Enter"||e.key===" ")){
+  e.preventDefault();
+  goTo(card.dataset.page,card.dataset.openOnly==="true");
+ }
+});
+
+/* تحميل الحساب */
 async function init(){
  const {data,error}=await db.auth.getSession();
- if(error||!data.session){location.href="index.html";return;}
+
+ if(error||!data.session){
+  location.href="index.html";
+  return;
+ }
+
  currentUser=data.session.user;
  document.getElementById("email").value=currentUser.email||"";
+
  await loadAccountData();
 }
+
 async function loadAccountData(){
- const {data,error}=await db.from("profiles").select("id,full_name,account_type").eq("id",currentUser.id).maybeSingle();
- if(error){showToast("تعذر تحميل الملف الشخصي: "+error.message);return;}
- if(!data){showToast("لم يتم العثور على ملف شخصي لهذا الحساب في Supabase.");return;}
+ const {data,error}=await db.from("profiles")
+  .select("id,full_name,account_type")
+  .eq("id",currentUser.id)
+  .maybeSingle();
+
+ if(error){
+  showToast("تعذر تحميل الملف الشخصي: "+error.message);
+  return;
+ }
+
+ if(!data){
+  showToast("لم يتم العثور على ملف شخصي لهذا الحساب في Supabase.");
+  return;
+ }
+
  currentProfile=data;
- const name=data.full_name||"مستخدم WASLA",initial=name.trim().charAt(0)||"W",type=accountLabel(data.account_type);
+
+ const name=data.full_name||"مستخدم WASLA";
+ const initial=name.trim().charAt(0)||"W";
+ const type=accountLabel(data.account_type);
+
  document.getElementById("topName").textContent="مرحباً، "+name;
  document.getElementById("sideName").textContent=name;
  document.getElementById("topCompany").textContent=type;
@@ -372,56 +489,117 @@ async function loadAccountData(){
  document.getElementById("sideAvatar").textContent=initial;
  document.getElementById("fullName").value=data.full_name||"";
  document.getElementById("accountType").value=type;
- await Promise.all([loadCompany(),loadMyProducts(),loadMyInquiries()]);
- renderOverview();setupRealtime();
+
+ await Promise.all([
+  loadCompany(),
+  loadMyProducts(),
+  loadMyInquiries()
+ ]);
+
+ renderOverview();
+ setupRealtime();
 }
 
+/* بيانات الشركة */
 async function loadCompany(){
- const {data,error}=await db.from("companies").select("owner_id,name,country").eq("owner_id",currentUser.id).maybeSingle();
- if(error){console.error(error);return;}
+ const {data,error}=await db.from("companies")
+  .select("owner_id,name,country")
+  .eq("owner_id",currentUser.id)
+  .maybeSingle();
+
+ if(error){
+  console.error(error);
+  return;
+ }
+
  currentCompany=data;
+
  document.getElementById("companyName").value=data?.name||"";
  document.getElementById("companyCountry").value=data?.country||"";
  document.getElementById("statCompany").textContent=data?.name?"مضاف":"غير مضاف";
 }
+
 document.getElementById("companyForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  const name=document.getElementById("companyName").value.trim();
  const country=document.getElementById("companyCountry").value.trim();
+
  if(!name)return showToast("يرجى إدخال اسم الشركة.");
+
  let result=currentCompany
- ?await db.from("companies").update({name,country}).eq("owner_id",currentUser.id)
- :await db.from("companies").insert({owner_id:currentUser.id,name,country});
+  ?await db.from("companies").update({name,country}).eq("owner_id",currentUser.id)
+  :await db.from("companies").insert({owner_id:currentUser.id,name,country});
+
  if(result.error)return showToast("تعذر حفظ الشركة: "+result.error.message);
- showToast("تم حفظ بيانات الشركة.");await loadCompany();renderOverview();
+
+ showToast("تم حفظ بيانات الشركة.");
+
+ await loadCompany();
+ renderOverview();
 });
 
+/* منتجاتي */
 async function loadMyProducts(){
- const {data,error}=await db.from("products").select("id,company_id,name,description,category,image_url,status,created_at").eq("company_id",currentUser.id).order("created_at",{ascending:false});
- if(error){console.error(error);products=[];document.getElementById("myProducts").innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
- products=data||[];renderMyProducts();
+ const {data,error}=await db.from("products")
+  .select("id,company_id,name,description,category,image_url,status,created_at")
+  .eq("company_id",currentUser.id)
+  .order("created_at",{ascending:false});
+
+ if(error){
+  console.error(error);
+  products=[];
+  document.getElementById("myProducts").innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';
+  return;
+ }
+
+ products=data||[];
+ renderMyProducts();
 }
+
 function productCard(p,owner=false){
  return `<article class="card product-card">
  <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
- <div class="product-info"><div class="company-tag">${esc(p.category||"عام")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج حتى الآن.")}</p>
- ${owner?`<div class="product-actions"><button class="btn btn-light" onclick="editProduct('${p.id}')">تعديل</button><button class="btn btn-danger" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button></div>`:`<button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>`}
+ <div class="product-info">
+ <div class="company-tag">${esc(p.category||"عام")}</div>
+ <h4>${esc(p.name)}</h4>
+ <p>${esc(p.description||"لا يوجد وصف لهذا المنتج حتى الآن.")}</p>
+ ${owner?`<div class="product-actions">
+ <button class="btn btn-light" onclick="editProduct('${p.id}')">تعديل</button>
+ <button class="btn btn-danger" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+ </div>`:`<button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>`}
  </div></article>`;
 }
+
 function renderMyProducts(){
- const container=document.getElementById("myProducts"),recent=document.getElementById("recentProducts");
- if(!products.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-box-open"></i><p>لم تضف أي منتجات بعد.</p><button class="btn btn-gold" onclick="openProductModal()">أضف أول منتج</button></div>';recent.innerHTML='<div class="empty">ستظهر منتجاتك هنا بعد إضافتها.</div>';return;}
+ const container=document.getElementById("myProducts");
+ const recent=document.getElementById("recentProducts");
+
+ if(!products.length){
+  container.innerHTML='<div class="empty card"><i class="fa-solid fa-box-open"></i><p>لم تضف أي منتجات بعد.</p><button class="btn btn-gold" onclick="openProductModal()">أضف أول منتج</button></div>';
+  recent.innerHTML='<div class="empty">ستظهر منتجاتك هنا بعد إضافتها.</div>';
+  return;
+ }
+
  container.innerHTML=products.map(p=>productCard(p,true)).join("");
  recent.innerHTML=products.slice(0,3).map(p=>productCard(p,true)).join("");
 }
+
 function openProductModal(){
- document.getElementById("productForm").reset();document.getElementById("productId").value="";
+ document.getElementById("productForm").reset();
+ document.getElementById("productId").value="";
  document.getElementById("productModalTitle").textContent="إضافة منتج جديد";
  document.getElementById("productModal").classList.add("show");
 }
-function closeProductModal(){document.getElementById("productModal").classList.remove("show");}
+
+function closeProductModal(){
+ document.getElementById("productModal").classList.remove("show");
+}
+
 function editProduct(id){
- const p=products.find(x=>String(x.id)===String(id));if(!p)return;
+ const p=products.find(x=>String(x.id)===String(id));
+ if(!p)return;
+
  document.getElementById("productId").value=p.id;
  document.getElementById("productName").value=p.name||"";
  document.getElementById("productCategory").value=p.category||"";
@@ -430,128 +608,377 @@ function editProduct(id){
  document.getElementById("productModalTitle").textContent="تعديل المنتج";
  document.getElementById("productModal").classList.add("show");
 }
+
 document.getElementById("productForm").addEventListener("submit",async e=>{
  e.preventDefault();
- if(!currentCompany){showToast("أضف بيانات شركتك أولاً.");closeProductModal();goTo("company");return;}
+
+ if(!currentCompany){
+  showToast("أضف بيانات شركتك أولاً.");
+  closeProductModal();
+  goTo("company");
+  return;
+ }
+
  const id=document.getElementById("productId").value;
- const payload={company_id:currentUser.id,name:document.getElementById("productName").value.trim(),category:document.getElementById("productCategory").value.trim(),description:document.getElementById("productDescription").value.trim(),image_url:document.getElementById("productImage").value.trim()||null};
+
+ const payload={
+  company_id:currentUser.id,
+  name:document.getElementById("productName").value.trim(),
+  category:document.getElementById("productCategory").value.trim(),
+  description:document.getElementById("productDescription").value.trim(),
+  image_url:document.getElementById("productImage").value.trim()||null
+ };
+
  if(!payload.name)return showToast("اسم المنتج مطلوب.");
- const result=id?await db.from("products").update(payload).eq("id",id).eq("company_id",currentUser.id):await db.from("products").insert(payload);
+
+ const result=id
+  ?await db.from("products").update(payload).eq("id",id).eq("company_id",currentUser.id)
+  :await db.from("products").insert(payload);
+
  if(result.error)return showToast("تعذر حفظ المنتج: "+result.error.message);
- closeProductModal();showToast("تم حفظ المنتج بنجاح.");await loadMyProducts();renderOverview();
+
+ closeProductModal();
+ showToast("تم حفظ المنتج بنجاح.");
+
+ await loadMyProducts();
+ renderOverview();
 });
+
 async function deleteProduct(id){
  if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
- const {error}=await db.from("products").delete().eq("id",id).eq("company_id",currentUser.id);
+
+ const {error}=await db.from("products")
+  .delete()
+  .eq("id",id)
+  .eq("company_id",currentUser.id);
+
  if(error)return showToast("تعذر حذف المنتج: "+error.message);
- showToast("تم حذف المنتج.");await loadMyProducts();renderOverview();
+
+ showToast("تم حذف المنتج.");
+
+ await loadMyProducts();
+ renderOverview();
 }
 
+/* اكتشاف المنتجات */
 async function loadDiscover(){
  const container=document.getElementById("discoverProducts");
+
  container.innerHTML='<div class="loading">جارٍ البحث...</div>';
+
  const search=document.getElementById("discoverSearch").value.trim();
  const category=document.getElementById("discoverCategory").value;
- let query=db.from("products").select("id,company_id,name,description,category,image_url,status,created_at,companies(name,country)").eq("status","published").neq("company_id",currentUser.id).order("created_at",{ascending:false}).limit(60);
+
+ let query=db.from("products")
+  .select("id,company_id,name,description,category,image_url,status,created_at,companies(name,country)")
+  .eq("status","published")
+  .neq("company_id",currentUser.id)
+  .order("created_at",{ascending:false})
+  .limit(60);
+
  if(search)query=query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
  if(category)query=query.eq("category",category);
+
  const {data,error}=await query;
- if(error){container.innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
- if(!data?.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-magnifying-glass"></i><p>لا توجد منتجات منشورة مطابقة لبحثك.</p></div>';return;}
- const categories=[...new Set(data.map(p=>p.category).filter(Boolean))],select=document.getElementById("discoverCategory"),old=select.value;
+
+ if(error){
+  container.innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';
+  return;
+ }
+
+ if(!data?.length){
+  container.innerHTML='<div class="empty card"><i class="fa-solid fa-magnifying-glass"></i><p>لا توجد منتجات منشورة مطابقة لبحثك.</p></div>';
+  return;
+ }
+
+ const categories=[...new Set(data.map(p=>p.category).filter(Boolean))];
+ const select=document.getElementById("discoverCategory");
+ const old=select.value;
+
  select.innerHTML='<option value="">كل التصنيفات</option>'+categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
  select.value=old;
- container.innerHTML=data.map(p=>`<article class="card product-card"><div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div><div class="product-info"><div class="company-tag">${esc(p.companies?.name||"شركة على WASLA")} · ${esc(p.companies?.country||"")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p><button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button></div></article>`).join("");
+
+ container.innerHTML=data.map(p=>`
+ <article class="card product-card">
+ <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
+ <div class="product-info">
+ <div class="company-tag">${esc(p.companies?.name||"شركة على WASLA")} · ${esc(p.companies?.country||"")}</div>
+ <h4>${esc(p.name)}</h4>
+ <p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p>
+ <button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>
+ </div></article>`).join("");
 }
 
+/* الاستفسارات */
 async function loadMyInquiries(){
- const {data,error}=await db.from("inquiries").select("id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)").or(`buyer_id.eq.${currentUser.id},company_id.eq.${currentUser.id}`).order("created_at",{ascending:false});
- if(error){console.error(error);inquiries=[];return;}
- inquiries=data||[];renderInquiries();
+ const {data,error}=await db.from("inquiries")
+  .select("id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)")
+  .or(`buyer_id.eq.${currentUser.id},company_id.eq.${currentUser.id}`)
+  .order("created_at",{ascending:false});
+
+ if(error){
+  console.error(error);
+  inquiries=[];
+  return;
+ }
+
+ inquiries=data||[];
+ renderInquiries();
 }
-function renderInquiries(){
- const body=document.getElementById("inquiriesTable");if(!body)return;
- if(!inquiries.length){body.innerHTML='<tr><td colspan="5"><div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد استفسارات حتى الآن.</p></div></td></tr>';return;}
- body.innerHTML=inquiries.map(i=>`<tr><td>${esc(i.products?.name||"منتج")}</td><td>${esc(i.quantity||"—")}</td><td><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></td><td>${dateText(i.created_at)}</td><td><button class="btn btn-light" onclick="openChat('${i.id}')">فتح المحادثة</button></td></tr>`).join("");
+
+/* عرض جميع الاستفسارات أو المفتوحة فقط */
+function renderInquiries(openOnly=false){
+ const body=document.getElementById("inquiriesTable");
+ const description=document.getElementById("inquiriesDescription");
+
+ if(!body)return;
+
+ const displayedInquiries=openOnly
+  ?inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status))
+  :inquiries;
+
+ if(description){
+  description.textContent=openOnly
+   ?"هذه الاستفسارات التي تحتاج إلى متابعة."
+   :"تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.";
+ }
+
+ if(!displayedInquiries.length){
+  body.innerHTML=openOnly
+   ?'<tr><td colspan="5"><div class="empty"><i class="fa-solid fa-check-circle"></i><p>لا توجد استفسارات مفتوحة حالياً.</p></div></td></tr>'
+   :'<tr><td colspan="5"><div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد استفسارات حتى الآن.</p></div></td></tr>';
+  return;
+ }
+
+ body.innerHTML=displayedInquiries.map(i=>`
+ <tr>
+ <td>${esc(i.products?.name||"منتج")}</td>
+ <td>${esc(i.quantity||"—")}</td>
+ <td><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></td>
+ <td>${dateText(i.created_at)}</td>
+ <td><button class="btn btn-light" onclick="openChat('${i.id}')">فتح المحادثة</button></td>
+ </tr>`).join("");
 }
+
+/* تحديث الإحصائيات والصفحة الرئيسية */
 function renderOverview(){
  document.getElementById("statProducts").textContent=products.length;
  document.getElementById("statInquiries").textContent=inquiries.length;
- document.getElementById("statOpen").textContent=inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status)).length;
- document.getElementById("statCompany").textContent=currentCompany?.name?"مضاف":"غير مضاف";
+
+ document.getElementById("statOpen").textContent=
+  inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status)).length;
+
+ document.getElementById("statCompany").textContent=
+  currentCompany?.name?"مضاف":"غير مضاف";
+
  const recent=document.getElementById("recentInquiries");
- recent.innerHTML=inquiries.length?inquiries.slice(0,4).map(i=>`<div class="activity"><div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div><div><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${dateText(i.created_at)}</small></div><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></div>`).join(""):'<div class="empty"><i class="fa-regular fa-envelope"></i><p>لا توجد استفسارات حتى الآن.</p></div>';
+
+ recent.innerHTML=inquiries.length
+  ?inquiries.slice(0,4).map(i=>`
+   <div class="activity">
+   <div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div>
+   <div><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${dateText(i.created_at)}</small></div>
+   <span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span>
+   </div>`).join("")
+  :'<div class="empty"><i class="fa-regular fa-envelope"></i><p>لا توجد استفسارات حتى الآن.</p></div>';
 }
 
+/* إرسال استفسار */
 function openInquiryModal(id){
- if(currentProfile?.account_type!=="buyer"){showToast("إرسال الاستفسارات متاح لحسابات المشترين.");return;}
- document.getElementById("inquiryForm").reset();document.getElementById("inquiryProductId").value=id;
+ if(currentProfile?.account_type!=="buyer"){
+  showToast("إرسال الاستفسارات متاح لحسابات المشترين.");
+  return;
+ }
+
+ document.getElementById("inquiryForm").reset();
+ document.getElementById("inquiryProductId").value=id;
  document.getElementById("inquiryModal").classList.add("show");
 }
-function closeInquiryModal(){document.getElementById("inquiryModal").classList.remove("show");}
+
+function closeInquiryModal(){
+ document.getElementById("inquiryModal").classList.remove("show");
+}
+
 document.getElementById("inquiryForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  const productId=document.getElementById("inquiryProductId").value;
- const product=await db.from("products").select("id,company_id").eq("id",productId).maybeSingle();
- if(product.error||!product.data)return showToast("لم نتمكن من العثور على المنتج.");
- const {error}=await db.from("inquiries").insert({product_id:productId,company_id:product.data.company_id,buyer_id:currentUser.id,quantity:document.getElementById("inquiryQuantity").value.trim(),message:document.getElementById("inquiryMessage").value.trim(),status:"pending"});
+
+ const product=await db.from("products")
+  .select("id,company_id")
+  .eq("id",productId)
+  .maybeSingle();
+
+ if(product.error||!product.data){
+  return showToast("لم نتمكن من العثور على المنتج.");
+ }
+
+ const {error}=await db.from("inquiries").insert({
+  product_id:productId,
+  company_id:product.data.company_id,
+  buyer_id:currentUser.id,
+  quantity:document.getElementById("inquiryQuantity").value.trim(),
+  message:document.getElementById("inquiryMessage").value.trim(),
+  status:"pending"
+ });
+
  if(error)return showToast("تعذر إرسال الاستفسار: "+error.message);
- closeInquiryModal();showToast("تم إرسال الاستفسار بنجاح.");await loadMyInquiries();renderOverview();
+
+ closeInquiryModal();
+ showToast("تم إرسال الاستفسار بنجاح.");
+
+ await loadMyInquiries();
+ renderOverview();
 });
 
+/* المحادثات */
 async function loadInbox(){
  const list=document.getElementById("inboxList");
- if(!inquiries.length){list.innerHTML='<div class="empty"><i class="fa-regular fa-comments"></i><p>لا توجد محادثات بعد.</p></div>';return;}
- list.innerHTML=inquiries.map(i=>`<div class="inbox-item ${String(selectedInquiry)===String(i.id)?"selected":""}" onclick="openChat('${i.id}')"><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${esc(i.companies?.name||"محادثة تجارية")}</small><small>${dateText(i.created_at)} · ${esc(statusLabel(i.status))}</small></div>`).join("");
+
+ if(!inquiries.length){
+  list.innerHTML='<div class="empty"><i class="fa-regular fa-comments"></i><p>لا توجد محادثات بعد.</p></div>';
+  return;
+ }
+
+ list.innerHTML=inquiries.map(i=>`
+ <div class="inbox-item ${String(selectedInquiry)===String(i.id)?"selected":""}" onclick="openChat('${i.id}')">
+ <strong>${esc(i.products?.name||"استفسار تجاري")}</strong>
+ <small>${esc(i.companies?.name||"محادثة تجارية")}</small>
+ <small>${dateText(i.created_at)} · ${esc(statusLabel(i.status))}</small>
+ </div>`).join("");
 }
+
 async function openChat(id){
- selectedInquiry=id;goTo("inbox");await loadInbox();
- const inquiry=inquiries.find(i=>String(i.id)===String(id));if(!inquiry)return;
- document.getElementById("chatTitle").textContent="محادثة: "+(inquiry.products?.name||"استفسار تجاري");
- document.getElementById("chatInput").disabled=false;document.getElementById("chatSend").disabled=false;
+ selectedInquiry=id;
+
+ goTo("inbox");
+ await loadInbox();
+
+ const inquiry=inquiries.find(i=>String(i.id)===String(id));
+ if(!inquiry)return;
+
+ document.getElementById("chatTitle").textContent=
+  "محادثة: "+(inquiry.products?.name||"استفسار تجاري");
+
+ document.getElementById("chatInput").disabled=false;
+ document.getElementById("chatSend").disabled=false;
+
  await loadMessages(id);
 }
+
 async function loadMessages(id){
  const container=document.getElementById("chatMessages");
- const {data,error}=await db.from("inquiry_messages").select("id,inquiry_id,sender_id,message,created_at").eq("inquiry_id",id).order("created_at",{ascending:true});
- if(error){container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';return;}
- container.innerHTML=data?.length?data.map(m=>`<div class="bubble ${m.sender_id===currentUser.id?"mine":"theirs"}">${esc(m.message)}<small>${dateText(m.created_at)}</small></div>`).join(""):'<div class="empty"><i class="fa-regular fa-message"></i><p>لا توجد رسائل في هذه المحادثة بعد.</p></div>';
+
+ const {data,error}=await db.from("inquiry_messages")
+  .select("id,inquiry_id,sender_id,message,created_at")
+  .eq("inquiry_id",id)
+  .order("created_at",{ascending:true});
+
+ if(error){
+  container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';
+  return;
+ }
+
+ container.innerHTML=data?.length
+  ?data.map(m=>`
+   <div class="bubble ${m.sender_id===currentUser.id?"mine":"theirs"}">
+   ${esc(m.message)}
+   <small>${dateText(m.created_at)}</small>
+   </div>`).join("")
+  :'<div class="empty"><i class="fa-regular fa-message"></i><p>لا توجد رسائل في هذه المحادثة بعد.</p></div>';
+
  container.scrollTop=container.scrollHeight;
 }
+
 document.getElementById("chatForm").addEventListener("submit",async e=>{
- e.preventDefault();if(!selectedInquiry)return;
- const input=document.getElementById("chatInput"),message=input.value.trim();if(!message)return;
- const {error}=await db.from("inquiry_messages").insert({inquiry_id:selectedInquiry,sender_id:currentUser.id,message});
+ e.preventDefault();
+
+ if(!selectedInquiry)return;
+
+ const input=document.getElementById("chatInput");
+ const message=input.value.trim();
+
+ if(!message)return;
+
+ const {error}=await db.from("inquiry_messages").insert({
+  inquiry_id:selectedInquiry,
+  sender_id:currentUser.id,
+  message
+ });
+
  if(error)return showToast("تعذر إرسال الرسالة: "+error.message);
- input.value="";await loadMessages(selectedInquiry);
+
+ input.value="";
+ await loadMessages(selectedInquiry);
 });
 
+/* الملف الشخصي */
 document.getElementById("profileForm").addEventListener("submit",async e=>{
  e.preventDefault();
- const full_name=document.getElementById("fullName").value.trim();if(!full_name)return showToast("يرجى إدخال الاسم.");
- const {error}=await db.from("profiles").update({full_name}).eq("id",currentUser.id);
+
+ const full_name=document.getElementById("fullName").value.trim();
+
+ if(!full_name)return showToast("يرجى إدخال الاسم.");
+
+ const {error}=await db.from("profiles")
+  .update({full_name})
+  .eq("id",currentUser.id);
+
  if(error)return showToast("تعذر تحديث الملف: "+error.message);
+
  currentProfile.full_name=full_name;
+
  document.getElementById("topName").textContent="مرحباً، "+full_name;
  document.getElementById("sideName").textContent=full_name;
  document.getElementById("topAvatar").textContent=full_name.charAt(0);
  document.getElementById("sideAvatar").textContent=full_name.charAt(0);
+
  showToast("تم تحديث الملف الشخصي.");
 });
 
-document.getElementById("menuToggle").addEventListener("click",()=>document.getElementById("sidebar").classList.toggle("open"));
-document.getElementById("discoverSearch").addEventListener("keydown",e=>{if(e.key==="Enter")loadDiscover();});
-document.getElementById("globalSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){document.getElementById("discoverSearch").value=e.target.value;goTo("discover");}});
+/* البحث والقائمة الجانبية */
+document.getElementById("menuToggle").addEventListener("click",()=>{
+ document.getElementById("sidebar").classList.toggle("open");
+});
+
+document.getElementById("discoverSearch").addEventListener("keydown",e=>{
+ if(e.key==="Enter")loadDiscover();
+});
+
+document.getElementById("globalSearch").addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+  document.getElementById("discoverSearch").value=e.target.value;
+  goTo("discover");
+ }
+});
+
+/* تسجيل الخروج */
 document.getElementById("logoutBtn").addEventListener("click",async()=>{
- const {error}=await db.auth.signOut();if(error)return showToast("تعذر تسجيل الخروج.");
+ const {error}=await db.auth.signOut();
+
+ if(error)return showToast("تعذر تسجيل الخروج.");
+
  location.href="index.html";
 });
+
+/* التحديث المباشر للرسائل */
 function setupRealtime(){
  if(messagesChannel)db.removeChannel(messagesChannel);
- messagesChannel=db.channel("wasla-inquiry-messages").on("postgres_changes",{event:"INSERT",schema:"public",table:"inquiry_messages"},payload=>{
- if(selectedInquiry&&String(payload.new.inquiry_id)===String(selectedInquiry))loadMessages(selectedInquiry);
- }).subscribe();
+
+ messagesChannel=db.channel("wasla-inquiry-messages")
+  .on("postgres_changes",{
+   event:"INSERT",
+   schema:"public",
+   table:"inquiry_messages"
+  },payload=>{
+   if(selectedInquiry&&String(payload.new.inquiry_id)===String(selectedInquiry)){
+    loadMessages(selectedInquiry);
+   }
+  })
+  .subscribe();
 }
+
+/* تشغيل اللوحة */
 init();
 </script>
 </body>
