@@ -164,8 +164,6 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 .profile-form-panel{padding:20px}
 .profile-file{display:none}
 .url-help{font-size:9px;color:var(--muted);margin-top:2px}
-
-/* دليل الحسابات والرسائل المباشرة */
 .direct-layout{display:grid;grid-template-columns:280px 1fr;gap:15px;min-height:520px}
 .direct-side{padding:12px;max-height:650px;overflow:auto}
 .direct-search{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;outline:none}
@@ -200,7 +198,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
  <div class="brand"><div class="brand-mark">W</div><h1>WASLA</h1><p>CONNECT · TRADE · GROW</p></div>
  <div class="nav-label">مساحة العمل</div>
  <button class="nav-btn active" data-page="overview"><i class="fa-solid fa-house"></i> الرئيسية</button>
- <button class="nav-btn" data-page="company"><i class="fa-solid fa-building"></i> شركتي</button>
+ <button class="nav-btn" data-page="company"><i class="fa-solid fa-building"></i><span id="accountSectionNavLabel">شركتي</span></button>
  <button class="nav-btn" data-page="products"><i class="fa-solid fa-box-open"></i> منتجاتي</button>
  <button class="nav-btn" data-page="discover"><i class="fa-solid fa-compass"></i> اكتشف المنتجات</button>
  <div class="nav-label">التواصل والتجارة</div>
@@ -243,12 +241,12 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
   <div class="card stat stat-clickable" data-page="products" role="button" tabindex="0"><div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div><div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div></div>
   <div class="card stat stat-clickable" data-page="inquiries" role="button" tabindex="0"><div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div><div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div></div>
   <div class="card stat stat-clickable" data-page="inquiries" data-open-only="true" role="button" tabindex="0"><div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div><div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div></div>
-  <div class="card stat stat-clickable" data-page="company" role="button" tabindex="0"><div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div><div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div></div>
+  <div class="card stat stat-clickable" data-page="company" role="button" tabindex="0"><div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div><div><small>ملف الحساب</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div></div>
  </div>
  <div class="grid-two">
   <div class="card panel"><div class="panel-head"><h3>الوصول السريع</h3></div><div class="quick-grid">
    <button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
-   <button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الشركة</strong></button>
+   <button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الحساب</strong></button>
    <button class="quick" onclick="goTo('discover')"><i class="fa-solid fa-magnifying-glass"></i><strong>تصفح المنتجات</strong></button>
    <button class="quick" onclick="goTo('direct')"><i class="fa-solid fa-message"></i><strong>رسالة مباشرة</strong></button>
   </div></div>
@@ -258,10 +256,10 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 </section>
 
 <section class="page" id="page-company">
- <div class="page-heading"><div><h2>ملف شركتي</h2><p>أدر معلومات شركتك التي تظهر في WASLA.</p></div></div>
+ <div class="page-heading"><div><h2 id="accountSectionTitle">ملف شركتي</h2><p>أدر معلومات حسابك التجاري التي تظهر في WASLA.</p></div></div>
  <div class="card panel"><div class="panel-head"><h3>المعلومات التجارية</h3></div>
   <form id="companyForm"><div class="form-grid">
-   <div class="field full"><label>اسم الشركة أو النشاط التجاري</label><input id="companyName" required placeholder="اسم الشركة"></div>
+   <div class="field full"><label>اسم الشركة أو النشاط التجاري</label><input id="companyName" required placeholder="اسم الشركة أو النشاط التجاري"></div>
    <div class="field"><label>الدولة</label><input id="companyCountry" placeholder="الدولة"></div>
   </div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ التغييرات</button></div></form>
  </div>
@@ -370,7 +368,6 @@ let products=[],inquiries=[],selectedInquiry=null,messagesChannel=null;
 let dashboardInitialized=false,dashboardInitializing=false;
 let pendingProfileImage=null,profilePreviewObjectUrl=null;
 
-/* بيانات الرسائل المباشرة */
 let directProfiles=[];
 let directConversations=[];
 let selectedDirectConversation=null;
@@ -395,6 +392,24 @@ function dateText(v){
 }
 function accountLabel(t){
  return({company:"شركة",manufacturer:"مصنّع",brand:"علامة تجارية",trader:"تاجر",buyer:"مشتري"})[t]||t||"حساب WASLA";
+}
+
+/* اسم قسم الحساب حسب نوع الحساب */
+function accountSectionLabel(t){
+ return({
+  company:"شركتي",
+  buyer:"مشتري",
+  trader:"تاجر",
+  manufacturer:"مصنّعي",
+  brand:"علامتي التجارية"
+ })[t]||"حسابي";
+}
+function updateAccountSectionLabel(type){
+ const label=accountSectionLabel(type);
+ const navLabel=document.getElementById("accountSectionNavLabel");
+ const pageTitle=document.getElementById("accountSectionTitle");
+ if(navLabel)navLabel.textContent=label;
+ if(pageTitle)pageTitle.textContent=label;
 }
 function statusLabel(s){
  return({pending:"قيد الانتظار",open:"مفتوح",accepted:"مقبول",rejected:"مرفوض",completed:"مكتمل",closed:"مغلق"})[s]||s||"غير محدد";
@@ -503,6 +518,10 @@ async function loadAccountData(){
  if(error){showToast("تعذر تحميل الملف الشخصي: "+error.message);return;}
  if(!data){showToast("لم يتم العثور على ملف شخصي لهذا الحساب.");return;}
  currentProfile=data;
+
+ /* تحديث اسم القسم تلقائياً حسب نوع الحساب */
+ updateAccountSectionLabel(data.account_type);
+
  const name=data.full_name||"مستخدم WASLA";
  const initial=name.trim().charAt(0)||"W";
  const type=accountLabel(data.account_type);
@@ -582,7 +601,7 @@ document.getElementById("companyForm").addEventListener("submit",async e=>{
   ?await db.from("companies").update({name,country}).eq("owner_id",currentUser.id)
   :await db.from("companies").insert({owner_id:currentUser.id,name,country});
  if(result.error)return showToast("تعذر حفظ الشركة: "+result.error.message);
- showToast("تم حفظ بيانات الشركة.");
+ showToast("تم حفظ بيانات الحساب.");
  await loadCompany();renderOverview();
 });
 
@@ -847,7 +866,6 @@ async function startDirectChat(targetId){
    .insert({user_one:ids[0],user_two:ids[1]})
    .select("id,user_one,user_two,created_at,updated_at").single();
   if(result.error){
-   /* إذا أنشأ الطرف الآخر المحادثة في نفس اللحظة، نحاول استرجاعها */
    const retry=await db.from("conversations").select("id,user_one,user_two,created_at,updated_at")
     .eq("user_one",ids[0]).eq("user_two",ids[1]).maybeSingle();
    if(retry.error||!retry.data){showToast("تعذر إنشاء المحادثة: "+result.error.message);return;}
