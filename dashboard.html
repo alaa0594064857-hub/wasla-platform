@@ -377,6 +377,7 @@ function statusClass(s){
 
 let currentDashboardPage="overview";
 let currentOpenOnly=false;
+let handlingPopState=false;
 
 /* عرض القسم دون إضافة سجل جديد */
 function showDashboardPage(page,openOnly=false){
@@ -467,7 +468,7 @@ function setupDashboardHistory(){
  try{
   history.replaceState(initialState,"",location.href);
  }catch(error){
-  console.warn("تعذر تجهيز سجل التنقل:",error);
+  console.warn("تعذر تجهيز سجل لوحة التحكم:",error);
  }
 
  showDashboardPage("overview",false);
@@ -485,6 +486,11 @@ window.addEventListener("popstate",function(event){
   return;
  }
 
+ /*
+   إذا وصل المستخدم إلى أول سجل في لوحة WASLA
+   نحافظ عليه داخل اللوحة ولا نسمح بالرجوع إلى
+   صفحة خارجية أو صفحة تسجيل الدخول.
+ */
  const safeState={
   waslaDashboard:true,
   page:currentDashboardPage||"overview",
@@ -542,6 +548,10 @@ async function init(){
 
   document.getElementById("email").value=currentUser.email||"";
 
+  /*
+    نجهز سجل التنقل بعد التأكد من وجود جلسة صالحة.
+    لا نعيد ضبط السجل إذا كانت اللوحة مهيأة بالفعل.
+  */
   if(!dashboardInitialized){
    setupDashboardHistory();
 
