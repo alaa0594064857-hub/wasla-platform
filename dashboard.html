@@ -84,22 +84,9 @@ overflow-y:auto;transition:.25s
 .welcome-art i{font-size:55px;color:#e8c47e}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .stat{padding:17px;display:flex;align-items:center;gap:12px;min-width:0}
-
-/* تعديل مربعات الإحصائيات لتصبح قابلة للضغط */
-.stat-clickable{
-cursor:pointer;
-transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
-}
-.stat-clickable:hover{
-transform:translateY(-3px);
-border-color:var(--gold);
-box-shadow:0 10px 25px rgba(18,38,64,.11);
-}
-.stat-clickable:focus-visible{
-outline:3px solid var(--gold);
-outline-offset:3px;
-}
-
+.stat-clickable{cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.stat-clickable:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 10px 25px rgba(18,38,64,.11)}
+.stat-clickable:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .stat-icon{width:49px;height:49px;flex-shrink:0;border-radius:15px;display:grid;place-items:center;font-size:19px}
 .ic-blue{background:#e9f1fc;color:#326db5}
 .ic-gold{background:#fbf1dd;color:#c28d31}
@@ -248,36 +235,22 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 </div>
 
 <div class="stats">
-
-<div class="card stat stat-clickable"
-data-page="products" role="button" tabindex="0"
-aria-label="فتح منتجاتي">
+<div class="card stat stat-clickable" data-page="products" role="button" tabindex="0" aria-label="فتح منتجاتي">
 <div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div>
 <div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div>
 </div>
-
-<div class="card stat stat-clickable"
-data-page="inquiries" role="button" tabindex="0"
-aria-label="فتح جميع الاستفسارات">
+<div class="card stat stat-clickable" data-page="inquiries" role="button" tabindex="0" aria-label="فتح جميع الاستفسارات">
 <div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div>
 <div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div>
 </div>
-
-<div class="card stat stat-clickable"
-data-page="inquiries" data-open-only="true"
-role="button" tabindex="0"
-aria-label="فتح الاستفسارات المفتوحة">
+<div class="card stat stat-clickable" data-page="inquiries" data-open-only="true" role="button" tabindex="0" aria-label="فتح الاستفسارات المفتوحة">
 <div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div>
 <div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div>
 </div>
-
-<div class="card stat stat-clickable"
-data-page="company" role="button" tabindex="0"
-aria-label="فتح ملف الشركة">
+<div class="card stat stat-clickable" data-page="company" role="button" tabindex="0" aria-label="فتح ملف الشركة">
 <div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div>
 <div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div>
 </div>
-
 </div>
 
 <div class="grid-two">
@@ -362,6 +335,8 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let currentUser=null,currentProfile=null,currentCompany=null;
 let products=[],inquiries=[],selectedInquiry=null,messagesChannel=null;
+let dashboardInitialized=false;
+let dashboardInitializing=false;
 
 /* رسائل التنبيه */
 function showToast(message){
@@ -444,20 +419,47 @@ document.addEventListener("keydown",function(e){
  }
 });
 
-/* تحميل الحساب */
+/* تحميل الحساب والتحقق من الجلسة */
 async function init(){
- const {data,error}=await db.auth.getSession();
+ if(dashboardInitializing)return;
+ dashboardInitializing=true;
 
- if(error||!data.session){
-  location.href="index.html";
-  return;
+ try{
+  const {data,error}=await db.auth.getSession();
+
+  if(error){
+   console.error("Session check error:",error);
+   showToast("تعذر التحقق من الجلسة. حاول تحديث الصفحة.");
+   return;
+  }
+
+  if(!data?.session){
+   location.replace("index.html");
+   return;
+  }
+
+  currentUser=data.session.user;
+  document.getElementById("email").value=currentUser.email||"";
+
+  if(!dashboardInitialized){
+   dashboardInitialized=true;
+   await loadAccountData();
+  }
+
+ }catch(error){
+  console.error("Dashboard initialization error:",error);
+  showToast("حدث خطأ أثناء تحميل لوحة التحكم.");
+ }finally{
+  dashboardInitializing=false;
  }
-
- currentUser=data.session.user;
- document.getElementById("email").value=currentUser.email||"";
-
- await loadAccountData();
 }
+
+/* التعامل مع استعادة الصفحة من ذاكرة المتصفح */
+window.addEventListener("pageshow",function(event){
+ if(event.persisted){
+  init();
+ }
+});
 
 async function loadAccountData(){
  const {data,error}=await db.from("profiles")
@@ -954,11 +956,24 @@ document.getElementById("globalSearch").addEventListener("keydown",e=>{
 
 /* تسجيل الخروج */
 document.getElementById("logoutBtn").addEventListener("click",async()=>{
- const {error}=await db.auth.signOut();
+ const button=document.getElementById("logoutBtn");
+ button.disabled=true;
 
- if(error)return showToast("تعذر تسجيل الخروج.");
+ try{
+  const {error}=await db.auth.signOut();
 
- location.href="index.html";
+  if(error){
+   button.disabled=false;
+   return showToast("تعذر تسجيل الخروج: "+error.message);
+  }
+
+  location.replace("index.html");
+
+ }catch(error){
+  button.disabled=false;
+  console.error("Sign out error:",error);
+  showToast("حدث خطأ أثناء تسجيل الخروج.");
+ }
 });
 
 /* التحديث المباشر للرسائل */
