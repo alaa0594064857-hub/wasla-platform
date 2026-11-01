@@ -606,40 +606,8 @@
     SUPABASE_ANON_KEY
   );
 
-  // ==========================================
-  // WASLA SESSION CHECK
-  // منع ظهور صفحة تسجيل الدخول للمستخدم المسجل
-  // ==========================================
-
-  let waslaRedirecting = false;
-
-  async function checkExistingSession() {
-    if (waslaRedirecting) return;
-
-    try {
-      const { data, error } = await supabaseClient.auth.getSession();
-
-      if (error) {
-        console.error("Session check error:", error);
-        return;
-      }
-
-      if (data && data.session) {
-        waslaRedirecting = true;
-        window.location.replace("dashboard.html");
-      }
-    } catch (error) {
-      console.error("Session check error:", error);
-    }
-  }
-
-  // فحص الجلسة عند فتح الصفحة
-  checkExistingSession();
-
-  // فحص الجلسة عند الرجوع للصفحة من سجل المتصفح
-  window.addEventListener("pageshow", function () {
-    checkExistingSession();
-  });
+  // لا نحول المستخدم تلقائياً من الصفحة الرئيسية.
+  // هذا يسمح بزر الرجوع بالعودة إلى WASLA بدلاً من الخروج منها.
 
   let currentLanguage = localStorage.getItem("wasla_lang") || "ar";
 
@@ -828,7 +796,7 @@
           account_type: accountType
         });
 
-        window.location.replace("dashboard.html");
+        window.location.href = "dashboard.html";
         return;
       }
 
@@ -864,7 +832,7 @@
 
       await ensureProfile(data.user);
 
-      window.location.replace("dashboard.html");
+      window.location.href = "dashboard.html";
     } catch (error) {
       message.textContent = error.message || "Login failed";
     } finally {
