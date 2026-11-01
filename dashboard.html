@@ -40,8 +40,7 @@ overflow-y:auto;transition:.25s
 .upgrade i{color:var(--gold);font-size:23px}
 .upgrade h3{margin:5px 0;color:#f1d28f;font-size:14px}
 .upgrade p{color:#c3cbd5;font-size:11px;line-height:1.8}
-.avatar{width:39px;height:39px;border-radius:50%;background:linear-gradient(140deg,#f4d99e,#c38b31);display:grid;place-items:center;color:var(--navy);font-weight:900;overflow:hidden;flex-shrink:0}
-.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar{width:39px;height:39px;border-radius:50%;background:linear-gradient(140deg,#f4d99e,#c38b31);display:grid;place-items:center;color:var(--navy);font-weight:900}
 .sidebar-user{display:flex;align-items:center;gap:10px;padding-top:16px;margin-top:15px;border-top:1px solid #ffffff19}
 .sidebar-user strong{font-size:12px;display:block}
 .sidebar-user small{font-size:10px;color:#aebccc}
@@ -51,7 +50,7 @@ overflow-y:auto;transition:.25s
 .search{background:#f5f6f8;border-radius:30px;padding:10px 15px;width:260px;display:flex;gap:10px}
 .search input{border:0;background:none;outline:none;width:100%;font-size:12px}
 .top-icon{width:39px;height:39px;border:0;border-radius:50%;background:#f3f5f7;color:var(--navy)}
-.top-profile{display:flex;align-items:center;gap:10px;cursor:pointer}
+.top-profile{display:flex;align-items:center;gap:10px}
 .top-profile strong{display:block;font-size:12px}
 .top-profile small{font-size:10px;color:var(--muted)}
 .menu-toggle{display:none}
@@ -162,24 +161,6 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 .toast{position:fixed;bottom:22px;left:22px;z-index:100;background:var(--navy);color:white;padding:13px 18px;border-radius:12px;font-size:12px;display:none;max-width:90%}
 .toast.show{display:block}
 .loading{padding:25px;text-align:center;color:var(--muted);font-size:12px}
-
-/* إضافات الملف الشخصي */
-.profile-avatar-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:22px}
-.profile-avatar-large{width:105px;height:105px;border-radius:50%;overflow:hidden;background:#f3e7ce;border:3px solid #e5c47f;display:grid;place-items:center;color:var(--navy);font-size:35px;font-weight:900}
-.profile-avatar-large img{width:100%;height:100%;object-fit:cover}
-.profile-avatar-actions{display:flex;flex-direction:column;gap:8px}
-.profile-hint{font-size:10px;color:var(--muted)}
-.public-cover{background:linear-gradient(115deg,#0a1d38,#234d73);border-radius:18px;padding:28px;color:white;margin-bottom:18px}
-.public-profile-head{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.public-profile-avatar{width:112px;height:112px;border-radius:50%;border:4px solid #f0d08e;background:#f4e8d1;overflow:hidden;display:grid;place-items:center;color:var(--navy);font-size:38px;font-weight:900;flex-shrink:0}
-.public-profile-avatar img{width:100%;height:100%;object-fit:cover}
-.public-profile-info h2{margin:0 0 5px;font-size:22px}
-.public-profile-info p{margin:4px 0;color:#e0e8f1;font-size:12px}
-.public-links{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
-.public-links a{color:#152744;background:#f3d99f;text-decoration:none;border-radius:9px;padding:8px 12px;font-size:11px;font-weight:800}
-.public-bio{white-space:pre-wrap;line-height:1.9;font-size:13px;color:#526174}
-.profile-view-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
-.company-tag button{border:0;background:none;color:#2865a5;font:inherit;padding:0;cursor:pointer}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){
 .sidebar{transform:translateX(100%)}
@@ -230,10 +211,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 <button class="nav-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
 <div class="sidebar-bottom">
 <div class="upgrade"><i class="fa-solid fa-crown"></i><h3>WASLA Business</h3><p>مساحة واحدة لإدارة حضورك التجاري والتواصل مع شركائك.</p></div>
-<div class="sidebar-user">
-<div class="avatar" id="sideAvatar">W</div>
-<div><strong id="sideName">مستخدم WASLA</strong><small id="sideType">حساب تجاري</small></div>
-</div>
+<div class="sidebar-user"><div class="avatar" id="sideAvatar">W</div><div><strong id="sideName">مستخدم WASLA</strong><small id="sideType">حساب تجاري</small></div></div>
 </div>
 </aside>
 
@@ -245,10 +223,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 </div>
 <div class="top-left">
 <button class="top-icon" onclick="goTo('inquiries')"><i class="fa-regular fa-bell"></i></button>
-<div class="top-profile" onclick="goTo('profile')" title="الملف الشخصي">
-<div class="avatar" id="topAvatar">W</div>
-<div class="profile-text"><strong id="topName">مرحباً بك في WASLA</strong><small id="topCompany">مساحة أعمالك</small></div>
-</div>
+<div class="top-profile"><div class="avatar" id="topAvatar">W</div><div class="profile-text"><strong id="topName">مرحباً بك في WASLA</strong><small id="topCompany">مساحة أعمالك</small></div></div>
 </div>
 </header>
 
@@ -322,53 +297,14 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 <form class="chat-compose" id="chatForm"><input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button></form></div></div>
 </section>
 
-<!-- الملف الشخصي الخاص -->
 <section class="page" id="page-profile">
-<div class="page-heading">
-<div><h2>الملف الشخصي</h2><p>إدارة بياناتك وصورتك ومعلومات التواصل التي تظهر للآخرين.</p></div>
-<button class="btn btn-dark" type="button" onclick="openMyPublicProfile()"><i class="fa-solid fa-eye"></i> عرض ملفي العام</button>
-</div>
-
-<div class="card panel">
-<form id="profileForm">
-<div class="profile-avatar-wrap">
-<div class="profile-avatar-large" id="profileAvatarPreview">W</div>
-<div class="profile-avatar-actions">
-<label class="btn btn-light" for="profileImageInput"><i class="fa-solid fa-camera"></i> اختيار صورة شخصية أو شعار</label>
-<input id="profileImageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
-<button class="btn btn-light" type="button" id="removeProfileImage">إزالة الصورة المختارة</button>
-<span class="profile-hint">JPEG أو PNG أو WebP — الحد الأقصى 5MB.</span>
-</div>
-</div>
-
-<div class="form-grid">
-<div class="field full"><label>الاسم الكامل</label><input id="fullName" required maxlength="120"></div>
+<div class="page-heading"><div><h2>الملف الشخصي</h2><p>إدارة بيانات حسابك الشخصي.</p></div></div>
+<div class="card panel"><form id="profileForm"><div class="form-grid">
+<div class="field full"><label>الاسم الكامل</label><input id="fullName" required></div>
 <div class="field full"><label>البريد الإلكتروني</label><input id="email" disabled></div>
 <div class="field full"><label>نوع الحساب</label><input id="accountType" disabled></div>
-<div class="field full"><label>عبارة تعريفية قصيرة</label><input id="profileTagline" maxlength="160" placeholder="مثال: نربط الأعمال بالفرص"></div>
-<div class="field full"><label>نبذة عنك أو عن نشاطك</label><textarea id="profileBio" maxlength="1500" placeholder="اكتب نبذة مختصرة تظهر في ملفك العام..."></textarea></div>
-<div class="field"><label>رابط WhatsApp</label><input id="profileWhatsapp" type="url" placeholder="https://wa.me/905xxxxxxxxx"></div>
-<div class="field"><label>رابط Facebook</label><input id="profileFacebook" type="url" placeholder="https://facebook.com/..."></div>
-<div class="field full"><label>الموقع الإلكتروني</label><input id="profileWebsite" type="url" placeholder="https://example.com"></div>
-</div>
-<div class="form-actions">
-<button class="btn btn-gold" type="submit" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ الملف الشخصي</button>
-</div>
-</form>
-</div>
+</div><div class="form-actions"><button class="btn btn-gold" type="submit">حفظ الملف الشخصي</button></div></form></div>
 </section>
-
-<!-- الملف العام لأي مستخدم -->
-<section class="page" id="page-public-profile">
-<div class="page-heading">
-<div><h2>الملف العام</h2><p>معلومات الحساب ووسائل التواصل والمنتجات المنشورة.</p></div>
-<button class="btn btn-light" onclick="goTo('discover')"><i class="fa-solid fa-arrow-right"></i> العودة للاكتشاف</button>
-</div>
-<div id="publicProfileContent">
-<div class="loading">جارٍ تحميل الملف الشخصي...</div>
-</div>
-</section>
-
 </div>
 </main>
 </div>
@@ -401,9 +337,6 @@ let currentUser=null,currentProfile=null,currentCompany=null;
 let products=[],inquiries=[],selectedInquiry=null,messagesChannel=null;
 let dashboardInitialized=false;
 let dashboardInitializing=false;
-let selectedProfileImage=null;
-let removeExistingProfileImage=false;
-let publicProfileId=null;
 
 /* رسائل التنبيه */
 function showToast(message){
@@ -438,51 +371,6 @@ function statusClass(s){
  return "pill-gray";
 }
 
-/* أدوات الملف الشخصي */
-function safeProfileUrl(value){
- const raw=String(value||"").trim();
- if(!raw)return "";
- try{
-  const url=new URL(raw);
-  if(url.protocol!=="https:"&&url.protocol!=="http:")return "";
-  return url.href;
- }catch(error){
-  return "";
- }
-}
-
-function profileInitial(name){
- return String(name||"W").trim().charAt(0)||"W";
-}
-
-function avatarMarkup(profile){
- const name=profile?.full_name||"W";
- const avatar=profile?.avatar_url;
- return avatar
-  ?`<img src="${esc(avatar)}" alt="${esc(name)}" onerror="this.style.display='none'">`
-  :esc(profileInitial(name));
-}
-
-function updateAvatarElements(){
- if(!currentProfile)return;
- const markup=avatarMarkup(currentProfile);
- document.getElementById("topAvatar").innerHTML=markup;
- document.getElementById("sideAvatar").innerHTML=markup;
- document.getElementById("profileAvatarPreview").innerHTML=markup;
-}
-
-function renderProfileForm(){
- if(!currentProfile)return;
- document.getElementById("fullName").value=currentProfile.full_name||"";
- document.getElementById("accountType").value=accountLabel(currentProfile.account_type);
- document.getElementById("profileTagline").value=currentProfile.tagline||"";
- document.getElementById("profileBio").value=currentProfile.bio||"";
- document.getElementById("profileWhatsapp").value=currentProfile.whatsapp_url||"";
- document.getElementById("profileFacebook").value=currentProfile.facebook_url||"";
- document.getElementById("profileWebsite").value=currentProfile.website_url||"";
- updateAvatarElements();
-}
-
 /* =========================================
    نظام التنقل الداخلي وسجل الرجوع
    ========================================= */
@@ -491,6 +379,7 @@ let currentDashboardPage="overview";
 let currentOpenOnly=false;
 let handlingPopState=false;
 
+/* عرض القسم دون إضافة سجل جديد */
 function showDashboardPage(page,openOnly=false){
  const target=document.getElementById("page-"+page);
 
@@ -523,11 +412,10 @@ function showDashboardPage(page,openOnly=false){
   renderInquiries(currentOpenOnly);
  }
 
- if(page==="profile")renderProfileForm();
-
  return true;
 }
 
+/* الانتقال إلى قسم جديد مع حفظه في سجل المتصفح */
 function goTo(page,openOnly=false){
  const target=document.getElementById("page-"+page);
 
@@ -559,12 +447,14 @@ function goTo(page,openOnly=false){
  showDashboardPage(page,openOnly);
 }
 
+/* تجهيز سجل البداية عند فتح لوحة التحكم */
 function setupDashboardHistory(){
  const state=history.state;
 
  if(state&&state.waslaDashboard===true){
   const page=state.page||"overview";
   const openOnly=Boolean(state.openOnly);
+
   showDashboardPage(page,openOnly);
   return;
  }
@@ -578,20 +468,29 @@ function setupDashboardHistory(){
  try{
   history.replaceState(initialState,"",location.href);
  }catch(error){
-  console.warn("تعذر تجهيز سجل التنقل:",error);
+  console.warn("تعذر تجهيز سجل لوحة التحكم:",error);
  }
 
  showDashboardPage("overview",false);
 }
 
+/* التعامل مع زر الرجوع وإيماءة الرجوع في الهاتف */
 window.addEventListener("popstate",function(event){
  const state=event.state;
 
  if(state&&state.waslaDashboard===true){
-  showDashboardPage(state.page||"overview",Boolean(state.openOnly));
+  showDashboardPage(
+   state.page||"overview",
+   Boolean(state.openOnly)
+  );
   return;
  }
 
+ /*
+   إذا وصل المستخدم إلى أول سجل في لوحة WASLA
+   نحافظ عليه داخل اللوحة ولا نسمح بالرجوع إلى
+   صفحة خارجية أو صفحة تسجيل الدخول.
+ */
  const safeState={
   waslaDashboard:true,
   page:currentDashboardPage||"overview",
@@ -606,16 +505,20 @@ window.addEventListener("popstate",function(event){
  }
 });
 
+/* الضغط على مربعات الإحصائيات والقائمة */
 document.addEventListener("click",function(e){
  const button=e.target.closest("[data-page]");
+
  if(button){
   e.preventDefault();
   goTo(button.dataset.page,button.dataset.openOnly==="true");
  }
 });
 
+/* دعم الضغط بلوحة المفاتيح على مربعات الإحصائيات */
 document.addEventListener("keydown",function(e){
  const card=e.target.closest(".stat-clickable");
+
  if(card&&(e.key==="Enter"||e.key===" ")){
   e.preventDefault();
   goTo(card.dataset.page,card.dataset.openOnly==="true");
@@ -642,10 +545,16 @@ async function init(){
   }
 
   currentUser=data.session.user;
+
   document.getElementById("email").value=currentUser.email||"";
 
+  /*
+    نجهز سجل التنقل بعد التأكد من وجود جلسة صالحة.
+    لا نعيد ضبط السجل إذا كانت اللوحة مهيأة بالفعل.
+  */
   if(!dashboardInitialized){
    setupDashboardHistory();
+
    dashboardInitialized=true;
    await loadAccountData();
   }
@@ -658,13 +567,16 @@ async function init(){
  }
 }
 
+/* التعامل مع استعادة الصفحة من ذاكرة المتصفح */
 window.addEventListener("pageshow",function(event){
- if(event.persisted)init();
+ if(event.persisted){
+  init();
+ }
 });
 
 async function loadAccountData(){
  const {data,error}=await db.from("profiles")
-  .select("id,full_name,account_type,avatar_url,bio,tagline,whatsapp_url,facebook_url,website_url")
+  .select("id,full_name,account_type")
   .eq("id",currentUser.id)
   .maybeSingle();
 
@@ -681,14 +593,17 @@ async function loadAccountData(){
  currentProfile=data;
 
  const name=data.full_name||"مستخدم WASLA";
+ const initial=name.trim().charAt(0)||"W";
  const type=accountLabel(data.account_type);
 
  document.getElementById("topName").textContent="مرحباً، "+name;
  document.getElementById("sideName").textContent=name;
  document.getElementById("topCompany").textContent=type;
  document.getElementById("sideType").textContent=type;
-
- renderProfileForm();
+ document.getElementById("topAvatar").textContent=initial;
+ document.getElementById("sideAvatar").textContent=initial;
+ document.getElementById("fullName").value=data.full_name||"";
+ document.getElementById("accountType").value=type;
 
  await Promise.all([
   loadCompany(),
@@ -698,12 +613,6 @@ async function loadAccountData(){
 
  renderOverview();
  setupRealtime();
-
- /* فتح ملف عام عند وجود ?profile= في الرابط */
- const requestedProfile=new URLSearchParams(location.search).get("profile");
- if(requestedProfile){
-  openPublicProfile(requestedProfile);
- }
 }
 
 /* بيانات الشركة */
@@ -740,6 +649,7 @@ document.getElementById("companyForm").addEventListener("submit",async e=>{
  if(result.error)return showToast("تعذر حفظ الشركة: "+result.error.message);
 
  showToast("تم حفظ بيانات الشركة.");
+
  await loadCompany();
  renderOverview();
 });
@@ -860,6 +770,7 @@ async function deleteProduct(id){
  if(error)return showToast("تعذر حذف المنتج: "+error.message);
 
  showToast("تم حذف المنتج.");
+
  await loadMyProducts();
  renderOverview();
 }
@@ -867,6 +778,7 @@ async function deleteProduct(id){
 /* اكتشاف المنتجات */
 async function loadDiscover(){
  const container=document.getElementById("discoverProducts");
+
  container.innerHTML='<div class="loading">جارٍ البحث...</div>';
 
  const search=document.getElementById("discoverSearch").value.trim();
@@ -905,16 +817,10 @@ async function loadDiscover(){
  <article class="card product-card">
  <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
  <div class="product-info">
- <div class="company-tag">
- <button type="button" onclick="openPublicProfile('${p.company_id}')">${esc(p.companies?.name||"عرض ملف الشركة")}</button>
- · ${esc(p.companies?.country||"")}
- </div>
+ <div class="company-tag">${esc(p.companies?.name||"شركة على WASLA")} · ${esc(p.companies?.country||"")}</div>
  <h4>${esc(p.name)}</h4>
  <p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p>
- <div class="product-actions">
  <button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>
- <button class="btn btn-light" onclick="openPublicProfile('${p.company_id}')">عرض الملف</button>
- </div>
  </div></article>`).join("");
 }
 
@@ -935,9 +841,11 @@ async function loadMyInquiries(){
  renderInquiries();
 }
 
+/* عرض جميع الاستفسارات أو المفتوحة فقط */
 function renderInquiries(openOnly=false){
  const body=document.getElementById("inquiriesTable");
  const description=document.getElementById("inquiriesDescription");
+
  if(!body)return;
 
  const displayedInquiries=openOnly
@@ -967,6 +875,7 @@ function renderInquiries(openOnly=false){
  </tr>`).join("");
 }
 
+/* تحديث الإحصائيات والصفحة الرئيسية */
 function renderOverview(){
  document.getElementById("statProducts").textContent=products.length;
  document.getElementById("statInquiries").textContent=inquiries.length;
@@ -1056,6 +965,7 @@ async function loadInbox(){
 
 async function openChat(id){
  selectedInquiry=id;
+
  goTo("inbox");
  await loadInbox();
 
@@ -1097,10 +1007,12 @@ async function loadMessages(id){
 
 document.getElementById("chatForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  if(!selectedInquiry)return;
 
  const input=document.getElementById("chatInput");
  const message=input.value.trim();
+
  if(!message)return;
 
  const {error}=await db.from("inquiry_messages").insert({
@@ -1115,276 +1027,29 @@ document.getElementById("chatForm").addEventListener("submit",async e=>{
  await loadMessages(selectedInquiry);
 });
 
-/* =========================================
-   رفع صورة الملف الشخصي
-   ========================================= */
-
-document.getElementById("profileImageInput").addEventListener("change",function(e){
- const file=e.target.files?.[0];
- if(!file)return;
-
- const allowed=["image/jpeg","image/png","image/webp"];
- if(!allowed.includes(file.type)){
-  showToast("نوع الصورة غير مدعوم. استخدم JPEG أو PNG أو WebP.");
-  this.value="";
-  return;
- }
-
- if(file.size>5*1024*1024){
-  showToast("حجم الصورة أكبر من 5MB.");
-  this.value="";
-  return;
- }
-
- selectedProfileImage=file;
- removeExistingProfileImage=false;
-
- const reader=new FileReader();
- reader.onload=event=>{
-  document.getElementById("profileAvatarPreview").innerHTML=
-   `<img src="${event.target.result}" alt="معاينة الصورة">`;
- };
- reader.readAsDataURL(file);
-});
-
-document.getElementById("removeProfileImage").addEventListener("click",function(){
- selectedProfileImage=null;
- removeExistingProfileImage=true;
- document.getElementById("profileImageInput").value="";
- document.getElementById("profileAvatarPreview").textContent=
-  profileInitial(document.getElementById("fullName").value);
-});
-
-async function uploadProfileImage(file){
- const extension=({
-  "image/jpeg":"jpg",
-  "image/png":"png",
-  "image/webp":"webp"
- })[file.type];
-
- if(!extension)throw new Error("نوع الصورة غير مدعوم.");
-
- const path=`${currentUser.id}/avatar-${Date.now()}.${extension}`;
-
- const {data,error}=await db.storage
-  .from("profile-media")
-  .upload(path,file,{
-   cacheControl:"3600",
-   upsert:false,
-   contentType:file.type
-  });
-
- if(error)throw error;
-
- const {data:publicData}=db.storage
-  .from("profile-media")
-  .getPublicUrl(data.path);
-
- if(!publicData?.publicUrl){
-  throw new Error("تعذر إنشاء رابط الصورة.");
- }
-
- return publicData.publicUrl;
-}
-
-/* حفظ الملف الشخصي */
+/* الملف الشخصي */
 document.getElementById("profileForm").addEventListener("submit",async e=>{
  e.preventDefault();
 
- const button=document.getElementById("saveProfileBtn");
  const full_name=document.getElementById("fullName").value.trim();
- const tagline=document.getElementById("profileTagline").value.trim();
- const bio=document.getElementById("profileBio").value.trim();
-
- const whatsappInput=document.getElementById("profileWhatsapp").value.trim();
- const facebookInput=document.getElementById("profileFacebook").value.trim();
- const websiteInput=document.getElementById("profileWebsite").value.trim();
 
  if(!full_name)return showToast("يرجى إدخال الاسم.");
 
- const whatsapp_url=whatsappInput?safeProfileUrl(whatsappInput):null;
- const facebook_url=facebookInput?safeProfileUrl(facebookInput):null;
- const website_url=websiteInput?safeProfileUrl(websiteInput):null;
+ const {error}=await db.from("profiles")
+  .update({full_name})
+  .eq("id",currentUser.id);
 
- if(whatsappInput&&!whatsapp_url)return showToast("رابط WhatsApp غير صالح. استخدم رابطاً يبدأ بـ https:// أو http://");
- if(facebookInput&&!facebook_url)return showToast("رابط Facebook غير صالح.");
- if(websiteInput&&!website_url)return showToast("رابط الموقع الإلكتروني غير صالح.");
+ if(error)return showToast("تعذر تحديث الملف: "+error.message);
 
- button.disabled=true;
- button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الحفظ...';
+ currentProfile.full_name=full_name;
 
- try{
-  let avatar_url=currentProfile?.avatar_url||null;
+ document.getElementById("topName").textContent="مرحباً، "+full_name;
+ document.getElementById("sideName").textContent=full_name;
+ document.getElementById("topAvatar").textContent=full_name.charAt(0);
+ document.getElementById("sideAvatar").textContent=full_name.charAt(0);
 
-  if(selectedProfileImage){
-   avatar_url=await uploadProfileImage(selectedProfileImage);
-  }else if(removeExistingProfileImage){
-   avatar_url=null;
-  }
-
-  const payload={
-   full_name,
-   tagline,
-   bio,
-   whatsapp_url,
-   facebook_url,
-   website_url,
-   avatar_url
-  };
-
-  const {error}=await db.from("profiles")
-   .update(payload)
-   .eq("id",currentUser.id);
-
-  if(error)throw error;
-
-  currentProfile={...currentProfile,...payload};
-
-  selectedProfileImage=null;
-  removeExistingProfileImage=false;
-  document.getElementById("profileImageInput").value="";
-
-  document.getElementById("topName").textContent="مرحباً، "+full_name;
-  document.getElementById("sideName").textContent=full_name;
-
-  updateAvatarElements();
-  showToast("تم حفظ الملف الشخصي بنجاح.");
-
- }catch(error){
-  console.error("Profile save error:",error);
-  showToast("تعذر حفظ الملف الشخصي: "+(error.message||"خطأ غير معروف"));
- }finally{
-  button.disabled=false;
-  button.innerHTML='<i class="fa-solid fa-floppy-disk"></i> حفظ الملف الشخصي';
- }
+ showToast("تم تحديث الملف الشخصي.");
 });
-
-/* =========================================
-   الملف الشخصي العام
-   ========================================= */
-
-function openMyPublicProfile(){
- if(!currentUser)return;
- openPublicProfile(currentUser.id);
-}
-
-async function openPublicProfile(profileId){
- if(!profileId){
-  showToast("معرّف الملف الشخصي غير صالح.");
-  return;
- }
-
- publicProfileId=profileId;
- goTo("public-profile");
-
- const container=document.getElementById("publicProfileContent");
- container.innerHTML='<div class="loading">جارٍ تحميل الملف الشخصي...</div>';
-
- try{
-  const {data:profile,error:profileError}=await db.from("profiles")
-   .select("id,full_name,account_type,avatar_url,bio,tagline,whatsapp_url,facebook_url,website_url")
-   .eq("id",profileId)
-   .maybeSingle();
-
-  if(profileError)throw profileError;
-
-  if(!profile){
-   container.innerHTML='<div class="empty card"><i class="fa-solid fa-user-slash"></i><p>لم يتم العثور على هذا الملف الشخصي.</p></div>';
-   return;
-  }
-
-  const {data:company,error:companyError}=await db.from("companies")
-   .select("owner_id,name,country")
-   .eq("owner_id",profileId)
-   .maybeSingle();
-
-  if(companyError)console.warn("Company profile load:",companyError);
-
-  /*
-    نعرض المنتجات المنشورة فقط في الملف العام.
-    لا نغيّر طريقة تحميل منتجات صاحب الحساب نفسه.
-  */
-  const {data:publicProducts,error:productsError}=await db.from("products")
-   .select("id,company_id,name,description,category,image_url,status,created_at")
-   .eq("company_id",profileId)
-   .eq("status","published")
-   .order("created_at",{ascending:false})
-   .limit(60);
-
-  if(productsError)console.warn("Public products load:",productsError);
-
-  const isOwner=String(profileId)===String(currentUser.id);
-  const displayName=profile.full_name||company?.name||"مستخدم WASLA";
-  const tagline=profile.tagline||"";
-  const bio=profile.bio||"لم تتم إضافة نبذة تعريفية بعد.";
-
-  const whatsapp=safeProfileUrl(profile.whatsapp_url);
-  const facebook=safeProfileUrl(profile.facebook_url);
-  const website=safeProfileUrl(profile.website_url);
-
-  const links=[];
-  if(whatsapp)links.push(`<a href="${esc(whatsapp)}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`);
-  if(facebook)links.push(`<a href="${esc(facebook)}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i> Facebook</a>`);
-  if(website)links.push(`<a href="${esc(website)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-globe"></i> الموقع الإلكتروني</a>`);
-
-  const productList=publicProducts||[];
-
-  container.innerHTML=`
-   <div class="public-cover">
-    <div class="public-profile-head">
-     <div class="public-profile-avatar">
-      ${profile.avatar_url
-       ?`<img src="${esc(profile.avatar_url)}" alt="${esc(displayName)}" onerror="this.style.display='none'">`
-       :esc(profileInitial(displayName))}
-     </div>
-     <div class="public-profile-info">
-      <h2>${esc(displayName)}</h2>
-      <p>${esc(tagline||accountLabel(profile.account_type))}</p>
-      <p>${esc(company?.name||accountLabel(profile.account_type))}${company?.country?" · "+esc(company.country):""}</p>
-      <div class="public-links">${links.join("")}</div>
-     </div>
-    </div>
-    ${isOwner?'<div class="profile-view-actions"><button class="btn btn-gold" onclick="goTo(\\'profile\\')"><i class="fa-solid fa-pen"></i> تعديل الملف الشخصي</button></div>':""}
-   </div>
-
-   <div class="card panel" style="margin-bottom:18px">
-    <div class="panel-head"><h3>نبذة تعريفية</h3></div>
-    <div class="public-bio">${esc(bio)}</div>
-   </div>
-
-   <div class="card panel">
-    <div class="panel-head">
-     <h3>المنتجات المنشورة</h3>
-     <span class="pill pill-gray">${productList.length} منتج</span>
-    </div>
-    <div class="product-grid" id="publicProductsGrid">
-     ${productList.length
-      ?productList.map(p=>`
-       <article class="card product-card">
-        <div class="product-image">
-         ${p.image_url
-          ?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`
-          :'<i class="fa-solid fa-box"></i>'}
-        </div>
-        <div class="product-info">
-         <div class="company-tag">${esc(p.category||"عام")}</div>
-         <h4>${esc(p.name)}</h4>
-         <p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p>
-         ${isOwner
-          ?'<span class="pill pill-green">منتجك</span>'
-          :`<button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>`}
-        </div>
-       </article>`).join("")
-      :'<div class="empty"><i class="fa-solid fa-box-open"></i><p>لا توجد منتجات منشورة لهذا الحساب حالياً.</p></div>'}
-    </div>
-   </div>
-  `;
-
- }catch(error){
-  console.error("Public profile error:",error);
-  container.innerHTML='<div class="empty card"><i class="fa-solid fa-triangle-exclamation"></i><p>تعذر تحميل الملف العام: '+esc(error.message)+'</p></div>';
- }
-}
 
 /* البحث والقائمة الجانبية */
 document.getElementById("menuToggle").addEventListener("click",()=>{
