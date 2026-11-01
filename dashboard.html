@@ -371,16 +371,30 @@ function statusClass(s){
  return "pill-gray";
 }
 
-/* التنقل بين أقسام اللوحة */
-function goTo(page,openOnly=false){
+/* =========================================
+   نظام التنقل الداخلي وسجل الرجوع
+   ========================================= */
+
+let currentDashboardPage="overview";
+let currentOpenOnly=false;
+let handlingPopState=false;
+
+/* عرض القسم دون إضافة سجل جديد */
+function showDashboardPage(page,openOnly=false){
  const target=document.getElementById("page-"+page);
 
  if(!target){
   showToast("القسم المطلوب غير موجود.");
-  return;
+  return false;
  }
 
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ currentDashboardPage=page;
+ currentOpenOnly=Boolean(openOnly);
+
+ document.querySelectorAll(".page").forEach(p=>{
+  p.classList.remove("active");
+ });
+
  target.classList.add("active");
 
  document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{
@@ -395,9 +409,101 @@ function goTo(page,openOnly=false){
  if(page==="inbox")loadInbox();
 
  if(page==="inquiries"){
-  renderInquiries(openOnly);
+  renderInquiries(currentOpenOnly);
  }
+
+ return true;
 }
+
+/* الانتقال إلى قسم جديد مع حفظه في سجل المتصفح */
+function goTo(page,openOnly=false){
+ const target=document.getElementById("page-"+page);
+
+ if(!target){
+  showToast("القسم المطلوب غير موجود.");
+  return;
+ }
+
+ openOnly=Boolean(openOnly);
+
+ const samePage=
+  currentDashboardPage===page &&
+  currentOpenOnly===openOnly;
+
+ if(!samePage){
+  const state={
+   waslaDashboard:true,
+   page:page,
+   openOnly:openOnly
+  };
+
+  try{
+   history.pushState(state,"",location.href);
+  }catch(error){
+   console.warn("تعذر حفظ سجل التنقل:",error);
+  }
+ }
+
+ showDashboardPage(page,openOnly);
+}
+
+/* تجهيز سجل البداية عند فتح لوحة التحكم */
+function setupDashboardHistory(){
+ const state=history.state;
+
+ if(state&&state.waslaDashboard===true){
+  const page=state.page||"overview";
+  const openOnly=Boolean(state.openOnly);
+
+  showDashboardPage(page,openOnly);
+  return;
+ }
+
+ const initialState={
+  waslaDashboard:true,
+  page:"overview",
+  openOnly:false
+ };
+
+ try{
+  history.replaceState(initialState,"",location.href);
+ }catch(error){
+  console.warn("تعذر تجهيز سجل لوحة التحكم:",error);
+ }
+
+ showDashboardPage("overview",false);
+}
+
+/* التعامل مع زر الرجوع وإيماءة الرجوع في الهاتف */
+window.addEventListener("popstate",function(event){
+ const state=event.state;
+
+ if(state&&state.waslaDashboard===true){
+  showDashboardPage(
+   state.page||"overview",
+   Boolean(state.openOnly)
+  );
+  return;
+ }
+
+ /*
+   إذا وصل المستخدم إلى أول سجل في لوحة WASLA
+   نحافظ عليه داخل اللوحة ولا نسمح بالرجوع إلى
+   صفحة خارجية أو صفحة تسجيل الدخول.
+ */
+ const safeState={
+  waslaDashboard:true,
+  page:currentDashboardPage||"overview",
+  openOnly:Boolean(currentOpenOnly)
+ };
+
+ try{
+  history.pushState(safeState,"",location.href);
+ }catch(error){
+  console.warn("تعذر تثبيت سجل لوحة التحكم:",error);
+  showDashboardPage("overview",false);
+ }
+});
 
 /* الضغط على مربعات الإحصائيات والقائمة */
 document.addEventListener("click",function(e){
@@ -439,9 +545,16 @@ async function init(){
   }
 
   currentUser=data.session.user;
+
   document.getElementById("email").value=currentUser.email||"";
 
+  /*
+    نجهز سجل التنقل بعد التأكد من وجود جلسة صالحة.
+    لا نعيد ضبط السجل إذا كانت اللوحة مهيأة بالفعل.
+  */
   if(!dashboardInitialized){
+   setupDashboardHistory();
+
    dashboardInitialized=true;
    await loadAccountData();
   }
