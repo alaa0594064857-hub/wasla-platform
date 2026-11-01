@@ -1,2046 +1,454 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WASLA | لوحة التحكم</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --primary: #175cd3;
-      --primary-dark: #1249a8;
-      --primary-light: #eaf2ff;
-      --bg: #f5f7fb;
-      --surface: #ffffff;
-      --text: #172b4d;
-      --muted: #718096;
-      --border: #e6ebf2;
-      --success: #138a55;
-      --danger: #d92d20;
-      --warning: #b7791f;
-      --shadow: 0 8px 28px rgba(20, 45, 90, .06);
-      --radius: 16px;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Cairo", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    button, input, textarea, select {
-      font-family: inherit;
-    }
-
-    button { cursor: pointer; }
-
-    .app {
-      min-height: 100vh;
-      display: flex;
-    }
-
-    .sidebar {
-      width: 250px;
-      background: #10284f;
-      color: #fff;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      padding: 25px 17px;
-      display: flex;
-      flex-direction: column;
-      z-index: 100;
-      overflow-y: auto;
-    }
-
-    .brand {
-      font-size: 27px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      padding: 0 12px 27px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
-    }
-
-    .brand span { color: #68a5ff; }
-
-    .side-label {
-      color: #8fa6c8;
-      font-size: 11px;
-      margin: 25px 12px 10px;
-    }
-
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .nav button {
-      border: 0;
-      background: transparent;
-      color: #d3deef;
-      text-align: right;
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: .2s;
-    }
-
-    .nav button:hover,
-    .nav button.active {
-      background: rgba(74, 137, 230, .22);
-      color: white;
-    }
-
-    .nav button.active {
-      border-right: 3px solid #66a4ff;
-    }
-
-    .nav-icon {
-      width: 22px;
-      text-align: center;
-      font-size: 17px;
-    }
-
-    .sidebar-bottom {
-      margin-top: auto;
-      padding-top: 25px;
-    }
-
-    .main {
-      margin-right: 250px;
-      width: calc(100% - 250px);
-      min-height: 100vh;
-    }
-
-    .topbar {
-      height: 76px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 34px;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-
-    .topbar-title {
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .user-avatar {
-      width: 39px;
-      height: 39px;
-      border-radius: 50%;
-      background: var(--primary-light);
-      color: var(--primary);
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-    }
-
-    .content {
-      padding: 30px 34px;
-      max-width: 1500px;
-      margin: auto;
-    }
-
-    .page { display: none; }
-    .page.active { display: block; }
-
-    .page-heading {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 25px;
-      flex-wrap: wrap;
-    }
-
-    .page-heading h1 {
-      font-size: 24px;
-      margin: 0 0 5px;
-    }
-
-    .page-heading p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 17px;
-      margin-bottom: 25px;
-    }
-
-    .stat-card, .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .stat-card { padding: 21px; }
-
-    .stat-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 17px;
-    }
-
-    .stat-icon {
-      width: 43px;
-      height: 43px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: var(--primary-light);
-      font-size: 21px;
-    }
-
-    .stat-number {
-      font-size: 27px;
-      font-weight: 800;
-      margin-bottom: 3px;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .card { padding: 23px; margin-bottom: 22px; }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 19px;
-      flex-wrap: wrap;
-    }
-
-    .card-header h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 9px;
-      padding: 10px 17px;
-      font-size: 13px;
-      font-weight: 700;
-      transition: .2s;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover { background: var(--primary-dark); }
-
-    .btn-light {
-      background: var(--primary-light);
-      color: var(--primary);
-    }
-
-    .btn-danger {
-      background: #fff0ee;
-      color: var(--danger);
-    }
-
-    .btn-outline {
-      background: white;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .btn:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 17px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .field.full { grid-column: 1 / -1; }
-
-    .field label {
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .field input,
-    .field textarea,
-    .field select {
-      width: 100%;
-      padding: 12px 13px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      outline: none;
-      background: #fff;
-      color: var(--text);
-      font-size: 13px;
-    }
-
-    .field input:focus,
-    .field textarea:focus,
-    .field select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(23,92,211,.08);
-    }
-
-    .field textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
-
-    th, td {
-      padding: 13px 12px;
-      text-align: right;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    th {
-      color: var(--muted);
-      font-weight: 700;
-      background: #fafbfd;
-    }
-
-    td { vertical-align: middle; }
-
-    .badge {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 30px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .badge-success { background: #e8f7ef; color: var(--success); }
-    .badge-warning { background: #fff6df; color: var(--warning); }
-    .badge-danger { background: #fff0ee; color: var(--danger); }
-    .badge-neutral { background: #edf1f6; color: #52647d; }
-
-    .empty {
-      padding: 35px 15px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .empty-icon {
-      font-size: 35px;
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .product-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .product-image {
-      height: 175px;
-      background: #eef3fb;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      color: #91a5c1;
-      font-size: 35px;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .product-body { padding: 17px; }
-
-    .product-body h3 {
-      margin: 0 0 7px;
-      font-size: 15px;
-    }
-
-    .product-body p {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.8;
-      min-height: 42px;
-      margin: 0 0 13px;
-    }
-
-    .product-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 13px;
-    }
-
-    .product-actions .btn {
-      flex: 1;
-      padding: 8px;
-      font-size: 11px;
-    }
-
-    .inbox-layout {
-      display: grid;
-      grid-template-columns: 330px minmax(0, 1fr);
-      min-height: 570px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .inbox-list {
-      border-left: 1px solid var(--border);
-      overflow-y: auto;
-      max-height: 650px;
-    }
-
-    .inbox-list h3 {
-      padding: 17px;
-      margin: 0;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .inquiry-item {
-      padding: 15px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: .2s;
-    }
-
-    .inquiry-item:hover,
-    .inquiry-item.selected {
-      background: var(--primary-light);
-    }
-
-    .inquiry-item strong {
-      font-size: 13px;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .inquiry-item small {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .chat-area {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .chat-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .chat-messages {
-      padding: 20px;
-      flex: 1;
-      overflow-y: auto;
-      max-height: 450px;
-      background: #fafbfd;
-    }
-
-    .message {
-      max-width: 75%;
-      padding: 11px 14px;
-      border-radius: 13px;
-      margin-bottom: 13px;
-      font-size: 13px;
-      line-height: 1.8;
-      overflow-wrap: anywhere;
-    }
-
-    .message.mine {
-      background: var(--primary);
-      color: white;
-      margin-right: auto;
-      border-bottom-left-radius: 3px;
-    }
-
-    .message.theirs {
-      background: white;
-      border: 1px solid var(--border);
-      margin-left: auto;
-      border-bottom-right-radius: 3px;
-    }
-
-    .message small {
-      display: block;
-      font-size: 10px;
-      opacity: .7;
-      margin-top: 5px;
-    }
-
-    .chat-form {
-      display: flex;
-      gap: 10px;
-      padding: 15px;
-      border-top: 1px solid var(--border);
-    }
-
-    .chat-form input {
-      flex: 1;
-      min-width: 0;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 11px;
-      outline: none;
-    }
-
-    .chat-placeholder {
-      display: grid;
-      place-items: center;
-      text-align: center;
-      color: var(--muted);
-      height: 100%;
-      min-height: 300px;
-      padding: 20px;
-    }
-
-    .notice {
-      padding: 14px 16px;
-      border-radius: 10px;
-      background: #eef5ff;
-      color: #28518d;
-      font-size: 12px;
-      line-height: 1.8;
-      margin-bottom: 20px;
-    }
-
-    .loading {
-      padding: 30px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(8, 22, 45, .55);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
-    }
-
-    .modal-backdrop.show { display: flex; }
-
-    .modal {
-      background: white;
-      border-radius: 17px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 25px;
-    }
-
-    .modal h2 {
-      font-size: 19px;
-      margin: 0 0 20px;
-    }
-
-    .modal-close {
-      float: left;
-      border: 0;
-      background: #f1f3f7;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      font-size: 18px;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 25px;
-      left: 25px;
-      z-index: 500;
-      background: #152c4e;
-      color: white;
-      padding: 13px 19px;
-      border-radius: 10px;
-      box-shadow: var(--shadow);
-      font-size: 13px;
-      display: none;
-      max-width: calc(100% - 50px);
-    }
-
-    .toast.show { display: block; }
-
-    .mobile-menu {
-      display: none;
-      border: 0;
-      background: transparent;
-      font-size: 23px;
-      color: var(--text);
-    }
-
-    @media (max-width: 1100px) {
-      .grid { grid-template-columns: repeat(2, 1fr); }
-      .product-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 800px) {
-      .sidebar {
-        transform: translateX(100%);
-        transition: .25s;
-      }
-
-      .sidebar.open { transform: translateX(0); }
-
-      .main {
-        margin-right: 0;
-        width: 100%;
-      }
-
-      .topbar { padding: 0 17px; }
-      .content { padding: 22px 15px; }
-      .mobile-menu { display: block; }
-      .inbox-layout { grid-template-columns: 1fr; }
-      .inbox-list {
-        border-left: 0;
-        border-bottom: 1px solid var(--border);
-        max-height: 230px;
-      }
-      .chat-area { min-height: 400px; }
-    }
-
-    @media (max-width: 520px) {
-      .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .stat-card { padding: 14px; }
-      .stat-number { font-size: 22px; }
-      .form-grid, .product-grid { grid-template-columns: 1fr; }
-      .page-heading h1 { font-size: 20px; }
-      .card { padding: 16px; }
-      .topbar-title { font-size: 14px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WASLA | لوحة التحكم</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+:root {
+  --navy:#0b1d38;
+  --navy2:#173653;
+  --gold:#d9ad58;
+  --cream:#f7f4ed;
+  --white:#fff;
+  --text:#172b46;
+  --muted:#7d8998;
+  --border:#e9e5dc;
+  --green:#16865c;
+  --shadow:0 8px 30px rgba(18,38,64,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Cairo',sans-serif;background:var(--cream);color:var(--text)}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+
+/* القائمة الجانبية */
+.sidebar{
+ width:250px;background:linear-gradient(180deg,#091a32,#132f50);
+ color:white;position:fixed;right:0;top:0;bottom:0;
+ z-index:20;padding:23px 16px;display:flex;flex-direction:column;
+ overflow-y:auto;transition:.25s
+}
+.brand{text-align:center;padding:10px 0 25px;border-bottom:1px solid #ffffff19;margin-bottom:20px}
+.brand-mark{
+ width:65px;height:65px;border:2px solid var(--gold);
+ border-radius:19px;display:grid;place-items:center;margin:auto auto 8px;
+ color:var(--gold);font-size:37px;font-weight:900
+}
+.brand h1{margin:0;font-size:27px;letter-spacing:2px;color:#f2d18e}
+.brand p{margin:0;color:#c3cbd5;font-size:10px;letter-spacing:1px}
+.nav-label{color:#8294aa;font-size:11px;padding:0 13px;margin:13px 0 8px}
+.nav-btn{
+ border:0;background:transparent;color:#d5dce5;width:100%;
+ display:flex;align-items:center;gap:13px;padding:12px 14px;
+ border-radius:12px;text-align:right;font-size:13px;font-weight:700;
+ margin-bottom:5px;transition:.2s
+}
+.nav-btn i{width:20px;text-align:center}
+.nav-btn:hover{background:#ffffff12;color:white}
+.nav-btn.active{color:#152744;background:linear-gradient(100deg,#f4d99e,#d8aa51)}
+.sidebar-bottom{margin-top:auto;padding-top:20px}
+.upgrade{border:1px solid #d9ad5870;border-radius:16px;padding:15px;text-align:center}
+.upgrade i{color:var(--gold);font-size:23px}
+.upgrade h3{margin:5px 0;color:#f1d28f;font-size:14px}
+.upgrade p{color:#c3cbd5;font-size:11px;line-height:1.8}
+.avatar{
+ width:39px;height:39px;border-radius:50%;
+ background:linear-gradient(140deg,#f4d99e,#c38b31);
+ display:grid;place-items:center;color:var(--navy);font-weight:900
+}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding-top:16px;margin-top:15px;border-top:1px solid #ffffff19}
+.sidebar-user strong{font-size:12px;display:block}
+.sidebar-user small{font-size:10px;color:#aebccc}
+
+/* المنطقة الرئيسية */
+.main{margin-right:250px;width:calc(100% - 250px);min-width:0}
+.topbar{
+ height:76px;background:white;border-bottom:1px solid var(--border);
+ display:flex;align-items:center;justify-content:space-between;
+ padding:0 30px;position:sticky;top:0;z-index:10
+}
+.top-right,.top-left{display:flex;align-items:center;gap:15px}
+.search{background:#f5f6f8;border-radius:30px;padding:10px 15px;width:260px;display:flex;gap:10px}
+.search input{border:0;background:none;outline:none;width:100%;font-size:12px}
+.top-icon{width:39px;height:39px;border:0;border-radius:50%;background:#f3f5f7;color:var(--navy)}
+.top-profile{display:flex;align-items:center;gap:10px}
+.top-profile strong{display:block;font-size:12px}
+.top-profile small{font-size:10px;color:var(--muted)}
+.menu-toggle{display:none}
+
+.content{padding:27px 30px 45px;max-width:1600px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.page-heading h2{font-size:22px;margin:0;font-weight:900}
+.page-heading p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.card{background:white;border:1px solid var(--border);border-radius:17px;box-shadow:var(--shadow)}
+.panel{padding:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}
+.panel-head h3{margin:0;font-size:15px;font-weight:900}
+.btn{border:0;border-radius:10px;padding:10px 17px;font-weight:800;font-size:12px;display:inline-flex;align-items:center;gap:8px}
+.btn-gold{background:linear-gradient(110deg,#f3d99f,#d5a54b);color:#182b45}
+.btn-dark{background:var(--navy);color:white}
+.btn-light{background:#f1f4f7;color:var(--navy)}
+.btn-danger{background:#fff0f0;color:#c94c4c}
+.muted{color:var(--muted)}
+.empty{text-align:center;padding:30px 15px;color:var(--muted)}
+.empty i{font-size:30px;color:#c6ced8;margin-bottom:10px}
+.empty p{font-size:12px}
+
+/* الواجهة الرئيسية */
+.welcome{
+ border-radius:20px;overflow:hidden;
+ background:radial-gradient(circle at 12% 15%,#3e6fa455,transparent 27%),linear-gradient(115deg,#0a1d38,#17395e);
+ color:white;padding:30px 32px;min-height:185px;
+ display:flex;align-items:center;justify-content:space-between;
+ position:relative;margin-bottom:20px
+}
+.welcome:after{content:"W";position:absolute;left:35px;top:-55px;font-size:250px;font-weight:900;color:#ffffff08}
+.welcome-text{position:relative;z-index:1}
+.welcome .eyebrow{color:#f0cf8b;font-size:11px;font-weight:800}
+.welcome h2{font-size:24px;margin:7px 0 4px;font-weight:900}
+.welcome p{color:#d2dce8;font-size:12px;margin:0 0 16px}
+.welcome-art{
+ position:relative;z-index:1;width:125px;height:110px;
+ border:1px solid #ebca8b55;border-radius:24px;
+ display:grid;place-items:center;background:#ffffff0d
+}
+.welcome-art i{font-size:55px;color:#e8c47e}
+
+/* الإحصائيات */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{padding:17px;display:flex;align-items:center;gap:12px;min-width:0}
+.stat-icon{width:49px;height:49px;flex-shrink:0;border-radius:15px;display:grid;place-items:center;font-size:19px}
+.ic-blue{background:#e9f1fc;color:#326db5}
+.ic-gold{background:#fbf1dd;color:#c28d31}
+.ic-green{background:#e4f4ed;color:#16865c}
+.ic-purple{background:#f0eafa;color:#7652b2}
+.stat small{color:var(--muted);font-size:10px}
+.stat strong{font-size:23px;display:block;line-height:1.5}
+.stat span{font-size:10px;color:var(--muted)}
+
+.grid-two{display:grid;grid-template-columns:1.1fr .9fr;gap:17px;margin-bottom:20px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.quick{border:1px solid var(--border);border-radius:13px;padding:13px 6px;text-align:center;background:white;color:var(--text)}
+.quick:hover{border-color:var(--gold);background:#fffaf0}
+.quick i{display:grid;place-items:center;width:41px;height:41px;border-radius:50%;background:#edf3fb;color:#316cac;margin:0 auto 8px}
+.quick strong{font-size:10px;display:block}
+.activity{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #f0eee9}
+.activity:last-child{border-bottom:0}
+.activity-icon{width:37px;height:37px;border-radius:12px;background:#edf3fb;color:#3976b8;display:grid;place-items:center}
+.activity strong{font-size:11px;display:block}
+.activity small{font-size:10px;color:var(--muted)}
+.text-link{border:0;background:none;color:#2865a5;font-weight:800;font-size:11px}
+
+/* المنتجات */
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.product-card{overflow:hidden}
+.product-image{height:145px;background:#f1f3f5;display:grid;place-items:center;overflow:hidden}
+.product-image img{width:100%;height:100%;object-fit:cover}
+.product-image i{font-size:35px;color:#b7c0ca}
+.product-info{padding:14px}
+.product-info h4{margin:0 0 5px;font-size:14px}
+.product-info p{font-size:11px;color:var(--muted);margin:0 0 12px;line-height:1.7}
+.company-tag{font-size:10px;color:#2865a5;font-weight:800;margin-bottom:5px}
+.product-actions{display:flex;gap:7px}
+
+/* الجداول */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:550px}
+th,td{text-align:right;padding:13px 11px;border-bottom:1px solid #f0eee9;font-size:12px}
+th{color:var(--muted);font-size:10px;background:#faf9f6}
+.pill{display:inline-block;border-radius:20px;padding:5px 10px;font-size:10px;font-weight:800}
+.pill-green{background:#e7f5ed;color:#16865c}
+.pill-orange{background:#fff2dc;color:#b57a20}
+.pill-red{background:#fff0f0;color:#c94c4c}
+.pill-gray{background:#eef1f4;color:#657384}
+
+/* النماذج */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:11px;font-weight:800}
+.field input,.field select,.field textarea{
+ width:100%;border:1px solid var(--border);background:#fcfbf8;
+ border-radius:10px;padding:12px;outline:none;font-size:12px;color:var(--text)
+}
+.field input:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{min-height:100px;resize:vertical}
+.form-actions{display:flex;gap:10px;margin-top:17px}
+
+/* الاكتشاف */
+.discover-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.discover-bar input,.discover-bar select{border:1px solid var(--border);border-radius:10px;padding:10px;background:white;font-family:inherit;font-size:12px}
+
+/* المحادثات */
+.inbox-layout{display:grid;grid-template-columns:300px 1fr;gap:15px;min-height:480px}
+.inbox-list{padding:10px;max-height:600px;overflow:auto}
+.inbox-item{padding:13px;border-radius:12px;cursor:pointer;border-bottom:1px solid #f0eee9}
+.inbox-item:hover,.inbox-item.selected{background:#f5f3ed}
+.inbox-item strong{font-size:12px}
+.inbox-item small{display:block;color:var(--muted);font-size:10px}
+.chat-area{display:flex;flex-direction:column;min-height:480px}
+.chat-head{padding:16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800}
+.chat-messages{flex:1;padding:20px;overflow:auto;max-height:430px}
+.bubble{max-width:75%;padding:11px 14px;border-radius:14px;margin-bottom:10px;font-size:12px;line-height:1.8}
+.bubble.mine{background:#e9f1fc;margin-right:auto}
+.bubble.theirs{background:#f4f1e9;margin-left:auto}
+.bubble small{display:block;font-size:9px;color:var(--muted);margin-top:4px}
+.chat-compose{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border)}
+.chat-compose input{flex:1;min-width:0;border:1px solid var(--border);border-radius:25px;padding:11px 15px;outline:none}
+.chat-compose button{width:43px;border:0;border-radius:50%;background:var(--navy);color:white}
+
+/* النوافذ */
+.modal{display:none;position:fixed;inset:0;background:#05112099;z-index:50;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modal-box{background:white;border-radius:18px;padding:23px;width:100%;max-width:530px;max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h3{margin:0;font-size:17px}
+.modal-close{border:0;background:#f1f3f5;width:32px;height:32px;border-radius:50%}
+.toast{position:fixed;bottom:22px;left:22px;z-index:100;background:var(--navy);color:white;padding:13px 18px;border-radius:12px;font-size:12px;display:none;max-width:90%}
+.toast.show{display:block}
+.loading{padding:25px;text-align:center;color:var(--muted);font-size:12px}
+
+@media(max-width:1100px){
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .product-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+ .sidebar{transform:translateX(100%)}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-right:0;width:100%}
+ .menu-toggle{display:inline-grid;place-items:center}
+ .topbar{padding:0 13px;height:65px}
+ .search{width:40vw;padding:9px 10px}
+ .top-profile .profile-text{display:none}
+ .content{padding:19px 13px 35px}
+ .welcome{padding:22px;min-height:165px}
+ .welcome h2{font-size:18px}
+ .welcome-art{width:75px;height:75px}
+ .welcome-art i{font-size:32px}
+ .grid-two{grid-template-columns:1fr}
+ .inbox-layout{grid-template-columns:1fr}
+ .inbox-list{max-height:210px}
+}
+@media(max-width:480px){
+ .stats{gap:8px}
+ .stat{padding:11px;gap:7px}
+ .stat-icon{width:37px;height:37px;font-size:14px}
+ .stat strong{font-size:19px}
+ .stat small{font-size:9px}
+ .product-grid{grid-template-columns:1fr}
+ .form-grid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
+ .quick-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
 </head>
 
 <body>
-
 <div class="app">
 
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">WAS<span>LA</span></div>
+<aside class="sidebar" id="sidebar">
+ <div class="brand">
+  <div class="brand-mark">W</div>
+  <h1>WASLA</h1>
+  <p>CONNECT · TRADE · GROW</p>
+ </div>
 
-    <div class="side-label">القائمة الرئيسية</div>
+ <div class="nav-label">مساحة العمل</div>
+ <button class="nav-btn active" data-page="overview"><i class="fa-solid fa-house"></i> الرئيسية</button>
+ <button class="nav-btn" data-page="company"><i class="fa-solid fa-building"></i> شركتي</button>
+ <button class="nav-btn" data-page="products"><i class="fa-solid fa-box-open"></i> منتجاتي</button>
+ <button class="nav-btn" data-page="discover"><i class="fa-solid fa-compass"></i> اكتشف المنتجات</button>
 
-    <nav class="nav">
-      <button class="active" data-page="overview" onclick="showPage('overview',this)">
-        <span class="nav-icon">▦</span> الرئيسية
-      </button>
+ <div class="nav-label">التواصل والتجارة</div>
+ <button class="nav-btn" data-page="inquiries"><i class="fa-solid fa-file-invoice"></i> الاستفسارات</button>
+ <button class="nav-btn" data-page="inbox"><i class="fa-solid fa-comments"></i> المحادثات</button>
 
-      <button data-page="inbox" onclick="showPage('inbox',this)">
-        <span class="nav-icon">✉</span> الاستفسارات والرسائل
-      </button>
+ <div class="nav-label">حسابك</div>
+ <button class="nav-btn" data-page="profile"><i class="fa-solid fa-user"></i> الملف الشخصي</button>
+ <button class="nav-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
 
-      <button data-page="profile" onclick="showPage('profile',this)">
-        <span class="nav-icon">♙</span> الملف الشخصي
-      </button>
-
-      <button data-page="company" onclick="showPage('company',this)">
-        <span class="nav-icon">▣</span> بيانات الشركة
-      </button>
-
-      <button data-page="products" onclick="showPage('products',this)">
-        <span class="nav-icon">▤</span> منتجاتي
-      </button>
-
-      <button data-page="discover" onclick="showPage('discover',this)">
-        <span class="nav-icon">⌕</span> اكتشف المنتجات
-      </button>
-    </nav>
-
-    <div class="sidebar-bottom">
-      <nav class="nav">
-        <button onclick="logout()">
-          <span class="nav-icon">⇥</span> تسجيل الخروج
-        </button>
-      </nav>
-    </div>
-  </aside>
-
-  <main class="main">
-
-    <header class="topbar">
-      <div class="topbar-right">
-        <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
-        <div class="topbar-title" id="topbarTitle">الرئيسية</div>
-      </div>
-
-      <div class="topbar-right">
-        <div>
-          <div id="topUserName" style="font-size:13px;font-weight:700">مرحباً بك</div>
-          <div id="topAccountType" style="font-size:11px;color:#718096">حساب WASLA</div>
-        </div>
-        <div class="user-avatar" id="avatar">W</div>
-      </div>
-    </header>
-
-    <div class="content">
-
-      <!-- OVERVIEW -->
-      <section class="page active" id="page-overview">
-        <div class="page-heading">
-          <div>
-            <h1>مرحباً بك في WASLA 👋</h1>
-            <p>إدارة أعمالك التجارية والتواصل مع الشركات من مكان واحد.</p>
-          </div>
-          <button class="btn btn-primary" onclick="showPage('discover')">
-            اكتشف المنتجات
-          </button>
-        </div>
-
-        <div class="grid">
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-icon">📦</span>
-            </div>
-            <div class="stat-number" id="statProducts">0</div>
-            <div class="stat-label">إجمالي المنتجات</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-icon">✉️</span>
-            </div>
-            <div class="stat-number" id="statInquiries">0</div>
-            <div class="stat-label">الاستفسارات</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-icon">🏢</span>
-            </div>
-            <div class="stat-number" id="statCompany">—</div>
-            <div class="stat-label">حالة الشركة</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-icon">🌐</span>
-            </div>
-            <div class="stat-number" id="statDiscover">0</div>
-            <div class="stat-label">منتجات متاحة للاكتشاف</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>آخر الاستفسارات</h3>
-            <button class="btn btn-light" onclick="showPage('inbox')">عرض الكل</button>
-          </div>
-          <div id="recentInquiries" class="loading">جاري تحميل البيانات...</div>
-        </div>
-
-        <div class="notice">
-          <strong>مرحباً بك في WASLA</strong><br>
-          منصتك للتواصل التجاري واكتشاف المنتجات وبناء العلاقات بين الشركات والمشترين.
-        </div>
-      </section>
-
-      <!-- INBOX -->
-      <section class="page" id="page-inbox">
-        <div class="page-heading">
-          <div>
-            <h1>الاستفسارات والرسائل</h1>
-            <p>تابع استفساراتك وتواصل مع الأطراف التجارية.</p>
-          </div>
-          <button class="btn btn-outline" onclick="loadInquiries()">↻ تحديث</button>
-        </div>
-
-        <div class="inbox-layout">
-          <div class="inbox-list">
-            <h3>قائمة الاستفسارات</h3>
-            <div id="inquiryList">
-              <div class="empty">جاري التحميل...</div>
-            </div>
-          </div>
-
-          <div class="chat-area" id="chatArea">
-            <div class="chat-placeholder">
-              <div>
-                <div style="font-size:45px;margin-bottom:10px">💬</div>
-                <strong>اختر استفساراً لفتح المحادثة</strong>
-                <p style="font-size:12px">ستظهر الرسائل هنا.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- PROFILE -->
-      <section class="page" id="page-profile">
-        <div class="page-heading">
-          <div>
-            <h1>الملف الشخصي</h1>
-            <p>إدارة معلومات حسابك الشخصية.</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>معلومات الحساب</h3>
-          </div>
-
-          <form id="profileForm">
-            <div class="form-grid">
-              <div class="field">
-                <label>الاسم الكامل</label>
-                <input id="profileName" type="text" required placeholder="الاسم الكامل">
-              </div>
-
-              <div class="field">
-                <label>البريد الإلكتروني</label>
-                <input id="profileEmail" type="email" disabled>
-              </div>
-
-              <div class="field">
-                <label>نوع الحساب</label>
-                <input id="profileType" type="text" disabled>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-primary" type="submit">حفظ التغييرات</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <!-- COMPANY -->
-      <section class="page" id="page-company">
-        <div class="page-heading">
-          <div>
-            <h1>بيانات الشركة</h1>
-            <p>أضف معلومات شركتك حتى يتمكن الآخرون من التعرف عليها.</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>معلومات النشاط التجاري</h3>
-          </div>
-
-          <form id="companyForm">
-            <div class="form-grid">
-              <div class="field full">
-                <label>اسم الشركة أو النشاط التجاري</label>
-                <input id="companyName" required placeholder="اسم الشركة">
-              </div>
-
-              <div class="field">
-                <label>الدولة</label>
-                <input id="companyCountry" placeholder="الدولة">
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-primary" type="submit">حفظ بيانات الشركة</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="notice">
-          يتم ربط الشركة بحسابك من خلال معرف المستخدم الخاص بك.
-        </div>
-      </section>
-
-      <!-- PRODUCTS -->
-      <section class="page" id="page-products">
-        <div class="page-heading">
-          <div>
-            <h1>منتجاتي</h1>
-            <p>أضف منتجاتك أو عدّلها أو احذفها.</p>
-          </div>
-
-          <button class="btn btn-primary" onclick="openProductModal()">
-            + إضافة منتج
-          </button>
-        </div>
-
-        <div id="myProducts" class="product-grid">
-          <div class="empty">جاري تحميل المنتجات...</div>
-        </div>
-      </section>
-
-      <!-- DISCOVER -->
-      <section class="page" id="page-discover">
-        <div class="page-heading">
-          <div>
-            <h1>اكتشف المنتجات</h1>
-            <p>استعرض المنتجات المنشورة من الشركات الأخرى.</p>
-          </div>
-
-          <button class="btn btn-outline" onclick="loadDiscover()">↻ تحديث</button>
-        </div>
-
-        <div class="card" style="padding:15px">
-          <div class="field">
-            <label>ابحث عن منتج</label>
-            <input id="discoverSearch" placeholder="اكتب اسم المنتج أو التصنيف..." oninput="filterDiscover()">
-          </div>
-        </div>
-
-        <div id="discoverProducts" class="product-grid">
-          <div class="empty">جاري تحميل المنتجات...</div>
-        </div>
-      </section>
-
-    </div>
-  </main>
-</div>
-
-<!-- PRODUCT MODAL -->
-<div class="modal-backdrop" id="productModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeProductModal()">×</button>
-    <h2 id="productModalTitle">إضافة منتج جديد</h2>
-
-    <form id="productForm">
-      <input type="hidden" id="productId">
-
-      <div class="form-grid">
-        <div class="field full">
-          <label>اسم المنتج</label>
-          <input id="productName" required placeholder="اسم المنتج">
-        </div>
-
-        <div class="field">
-          <label>التصنيف</label>
-          <input id="productCategory" placeholder="مثال: مواد غذائية">
-        </div>
-
-        <div class="field">
-          <label>رابط صورة المنتج</label>
-          <input id="productImage" type="url" placeholder="https://example.com/image.jpg">
-        </div>
-
-        <div class="field full">
-          <label>وصف المنتج</label>
-          <textarea id="productDescription" placeholder="اكتب تفاصيل المنتج..."></textarea>
-        </div>
-
-        <div class="field">
-          <label>حالة المنتج</label>
-          <select id="productStatus">
-            <option value="published">منشور</option>
-            <option value="draft">مسودة</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn btn-primary" type="submit">حفظ المنتج</button>
-        <button class="btn btn-outline" type="button" onclick="closeProductModal()">إلغاء</button>
-      </div>
-    </form>
+ <div class="sidebar-bottom">
+  <div class="upgrade">
+   <i class="fa-solid fa-crown"></i>
+   <h3>WASLA Business</h3>
+   <p>مساحة واحدة لإدارة حضورك التجاري والتواصل مع شركائك.</p>
+   <button class="btn btn-gold" onclick="showToast('سيتم الإعلان عن تفاصيل الباقات لاحقاً.')">اكتشف المزيد</button>
   </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-/* =========================================
-   WASLA - SUPABASE CONFIGURATION
-========================================= */
-
-const SUPABASE_URL = "https://bzrcbodvcuujdjupfgzw.supabase.co";
-
-const SUPABASE_KEY = "sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-/* =========================================
-   GLOBAL DATA
-========================================= */
-
-let currentUser = null;
-let currentProfile = null;
-let currentCompany = null;
-let products = [];
-let inquiries = [];
-let discoverProducts = [];
-let activeInquiry = null;
-let chatMessages = [];
-let chatChannel = null;
-
-/* =========================================
-   HELPERS
-========================================= */
-
-function toast(message) {
-  const element = document.getElementById("toast");
-  element.textContent = message;
-  element.classList.add("show");
-
-  clearTimeout(window.toastTimer);
-
-  window.toastTimer = setTimeout(() => {
-    element.classList.remove("show");
-  }, 3500);
-}
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
-}
-
-function formatDate(value) {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString("ar");
-}
-
-function accountTypeLabel(type) {
-  const labels = {
-    company: "شركة",
-    manufacturer: "مصنّع",
-    brand: "علامة تجارية",
-    trader: "تاجر",
-    buyer: "مشتري"
-  };
-
-  return labels[type] || type || "مستخدم";
-}
-
-function statusLabel(status) {
-  if (status === "published") return "منشور";
-  if (status === "draft") return "مسودة";
-  if (status === "pending") return "قيد الانتظار";
-  if (status === "answered") return "تم الرد";
-  if (status === "closed") return "مغلق";
-  return status || "غير محدد";
-}
-
-function statusBadge(status) {
-  let cls = "badge-neutral";
-
-  if (status === "published" || status === "answered") {
-    cls = "badge-success";
-  } else if (status === "pending" || status === "draft") {
-    cls = "badge-warning";
-  } else if (status === "closed") {
-    cls = "badge-danger";
-  }
-
-  return `<span class="badge ${cls}">${escapeHTML(statusLabel(status))}</span>`;
-}
-
-function getCompanyName(inquiry) {
-  return inquiry.companies?.name || "شركة";
-}
-
-function getProductName(inquiry) {
-  return inquiry.products?.name || "منتج";
-}
-
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("open");
-}
-
-/* =========================================
-   NAVIGATION
-========================================= */
-
-function showPage(page, button) {
-  document.querySelectorAll(".page").forEach(element => {
-    element.classList.remove("active");
-  });
-
-  const target = document.getElementById("page-" + page);
-
-  if (target) target.classList.add("active");
-
-  document.querySelectorAll(".nav button").forEach(element => {
-    element.classList.remove("active");
-  });
-
-  const selected = button || document.querySelector(
-    `.nav button[data-page="${page}"]`
-  );
-
-  if (selected) selected.classList.add("active");
-
-  const titles = {
-    overview: "الرئيسية",
-    inbox: "الاستفسارات والرسائل",
-    profile: "الملف الشخصي",
-    company: "بيانات الشركة",
-    products: "منتجاتي",
-    discover: "اكتشف المنتجات"
-  };
-
-  document.getElementById("topbarTitle").textContent =
-    titles[page] || "WASLA";
-
-  document.getElementById("sidebar").classList.remove("open");
-
-  if (page === "inbox") loadInquiries();
-  if (page === "products") loadProducts();
-  if (page === "discover") loadDiscover();
-}
-
-/* =========================================
-   AUTHENTICATION
-========================================= */
-
-async function boot() {
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
-
-    if (error) throw error;
-
-    if (!data.session) {
-      window.location.href = "index.html";
-      return;
-    }
-
-    currentUser = data.session.user;
-
-    await loadProfile();
-    await loadCompany();
-    await Promise.all([
-      loadProducts(),
-      loadInquiries(),
-      loadDiscover()
-    ]);
-
-    updateDashboard();
-
-  } catch (error) {
-    console.error("Boot error:", error);
-    toast("تعذر تحميل لوحة التحكم: " + error.message);
-  }
-}
-
-async function logout() {
-  if (!confirm("هل تريد تسجيل الخروج؟")) return;
-
-  if (chatChannel) {
-    await supabaseClient.removeChannel(chatChannel);
-    chatChannel = null;
-  }
-
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    toast("تعذر تسجيل الخروج: " + error.message);
-    return;
-  }
-
-  window.location.href = "index.html";
-}
-
-/* =========================================
-   PROFILE
-========================================= */
-
-async function loadProfile() {
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("id", currentUser.id)
-    .maybeSingle();
-
-  if (error) throw error;
-
-  currentProfile = data || {};
-
-  const name = currentProfile.full_name || "مستخدم WASLA";
-
-  document.getElementById("profileName").value =
-    currentProfile.full_name || "";
-
-  document.getElementById("profileEmail").value =
-    currentUser.email || "";
-
-  document.getElementById("profileType").value =
-    accountTypeLabel(currentProfile.account_type);
-
-  document.getElementById("topUserName").textContent = name;
-
-  document.getElementById("topAccountType").textContent =
-    accountTypeLabel(currentProfile.account_type);
-
-  document.getElementById("avatar").textContent =
-    name.trim().charAt(0) || "W";
-}
-
-document.getElementById("profileForm").addEventListener(
-  "submit",
-  async function(event) {
-    event.preventDefault();
-
-    const fullName = document.getElementById("profileName").value.trim();
-
-    if (!fullName) {
-      toast("يرجى إدخال الاسم.");
-      return;
-    }
-
-    const { data, error } = await supabaseClient
-      .from("profiles")
-      .update({ full_name: fullName })
-      .eq("id", currentUser.id)
-      .select()
-      .maybeSingle();
-
-    if (error) {
-      toast("تعذر حفظ الملف الشخصي: " + error.message);
-      return;
-    }
-
-    if (!data) {
-      toast("لم يتم العثور على سجل الملف الشخصي لتحديثه.");
-      return;
-    }
-
-    currentProfile = data;
-    await loadProfile();
-
-    toast("تم حفظ الملف الشخصي بنجاح.");
-  }
-);
-
-/* =========================================
-   COMPANY
-========================================= */
-
-async function loadCompany() {
-  const { data, error } = await supabaseClient
-    .from("companies")
-    .select("*")
-    .eq("owner_id", currentUser.id)
-    .maybeSingle();
-
-  if (error) throw error;
-
-  currentCompany = data || null;
-
-  document.getElementById("companyName").value =
-    currentCompany?.name || "";
-
-  document.getElementById("companyCountry").value =
-    currentCompany?.country || "";
-}
-
-document.getElementById("companyForm").addEventListener(
-  "submit",
-  async function(event) {
-    event.preventDefault();
-
-    const name = document.getElementById("companyName").value.trim();
-    const country = document.getElementById("companyCountry").value.trim();
-
-    if (!name) {
-      toast("يرجى إدخال اسم الشركة.");
-      return;
-    }
-
-    const companyData = {
-      owner_id: currentUser.id,
-      name,
-      country
-    };
-
-    let result;
-
-    if (currentCompany) {
-      result = await supabaseClient
-        .from("companies")
-        .update({
-          name,
-          country
-        })
-        .eq("id", currentCompany.id)
-        .select()
-        .single();
-    } else {
-      result = await supabaseClient
-        .from("companies")
-        .insert(companyData)
-        .select()
-        .single();
-    }
-
-    if (result.error) {
-      toast("تعذر حفظ الشركة: " + result.error.message);
-      return;
-    }
-
-    currentCompany = result.data;
-
-    updateDashboard();
-
-    toast("تم حفظ بيانات الشركة بنجاح.");
-
-    await loadProducts();
-  }
-);
-
-/* =========================================
-   PRODUCTS
-========================================= */
-
-async function loadProducts() {
-  if (!currentCompany) {
-    products = [];
-    renderMyProducts();
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("*")
-    .eq("company_id", currentCompany.id)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    toast("تعذر تحميل المنتجات: " + error.message);
-    return;
-  }
-
-  products = data || [];
-
-  renderMyProducts();
-  updateDashboard();
-}
-
-function renderMyProducts() {
-  const container = document.getElementById("myProducts");
-
-  if (!currentCompany) {
-    container.innerHTML = `
-      <div class="card empty" style="grid-column:1/-1">
-        <span class="empty-icon">🏢</span>
-        يرجى إضافة بيانات شركتك أولاً حتى تتمكن من إضافة المنتجات.
-        <br><br>
-        <button class="btn btn-primary" onclick="showPage('company')">
-          إضافة بيانات الشركة
-        </button>
-      </div>
-    `;
-    return;
-  }
-
-  if (!products.length) {
-    container.innerHTML = `
-      <div class="card empty" style="grid-column:1/-1">
-        <span class="empty-icon">📦</span>
-        لا توجد منتجات حتى الآن.
-        <br><br>
-        <button class="btn btn-primary" onclick="openProductModal()">
-          إضافة أول منتج
-        </button>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = products.map(product => `
-    <div class="product-card">
-      <div class="product-image">
-        ${
-          product.image_url
-            ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" onerror="this.style.display='none'">`
-            : "📦"
-        }
-      </div>
-
-      <div class="product-body">
-        <h3>${escapeHTML(product.name)}</h3>
-
-        <p>${escapeHTML(product.description || "لا يوجد وصف للمنتج.")}</p>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <small style="color:#718096">
-            ${escapeHTML(product.category || "بدون تصنيف")}
-          </small>
-          ${statusBadge(product.status)}
-        </div>
-
-        <div class="product-actions">
-          <button class="btn btn-light" onclick="editProduct('${product.id}')">
-            تعديل
-          </button>
-
-          <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">
-            حذف
-          </button>
-        </div>
-      </div>
+  <div class="sidebar-user">
+   <div class="avatar" id="sideAvatar">W</div>
+   <div><strong id="sideName">مستخدم WASLA</strong><small id="sideType">حساب تجاري</small></div>
+  </div>
+ </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+ <div class="top-right">
+  <button class="top-icon menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+  <div class="search">
+   <i class="fa-solid fa-magnifying-glass"></i>
+   <input id="globalSearch" placeholder="ابحث في المنتجات...">
+  </div>
+ </div>
+ <div class="top-left">
+  <button class="top-icon" onclick="goTo('inquiries')"><i class="fa-regular fa-bell"></i></button>
+  <div class="top-profile">
+   <div class="avatar" id="topAvatar">W</div>
+   <div class="profile-text">
+    <strong id="topName">مرحباً بك في WASLA</strong>
+    <small id="topCompany">مساحة أعمالك</small>
+   </div>
+  </div>
+ </div>
+</header>
+
+<div class="content">
+
+<section class="page active" id="page-overview">
+ <div class="welcome">
+  <div class="welcome-text">
+   <div class="eyebrow">WASLA BUSINESS PLATFORM</div>
+   <h2>أهلاً بك في عالم الأعمال والتجارة</h2>
+   <p>اكتشف منتجات جديدة، اعرض أعمالك، وابنِ علاقات تجارية تتجاوز الحدود.</p>
+   <button class="btn btn-gold" onclick="goTo('discover')">
+    <i class="fa-solid fa-arrow-left"></i> اكتشف الفرص التجارية
+   </button>
+  </div>
+  <div class="welcome-art"><i class="fa-solid fa-handshake"></i></div>
+ </div>
+
+ <div class="stats">
+  <div class="card stat">
+   <div class="stat-icon ic-gold"><i class="fa-solid fa-box-open"></i></div>
+   <div><small>منتجاتي</small><strong id="statProducts">—</strong><span>المنتجات المسجلة</span></div>
+  </div>
+  <div class="card stat">
+   <div class="stat-icon ic-blue"><i class="fa-solid fa-file-circle-question"></i></div>
+   <div><small>الاستفسارات</small><strong id="statInquiries">—</strong><span>المرتبطة بحسابك</span></div>
+  </div>
+  <div class="card stat">
+   <div class="stat-icon ic-green"><i class="fa-solid fa-check-circle"></i></div>
+   <div><small>استفسارات مفتوحة</small><strong id="statOpen">—</strong><span>تحتاج إلى متابعة</span></div>
+  </div>
+  <div class="card stat">
+   <div class="stat-icon ic-purple"><i class="fa-solid fa-building"></i></div>
+   <div><small>ملف الشركة</small><strong id="statCompany">—</strong><span>حالة الملف التجاري</span></div>
+  </div>
+ </div>
+
+ <div class="grid-two">
+  <div class="card panel">
+   <div class="panel-head"><h3>الوصول السريع</h3></div>
+   <div class="quick-grid">
+    <button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
+    <button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الشركة</strong></button>
+    <button class="quick" onclick="goTo('discover')"><i class="fa-solid fa-magnifying-glass"></i><strong>تصفح المنتجات</strong></button>
+    <button class="quick" onclick="goTo('inquiries')"><i class="fa-solid fa-envelope"></i><strong>الاستفسارات</strong></button>
+   </div>
+  </div>
+  <div class="card panel">
+   <div class="panel-head">
+    <h3>آخر الاستفسارات</h3>
+    <button class="text-link" onclick="goTo('inquiries')">عرض الكل ←</button>
+   </div>
+   <div id="recentInquiries"><div class="loading">جارٍ تحميل البيانات...</div></div>
+  </div>
+ </div>
+
+ <div class="card panel">
+  <div class="panel-head">
+   <h3>أحدث منتجاتك</h3>
+   <button class="text-link" onclick="goTo('products')">عرض الكل ←</button>
+  </div>
+  <div id="recentProducts" class="product-grid"></div>
+ </div>
+</section>
+
+<section class="page" id="page-company">
+ <div class="page-heading">
+  <div><h2>ملف شركتي</h2><p>أدر معلومات شركتك التي تظهر في WASLA.</p></div>
+ </div>
+ <div class="card panel">
+  <div class="panel-head"><h3>المعلومات التجارية</h3></div>
+  <form id="companyForm">
+   <div class="form-grid">
+    <div class="field full">
+     <label>اسم الشركة أو النشاط التجاري</label>
+     <input id="companyName" required placeholder="اسم الشركة">
     </div>
-  `).join("");
-}
-
-function openProductModal() {
-  if (!currentCompany) {
-    toast("أضف بيانات شركتك أولاً.");
-    showPage("company");
-    return;
-  }
-
-  document.getElementById("productForm").reset();
-  document.getElementById("productId").value = "";
-  document.getElementById("productModalTitle").textContent =
-    "إضافة منتج جديد";
-
-  document.getElementById("productStatus").value = "published";
-
-  document.getElementById("productModal").classList.add("show");
-}
-
-function closeProductModal() {
-  document.getElementById("productModal").classList.remove("show");
-}
-
-function editProduct(id) {
-  const product = products.find(item => String(item.id) === String(id));
-
-  if (!product) return;
-
-  document.getElementById("productId").value = product.id;
-  document.getElementById("productName").value = product.name || "";
-  document.getElementById("productCategory").value = product.category || "";
-  document.getElementById("productImage").value = product.image_url || "";
-  document.getElementById("productDescription").value =
-    product.description || "";
-  document.getElementById("productStatus").value =
-    product.status || "published";
-
-  document.getElementById("productModalTitle").textContent =
-    "تعديل المنتج";
-
-  document.getElementById("productModal").classList.add("show");
-}
-
-document.getElementById("productForm").addEventListener(
-  "submit",
-  async function(event) {
-    event.preventDefault();
-
-    if (!currentCompany) {
-      toast("لا توجد شركة مرتبطة بحسابك.");
-      return;
-    }
-
-    const id = document.getElementById("productId").value;
-
-    const productData = {
-      name: document.getElementById("productName").value.trim(),
-      category: document.getElementById("productCategory").value.trim(),
-      image_url: document.getElementById("productImage").value.trim() || null,
-      description: document.getElementById("productDescription").value.trim(),
-      status: document.getElementById("productStatus").value
-    };
-
-    if (!productData.name) {
-      toast("يرجى إدخال اسم المنتج.");
-      return;
-    }
-
-    let result;
-
-    if (id) {
-      result = await supabaseClient
-        .from("products")
-        .update(productData)
-        .eq("id", id)
-        .eq("company_id", currentCompany.id);
-    } else {
-      result = await supabaseClient
-        .from("products")
-        .insert({
-          ...productData,
-          company_id: currentCompany.id
-        });
-    }
-
-    if (result.error) {
-      toast("تعذر حفظ المنتج: " + result.error.message);
-      return;
-    }
-
-    closeProductModal();
-
-    await loadProducts();
-    await loadDiscover();
-
-    toast(id ? "تم تعديل المنتج." : "تمت إضافة المنتج بنجاح.");
-  }
-);
-
-async function deleteProduct(id) {
-  if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
-
-  const { error } = await supabaseClient
-    .from("products")
-    .delete()
-    .eq("id", id)
-    .eq("company_id", currentCompany.id);
-
-  if (error) {
-    toast("تعذر حذف المنتج: " + error.message);
-    return;
-  }
-
-  await loadProducts();
-  await loadDiscover();
-
-  toast("تم حذف المنتج.");
-}
-
-/* =========================================
-   DISCOVER PRODUCTS
-========================================= */
-
-async function loadDiscover() {
-  const container = document.getElementById("discoverProducts");
-
-  container.innerHTML = `<div class="empty">جاري تحميل المنتجات...</div>`;
-
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("*,companies(name,country)")
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    container.innerHTML = `
-      <div class="card empty" style="grid-column:1/-1">
-        تعذر تحميل المنتجات: ${escapeHTML(error.message)}
-      </div>
-    `;
-    return;
-  }
-
-  discoverProducts = (data || []).filter(product =>
-    product.company_id !== currentCompany?.id
-  );
-
-  renderDiscoverProducts();
-  updateDashboard();
-}
-
-function renderDiscoverProducts(list) {
-  const container = document.getElementById("discoverProducts");
-
-  const items = list || discoverProducts;
-
-  if (!items.length) {
-    container.innerHTML = `
-      <div class="card empty" style="grid-column:1/-1">
-        <span class="empty-icon">🔎</span>
-        لا توجد منتجات متاحة حالياً.
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = items.map(product => `
-    <div class="product-card">
-      <div class="product-image">
-        ${
-          product.image_url
-            ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" onerror="this.style.display='none'">`
-            : "📦"
-        }
-      </div>
-
-      <div class="product-body">
-        <h3>${escapeHTML(product.name)}</h3>
-
-        <p>${escapeHTML(product.description || "لا يوجد وصف للمنتج.")}</p>
-
-        <div style="font-size:12px;color:#718096;line-height:1.8">
-          الشركة: ${escapeHTML(product.companies?.name || "غير محدد")}
-          <br>
-          الدولة: ${escapeHTML(product.companies?.country || "غير محدد")}
-          <br>
-          التصنيف: ${escapeHTML(product.category || "غير محدد")}
-        </div>
-
-        <div class="product-actions">
-          ${
-            currentProfile?.account_type === "buyer"
-              ? `<button class="btn btn-primary" onclick="contactAboutProduct('${product.id}')">إرسال استفسار</button>`
-              : `<button class="btn btn-light" onclick="toast('إرسال الاستفسارات متاح لحسابات المشترين.')">عرض المنتج</button>`
-          }
-        </div>
-      </div>
+    <div class="field">
+     <label>الدولة</label>
+     <input id="companyCountry" placeholder="الدولة">
     </div>
-  `).join("");
-}
-
-function filterDiscover() {
-  const search = document.getElementById("discoverSearch")
-    .value.trim().toLowerCase();
-
-  const filtered = discoverProducts.filter(product => {
-    const name = (product.name || "").toLowerCase();
-    const category = (product.category || "").toLowerCase();
-    const company = (product.companies?.name || "").toLowerCase();
-
-    return name.includes(search) ||
-      category.includes(search) ||
-      company.includes(search);
-  });
-
-  renderDiscoverProducts(filtered);
-}
-
-/* =========================================
-   CREATE INQUIRY
-========================================= */
-
-async function contactAboutProduct(productId) {
-  if (currentProfile?.account_type !== "buyer") {
-    toast("إرسال الاستفسارات متاح لحسابات المشترين فقط.");
-    return;
-  }
-
-  const product = discoverProducts.find(item =>
-    String(item.id) === String(productId)
-  );
-
-  if (!product) {
-    toast("لم يتم العثور على المنتج.");
-    return;
-  }
-
-  const message = prompt(
-    "اكتب استفسارك حول المنتج: " + product.name
-  );
-
-  if (message === null) return;
-
-  if (!message.trim()) {
-    toast("يرجى كتابة رسالة الاستفسار.");
-    return;
-  }
-
-  const { error } = await supabaseClient
-    .from("inquiries")
-    .insert({
-      product_id: product.id,
-      company_id: product.company_id,
-      buyer_id: currentUser.id,
-      message: message.trim(),
-      status: "pending"
-    });
-
-  if (error) {
-    toast("تعذر إرسال الاستفسار: " + error.message);
-    return;
-  }
-
-  toast("تم إرسال استفسارك بنجاح.");
-
-  await loadInquiries();
-  showPage("inbox");
-}
-
-/* =========================================
-   INQUIRIES
-========================================= */
-
-async function loadInquiries() {
-  const container = document.getElementById("inquiryList");
-
-  container.innerHTML = `<div class="empty">جاري تحميل الاستفسارات...</div>`;
-
-  const isBuyer = currentProfile?.account_type === "buyer";
-
-  let query = supabaseClient
-    .from("inquiries")
-    .select("*,products(name),companies(name)")
-    .order("created_at", { ascending: false });
-
-  if (isBuyer) {
-    query = query.eq("buyer_id", currentUser.id);
-  } else {
-    if (!currentCompany) {
-      inquiries = [];
-      renderInquiries();
-      updateDashboard();
-      return;
-    }
-
-    query = query.eq("company_id", currentCompany.id);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    container.innerHTML = `
-      <div class="empty">
-        تعذر تحميل الاستفسارات:
-        ${escapeHTML(error.message)}
-      </div>
-    `;
-    return;
-  }
-
-  inquiries = data || [];
-
-  renderInquiries();
-  renderRecentInquiries();
-  updateDashboard();
-}
-
-function renderInquiries() {
-  const container = document.getElementById("inquiryList");
-
-  if (!inquiries.length) {
-    container.innerHTML = `
-      <div class="empty">
-        <span class="empty-icon">✉️</span>
-        لا توجد استفسارات حتى الآن.
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = inquiries.map(inquiry => `
-    <div class="inquiry-item ${
-      String(activeInquiry?.id) === String(inquiry.id) ? "selected" : ""
-    }" onclick="openInquiry('${inquiry.id}')">
-
-      <strong>${escapeHTML(getProductName(inquiry))}</strong>
-
-      <small>
-        ${escapeHTML(getCompanyName(inquiry))}
-        · ${formatDate(inquiry.created_at)}
-      </small>
-
-      <div style="margin-top:8px">
-        ${statusBadge(inquiry.status)}
-      </div>
-    </div>
-  `).join("");
-}
-
-function renderRecentInquiries() {
-  const container = document.getElementById("recentInquiries");
-
-  const recent = inquiries.slice(0, 5);
-
-  if (!recent.length) {
-    container.innerHTML = `<div class="empty">لا توجد استفسارات جديدة.</div>`;
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>المنتج</th>
-            <th>الشركة</th>
-            <th>التاريخ</th>
-            <th>الحالة</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          ${recent.map(inquiry => `
-            <tr>
-              <td>${escapeHTML(getProductName(inquiry))}</td>
-              <td>${escapeHTML(getCompanyName(inquiry))}</td>
-              <td>${formatDate(inquiry.created_at)}</td>
-              <td>${statusBadge(inquiry.status)}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-/* =========================================
-   CHAT
-========================================= */
-
-async function openInquiry(id) {
-  const inquiry = inquiries.find(item =>
-    String(item.id) === String(id)
-  );
-
-  if (!inquiry) return;
-
-  activeInquiry = inquiry;
-
-  renderInquiries();
-
-  const chatArea = document.getElementById("chatArea");
-
-  chatArea.innerHTML = `
-    <div class="chat-header">
-      ${escapeHTML(getProductName(inquiry))}
-      <span style="color:#718096;font-size:11px;font-weight:400">
-        · ${escapeHTML(getCompanyName(inquiry))}
-      </span>
-    </div>
-
-    <div class="chat-messages" id="chatMessages">
-      <div class="empty">جاري تحميل الرسائل...</div>
-    </div>
-
-    <form class="chat-form" id="chatForm">
-      <input id="chatInput" placeholder="اكتب رسالتك هنا..." autocomplete="off" required>
-      <button class="btn btn-primary" type="submit">إرسال</button>
-    </form>
-  `;
-
-  document.getElementById("chatForm").addEventListener(
-    "submit",
-    sendChatMessage
-  );
-
-  await loadChatMessages();
-
-  subscribeToChat();
-}
-
-async function loadChatMessages() {
-  if (!activeInquiry) return;
-
-  const container = document.getElementById("chatMessages");
-
-  if (!container) return;
-
-  const { data, error } = await supabaseClient
-    .from("inquiry_messages")
-    .select("*")
-    .eq("inquiry_id", activeInquiry.id)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    container.innerHTML = `
-      <div class="empty">
-        تعذر تحميل الرسائل:
-        ${escapeHTML(error.message)}
-      </div>
-    `;
-    return;
-  }
-
-  chatMessages = data || [];
-
-  renderChatMessages();
-}
-
-function renderChatMessages() {
-  const container = document.getElementById("chatMessages");
-
-  if (!container) return;
-
-  let html = `
-    <div class="message theirs">
-      ${escapeHTML(activeInquiry.message || "استفسار حول المنتج")}
-      <small>الاستفسار الأصلي · ${formatDate(activeInquiry.created_at)}</small>
-    </div>
-  `;
-
-  if (!chatMessages.length) {
-    html += `
-      <div style="text-align:center;color:#718096;font-size:12px;padding:15px">
-        لا توجد رسائل إضافية. ابدأ المحادثة الآن.
-      </div>
-    `;
-  }
-
-  html += chatMessages.map(message => {
-    const mine = message.sender_id === currentUser.id;
-
-    return `
-      <div class="message ${mine ? "mine" : "theirs"}">
-        ${escapeHTML(message.message)}
-        <small>${formatDate(message.created_at)}</small>
-      </div>
-    `;
-  }).join("");
-
-  container.innerHTML = html;
-  container.scrollTop = container.scrollHeight;
-}
-
-async function sendChatMessage(event) {
-  event.preventDefault();
-
-  if (!activeInquiry) return;
-
-  const input = document.getElementById("chatInput");
-  const message = input.value.trim();
-
-  if (!message) return;
-
-  const button = event.submitter;
-
-  if (button) button.disabled = true;
-
-  const { error } = await supabaseClient
-    .from("inquiry_messages")
-    .insert({
-      inquiry_id: activeInquiry.id,
-      sender_id: currentUser.id,
-      message
-    });
-
-  if (button) button.disabled = false;
-
-  if (error) {
-    toast("تعذر إرسال الرسالة: " + error.message);
-    return;
-  }
-
-  input.value = "";
-
-  await loadChatMessages();
-}
-
-function subscribeToChat() {
-  if (chatChannel) {
-    supabaseClient.removeChannel(chatChannel);
-    chatChannel = null;
-  }
-
-  if (!activeInquiry) return;
-
-  chatChannel = supabaseClient
-    .channel("inquiry-chat-" + activeInquiry.id)
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "inquiry_messages",
-        filter: "inquiry_id=eq." + activeInquiry.id
-      },
-      payload => {
-        const newMessage = payload.new;
-
-        if (!chatMessages.some(message =>
-          String(message.id) === String(newMessage.id)
-        )) {
-          chatMessages.push(newMessage);
-          renderChatMessages();
-        }
-      }
-    )
-    .subscribe();
-}
-
-/* =========================================
-   DASHBOARD STATS
-========================================= */
-
-function updateDashboard() {
-  document.getElementById("statProducts").textContent =
-    products.length;
-
-  document.getElementById("statInquiries").textContent =
-    inquiries.length;
-
-  document.getElementById("statCompany").textContent =
-    currentCompany ? "مضافة" : "غير مضافة";
-
-  document.getElementById("statDiscover").textContent =
-    discoverProducts.length;
-
-  renderRecentInquiries();
-}
-
-/* =========================================
-   START
-========================================= */
-
-boot();
-
-</script>
-
-</body>
-</html>
+   </div>
+   <div class="form-actions"><button class="btn btn-gold" type="submit">حفظ التغييرات</button></div>
+  </form>
+ </div>
+</section>
+
+<section class="page" id="page-products">
+ <div class="page-heading">
+  <div><h2>منتجاتي</h2><p>إدارة المنتجات التي تعرضها في منصة WASLA.</p></div>
+  <button class="btn btn-gold" onclick="openProductModal()"><i class="fa-solid fa-plus"></i> إضافة منتج</button>
+ </div>
+ <div id="myProducts" class="product-grid"></div>
+</section>
+
+<section class="page" id="page-discover">
+ <div class="page-heading">
+  <div><h2>اكتشف المنتجات</h2><p>تصفح المنتجات المنشورة من الشركات على WASLA.</p></div>
+ </div>
+ <div class="discover-bar">
+  <input id="discoverSearch" placeholder="ابحث عن منتج أو وصف...">
+  <select id="discoverCategory"><option value="">كل التصنيفات</option></select>
+  <button class="btn btn-dark" onclick="loadDiscover()">بحث</button>
+ </div>
+ <div id="discoverProducts" class="product-grid"></div>
+</section>
+
+<section class="page" id="page-inquiries">
+ <div class="page-heading">
+  <div><h2>الاستفسارات التجارية</h2><p>تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.</p></div>
+ </div>
+ <div class="card panel">
+  <div class="table-wrap">
+   <table>
+    <thead><tr><th>المنتج</th><th>الكمية</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead>
+    <tbody id="inquiriesTable"></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="page-inbox">
+ <div class="page-heading">
+  <div><h2>المحادثات</h2><p>تواصل مع الأطراف المرتبطة باستفساراتك.</p></div>
+ </div>
+ <div class="inbox-layout">
+  <div class="card inbox-list" id="inboxList"></div>
+  <div class="card chat-area">
+   <div class="chat-head" id="chatTitle">اختر استفساراً لعرض المحادثة</div>
+   <div class="chat-messages" id="chatMessages"><div class="empty">ستظهر الرسائل هنا</div></div>
+   <form class="chat-compose" id="chatForm">
+    <input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off">
+    <button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button>
+   </form>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="page-profile">
+ <div class="page-heading">
+  <div><h2>الملف الشخصي</h2><p>إدارة بيانات حسابك الشخصي.</p></div>
+ </div>
+ <div class="card panel">
+  <form 
