@@ -1,1726 +1,520 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WASLA — Workspace</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    :root{
-      --bg:#f5f7fb;
-      --card:#ffffff;
-      --text:#172033;
-      --muted:#718096;
-      --primary:#155eef;
-      --primary-dark:#0d47c9;
-      --primary-soft:#eaf1ff;
-      --green:#12b76a;
-      --green-soft:#e9f9f1;
-      --orange:#f79009;
-      --orange-soft:#fff4e5;
-      --red:#f04438;
-      --border:#e7ebf2;
-      --shadow:0 12px 35px rgba(16,24,40,.07);
-      --radius:20px;
-    }
-
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
-
-    body{
-      font-family:Arial,"Segoe UI",sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    button,input,textarea,select{
-      font:inherit;
-    }
-
-    button{
-      cursor:pointer;
-    }
-
-    .app{
-      display:flex;
-      min-height:100vh;
-    }
-
-    /* SIDEBAR */
-    .sidebar{
-      width:270px;
-      background:#fff;
-      border-left:1px solid var(--border);
-      padding:22px 16px;
-      position:fixed;
-      right:0;
-      top:0;
-      bottom:0;
-      z-index:50;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:4px 10px 26px;
-    }
-
-    .brand-logo{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      background:linear-gradient(135deg,#155eef,#6b8cff);
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:20px;
-      font-weight:800;
-      box-shadow:0 8px 20px rgba(21,94,239,.22);
-    }
-
-    .brand-name{
-      font-size:21px;
-      font-weight:800;
-      letter-spacing:.5px;
-    }
-
-    .brand-sub{
-      font-size:10px;
-      color:var(--muted);
-      margin-top:3px;
-      letter-spacing:1px;
-    }
-
-    .nav{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .nav-btn{
-      border:0;
-      background:transparent;
-      color:#596579;
-      width:100%;
-      display:flex;
-      align-items:center;
-      gap:13px;
-      padding:13px 14px;
-      border-radius:13px;
-      text-align:right;
-      transition:.2s;
-    }
-
-    .nav-btn:hover{
-      background:#f5f8ff;
-      color:var(--primary);
-    }
-
-    .nav-btn.active{
-      background:var(--primary-soft);
-      color:var(--primary);
-      font-weight:700;
-    }
-
-    .nav-icon{
-      width:22px;
-      text-align:center;
-      font-size:18px;
-    }
-
-    .sidebar-bottom{
-      margin-top:auto;
-    }
-
-    .user-mini{
-      background:#f7f9fc;
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-
-    .avatar{
-      width:40px;
-      height:40px;
-      border-radius:12px;
-      background:linear-gradient(135deg,#155eef,#7b61ff);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:800;
-      flex-shrink:0;
-    }
-
-    .user-info{
-      min-width:0;
-    }
-
-    .user-name{
-      font-size:13px;
-      font-weight:700;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .user-type{
-      color:var(--muted);
-      font-size:11px;
-      margin-top:3px;
-    }
-
-    .logout{
-      width:100%;
-      border:1px solid var(--border);
-      background:#fff;
-      color:#667085;
-      border-radius:12px;
-      padding:10px;
-    }
-
-    /* MAIN */
-    .main{
-      width:calc(100% - 270px);
-      margin-right:270px;
-      min-height:100vh;
-    }
-
-    .topbar{
-      height:76px;
-      background:#fff;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 32px;
-      position:sticky;
-      top:0;
-      z-index:30;
-    }
-
-    .page-title{
-      font-size:19px;
-      font-weight:800;
-    }
-
-    .page-sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:4px;
-    }
-
-    .top-actions{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    .lang-btn,
-    .mobile-menu{
-      border:1px solid var(--border);
-      background:#fff;
-      border-radius:11px;
-      padding:9px 12px;
-      color:#596579;
-    }
-
-    .content{
-      padding:30px;
-      max-width:1500px;
-      margin:auto;
-    }
-
-    /* HERO */
-    .hero{
-      background:linear-gradient(135deg,#0f4cdb,#3b6ff4 60%,#6d7ff7);
-      border-radius:24px;
-      padding:30px;
-      color:white;
-      box-shadow:0 18px 45px rgba(21,94,239,.2);
-      position:relative;
-      overflow:hidden;
-      margin-bottom:24px;
-    }
-
-    .hero:after{
-      content:"";
-      position:absolute;
-      width:280px;
-      height:280px;
-      border-radius:50%;
-      background:rgba(255,255,255,.09);
-      left:-70px;
-      top:-120px;
-    }
-
-    .hero h1{
-      font-size:28px;
-      margin-bottom:8px;
-      position:relative;
-      z-index:2;
-    }
-
-    .hero p{
-      color:rgba(255,255,255,.82);
-      max-width:700px;
-      line-height:1.8;
-      position:relative;
-      z-index:2;
-    }
-
-    /* CARDS */
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:18px;
-      margin-bottom:24px;
-    }
-
-    .stat{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:20px;
-      box-shadow:var(--shadow);
-    }
-
-    .stat-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .stat-icon{
-      width:42px;
-      height:42px;
-      border-radius:13px;
-      background:var(--primary-soft);
-      color:var(--primary);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:19px;
-    }
-
-    .stat-number{
-      font-size:30px;
-      font-weight:800;
-      margin-top:16px;
-    }
-
-    .stat-label{
-      color:var(--muted);
-      font-size:13px;
-      margin-top:4px;
-    }
-
-    .section{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      margin-bottom:22px;
-      overflow:hidden;
-    }
-
-    .section-head{
-      padding:20px 22px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .section-title{
-      font-size:17px;
-      font-weight:800;
-    }
-
-    .section-body{
-      padding:20px;
-    }
-
-    /* INQUIRY */
-    .inquiry{
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:17px;
-      margin-bottom:12px;
-      background:#fff;
-    }
-
-    .inquiry:last-child{
-      margin-bottom:0;
-    }
-
-    .inquiry-head{
-      display:flex;
-      justify-content:space-between;
-      gap:15px;
-      margin-bottom:10px;
-    }
-
-    .inquiry-product{
-      font-weight:800;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 10px;
-      border-radius:20px;
-      font-size:11px;
-      font-weight:700;
-    }
-
-    .badge-green{
-      background:var(--green-soft);
-      color:#087443;
-    }
-
-    .badge-orange{
-      background:var(--orange-soft);
-      color:#b54708;
-    }
-
-    .badge-blue{
-      background:var(--primary-soft);
-      color:var(--primary);
-    }
-
-    .inquiry-message{
-      color:#596579;
-      font-size:13px;
-      line-height:1.8;
-      background:#f8fafc;
-      border-radius:12px;
-      padding:12px;
-    }
-
-    .reply{
-      margin-top:10px;
-      border-right:3px solid var(--green);
-      background:#f0fbf6;
-      padding:12px;
-      border-radius:10px;
-      color:#344054;
-      font-size:13px;
-      line-height:1.8;
-    }
-
-    /* PRODUCTS */
-    .product-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:18px;
-    }
-
-    .product-card{
-      border:1px solid var(--border);
-      border-radius:17px;
-      padding:18px;
-      background:#fff;
-      transition:.2s;
-    }
-
-    .product-card:hover{
-      transform:translateY(-3px);
-      box-shadow:0 12px 30px rgba(16,24,40,.08);
-    }
-
-    .product-image{
-      height:130px;
-      background:linear-gradient(135deg,#eef3ff,#f7f9ff);
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:38px;
-      margin-bottom:15px;
-      overflow:hidden;
-    }
-
-    .product-image img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .product-name{
-      font-weight:800;
-      margin-bottom:7px;
-    }
-
-    .product-company{
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .product-desc{
-      color:#667085;
-      font-size:12px;
-      line-height:1.7;
-      margin-top:10px;
-    }
-
-    /* PROFILE */
-    .profile-cover{
-      height:170px;
-      background:linear-gradient(135deg,#0f4cdb,#7568f5);
-      border-radius:20px 20px 0 0;
-    }
-
-    .profile-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:20px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-    }
-
-    .profile-main{
-      padding:0 25px 25px;
-      position:relative;
-    }
-
-    .profile-avatar{
-      width:90px;
-      height:90px;
-      border-radius:25px;
-      background:linear-gradient(135deg,#155eef,#7b61ff);
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:30px;
-      font-weight:800;
-      border:5px solid white;
-      margin-top:-45px;
-      position:relative;
-    }
-
-    .profile-name{
-      font-size:23px;
-      font-weight:800;
-      margin-top:12px;
-    }
-
-    .profile-role{
-      color:var(--muted);
-      margin-top:5px;
-    }
-
-    .profile-grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:15px;
-      margin-top:25px;
-    }
-
-    .profile-field{
-      background:#f8fafc;
-      border:1px solid var(--border);
-      padding:15px;
-      border-radius:14px;
-    }
-
-    .field-label{
-      font-size:11px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-
-    .field-value{
-      font-weight:700;
-      font-size:14px;
-    }
-
-    /* FORMS */
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:16px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-    }
-
-    .field.full{
-      grid-column:1/-1;
-    }
-
-    .field label{
-      font-size:12px;
-      font-weight:700;
-      color:#475467;
-    }
-
-    .field input,
-    .field textarea,
-    .field select{
-      border:1px solid #d9dee8;
-      border-radius:12px;
-      padding:12px;
-      outline:none;
-      background:#fff;
-    }
-
-    .field input:focus,
-    .field textarea:focus,
-    .field select:focus{
-      border-color:var(--primary);
-      box-shadow:0 0 0 3px rgba(21,94,239,.1);
-    }
-
-    .primary-btn{
-      border:0;
-      background:var(--primary);
-      color:white;
-      border-radius:12px;
-      padding:12px 18px;
-      font-weight:700;
-    }
-
-    .primary-btn:hover{
-      background:var(--primary-dark);
-    }
-
-    .secondary-btn{
-      border:1px solid var(--border);
-      background:white;
-      color:#475467;
-      border-radius:12px;
-      padding:11px 16px;
-    }
-
-    /* DISCOVER */
-    .discover-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:18px;
-    }
-
-    .company-card{
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:20px;
-      background:#fff;
-    }
-
-    .company-logo{
-      width:52px;
-      height:52px;
-      border-radius:15px;
-      background:var(--primary-soft);
-      color:var(--primary);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:800;
-      font-size:20px;
-      margin-bottom:14px;
-    }
-
-    .company-name{
-      font-weight:800;
-      font-size:16px;
-    }
-
-    .company-location{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:6px;
-    }
-
-    /* EMPTY */
-    .empty{
-      padding:45px 20px;
-      text-align:center;
-      color:var(--muted);
-    }
-
-    .empty-icon{
-      font-size:38px;
-      margin-bottom:10px;
-      opacity:.7;
-    }
-
-    /* LOADING */
-    .loading{
-      min-height:70vh;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      gap:15px;
-      color:var(--muted);
-    }
-
-    .spinner{
-      width:42px;
-      height:42px;
-      border:4px solid #e4e9f2;
-      border-top-color:var(--primary);
-      border-radius:50%;
-      animation:spin .8s linear infinite;
-    }
-
-    @keyframes spin{
-      to{transform:rotate(360deg)}
-    }
-
-    .notice{
-      position:fixed;
-      left:25px;
-      bottom:25px;
-      max-width:420px;
-      background:#fff;
-      border:1px solid var(--border);
-      box-shadow:0 15px 40px rgba(0,0,0,.15);
-      border-radius:15px;
-      padding:15px 18px;
-      z-index:100;
-      display:none;
-      font-size:13px;
-    }
-
-    .notice.show{
-      display:block;
-    }
-
-    .notice.error{
-      border-right:4px solid var(--red);
-    }
-
-    .notice.success{
-      border-right:4px solid var(--green);
-    }
-
-    /* MOBILE */
-    .mobile-menu{
-      display:none;
-    }
-
-    @media(max-width:1050px){
-      .product-grid,
-      .discover-grid{
-        grid-template-columns:repeat(2,1fr);
-      }
-    }
-
-    @media(max-width:800px){
-      .sidebar{
-        transform:translateX(100%);
-        transition:.25s;
-      }
-
-      .sidebar.open{
-        transform:translateX(0);
-      }
-
-      .main{
-        width:100%;
-        margin-right:0;
-      }
-
-      .mobile-menu{
-        display:block;
-      }
-
-      .topbar{
-        padding:0 16px;
-      }
-
-      .content{
-        padding:18px;
-      }
-
-      .stats{
-        grid-template-columns:1fr;
-      }
-
-      .product-grid,
-      .discover-grid{
-        grid-template-columns:1fr;
-      }
-
-      .profile-grid,
-      .form-grid{
-        grid-template-columns:1fr;
-      }
-
-      .hero{
-        padding:23px;
-      }
-
-      .hero h1{
-        font-size:23px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WASLA — Workspace</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#718096;--primary:#155eef;--primary-dark:#0d47c9;--primary-soft:#eaf1ff;--green:#12b76a;--green-soft:#e9f9f1;--orange:#f79009;--orange-soft:#fff4e5;--red:#f04438;--border:#e7ebf2;--shadow:0 12px 35px rgba(16,24,40,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font-family:Arial,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{width:270px;background:#fff;border-inline-start:1px solid var(--border);padding:22px 16px;position:fixed;inset-inline-end:0;top:0;bottom:0;z-index:50;display:flex;flex-direction:column;transition:transform .25s}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 10px 26px}
+.brand-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#155eef,#6b8cff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;box-shadow:0 8px 20px rgba(21,94,239,.22)}
+.brand-name{font-size:21px;font-weight:800;letter-spacing:.5px}
+.brand-sub{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1px}
+.nav{display:flex;flex-direction:column;gap:6px}
+.nav-btn{border:0;background:transparent;color:#596579;width:100%;display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:13px;text-align:start;transition:.2s}
+.nav-btn:hover{background:#f5f8ff;color:var(--primary)}
+.nav-btn.active{background:var(--primary-soft);color:var(--primary);font-weight:700}
+.nav-icon{width:22px;text-align:center;font-size:18px}
+.sidebar-bottom{margin-top:auto}
+.user-mini{background:#f7f9fc;border:1px solid var(--border);border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#155eef,#7b61ff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.user-info{min-width:0}
+.user-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-type{color:var(--muted);font-size:11px;margin-top:3px}
+.logout{width:100%;border:1px solid var(--border);background:#fff;color:#667085;border-radius:12px;padding:10px}
+.main{width:calc(100% - 270px);margin-inline-end:270px;min-height:100vh}
+.topbar{height:76px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:30}
+.page-title{font-size:19px;font-weight:800}
+.page-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.lang-btn,.mobile-menu{border:1px solid var(--border);background:#fff;border-radius:11px;padding:9px 12px;color:#596579}
+.mobile-menu{display:none}
+.content{padding:30px;max-width:1500px;margin:auto}
+.hero{background:linear-gradient(135deg,#0f4cdb,#3b6ff4 60%,#6d7ff7);border-radius:24px;padding:30px;color:#fff;box-shadow:0 18px 45px rgba(21,94,239,.2);position:relative;overflow:hidden;margin-bottom:24px}
+.hero:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.09);inset-inline-start:-70px;top:-120px}
+.hero h1{font-size:28px;margin-bottom:8px;position:relative;z-index:2}
+.hero p{color:rgba(255,255,255,.82);max-width:700px;line-height:1.8;position:relative;z-index:2}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+.stat-top{display:flex;justify-content:space-between;align-items:center}
+.stat-icon{width:42px;height:42px;border-radius:13px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:19px}
+.stat-number{font-size:30px;font-weight:800;margin-top:16px}
+.stat-label{color:var(--muted);font-size:13px;margin-top:4px}
+.section{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden}
+.section-head{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.section-title{font-size:17px;font-weight:800}
+.section-body{padding:20px}
+.inquiry{border:1px solid var(--border);border-radius:16px;padding:17px;margin-bottom:12px;background:#fff}
+.inquiry:last-child{margin-bottom:0}
+.inquiry-head{display:flex;justify-content:space-between;gap:15px;margin-bottom:10px}
+.badge{display:inline-flex;align-items:center;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-green{background:var(--green-soft);color:#087443}
+.badge-orange{background:var(--orange-soft);color:#b54708}
+.inquiry-message{color:#596579;font-size:13px;line-height:1.8;background:#f8fafc;border-radius:12px;padding:12px}
+.reply{margin-top:10px;border-inline-start:3px solid var(--green);background:#f0fbf6;padding:12px;border-radius:10px;color:#344054;font-size:13px;line-height:1.8}
+.product-grid,.discover-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.product-card{border:1px solid var(--border);border-radius:17px;padding:18px;background:#fff;transition:.2s}
+.product-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(16,24,40,.08)}
+.product-image{height:130px;background:linear-gradient(135deg,#eef3ff,#f7f9ff);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:15px;overflow:hidden}
+.product-image img{width:100%;height:100%;object-fit:cover}
+.product-name{font-weight:800;margin-bottom:7px}
+.product-company{color:var(--muted);font-size:12px}
+.product-desc{color:#667085;font-size:12px;line-height:1.7;margin-top:10px}
+.profile-card{background:#fff;border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+.profile-cover{height:170px;background:linear-gradient(135deg,#0f4cdb,#7568f5)}
+.profile-main{padding:0 25px 25px}
+.profile-top{display:flex;justify-content:space-between;align-items:flex-end}
+.profile-top .secondary-btn{margin-top:14px}
+.profile-avatar{width:90px;height:90px;border-radius:25px;background:linear-gradient(135deg,#155eef,#7b61ff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;border:5px solid #fff;margin-top:-45px}
+.profile-name{font-size:23px;font-weight:800;margin-top:12px}
+.profile-role{color:var(--muted);margin-top:5px}
+.profile-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.profile-meta span{background:var(--primary-soft);color:var(--primary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700}
+.profile-bio{margin:14px 0;color:#475467;line-height:1.8}
+.profile-grid,.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.profile-field{background:#f8fafc;border:1px solid var(--border);padding:15px;border-radius:14px}
+.field-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.field-value{font-weight:700;font-size:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:700;color:#475467}
+.field input,.field textarea,.composer textarea,.chat-form input{border:1px solid #d9dee8;border-radius:12px;padding:12px;outline:none;background:#fff}
+.field input:focus,.field textarea:focus,.composer textarea:focus,.chat-form input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(21,94,239,.1)}
+.primary-btn{border:0;background:var(--primary);color:#fff;border-radius:12px;padding:12px 18px;font-weight:700}
+.primary-btn:hover{background:var(--primary-dark)}
+.secondary-btn{border:1px solid var(--border);background:#fff;color:#475467;border-radius:12px;padding:11px 16px}
+.company-card{border:1px solid var(--border);border-radius:18px;padding:20px;background:#fff}
+.company-logo{width:52px;height:52px;border-radius:15px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;margin-bottom:14px}
+.company-name{font-weight:800;font-size:16px}
+.company-location{color:var(--muted);font-size:12px;margin-top:6px}
+.composer{display:flex;gap:10px;margin-bottom:18px}
+.composer textarea{flex:1;resize:vertical}
+.post{border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.post-head{display:flex;align-items:center;gap:10px}
+.post-head>div:nth-child(2){flex:1}
+.post-body{margin-top:12px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.chat{display:grid;grid-template-columns:320px 1fr;gap:18px;height:calc(100vh - 150px);min-height:420px}
+.chat-list,.chat-thread{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:auto;display:flex;flex-direction:column}
+.chat-item{display:flex;gap:10px;align-items:center;border:0;background:none;padding:14px;width:100%;text-align:start;border-bottom:1px solid var(--border)}
+.chat-item.on,.chat-item:hover{background:var(--primary-soft)}
+.chat-meta{min-width:0;display:flex;flex-direction:column}
+.chat-meta span{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.chat-back{display:none}
+.chat-msgs{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:75%;padding:10px 14px;border-radius:16px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.bubble small{display:block;font-size:10px;opacity:.65;margin-top:4px}
+.bubble.me{background:var(--primary);color:#fff}
+.bubble.them{background:#eef1f6}
+[dir="rtl"] .bubble.me,[dir="ltr"] .bubble.them{align-self:flex-start}
+[dir="rtl"] .bubble.them,[dir="ltr"] .bubble.me{align-self:flex-end}
+.chat-form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border)}
+.chat-form input{flex:1}
+.empty{padding:45px 20px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:38px;margin-bottom:10px;opacity:.7}
+.loading{min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;color:var(--muted)}
+.spinner{width:42px;height:42px;border:4px solid #e4e9f2;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.notice{position:fixed;inset-inline-start:25px;bottom:25px;max-width:420px;background:#fff;border:1px solid var(--border);box-shadow:0 15px 40px rgba(0,0,0,.15);border-radius:15px;padding:15px 18px;z-index:100;display:none;font-size:13px}
+.notice.show{display:block}
+.notice.error{border-inline-start:4px solid var(--red)}
+.notice.success{border-inline-start:4px solid var(--green)}
+@media(max-width:1050px){.product-grid,.discover-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){
+.sidebar{transform:translateX(100%)}
+[dir="ltr"] .sidebar{transform:translateX(-100%)}
+.sidebar.open,[dir="ltr"] .sidebar.open{transform:none}
+.main{width:100%;margin-inline-end:0}
+.mobile-menu{display:block}
+.topbar{padding:0 16px}
+.content{padding:18px}
+.stats,.product-grid,.discover-grid,.profile-grid,.form-grid{grid-template-columns:1fr}
+.hero{padding:23px}.hero h1{font-size:23px}
+.chat{grid-template-columns:1fr;height:calc(100vh - 130px)}
+.chat.open .chat-list,.chat:not(.open) .chat-thread{display:none}
+.chat-back{display:inline-block}.composer{flex-direction:column}}
+</style>
 </head>
-
 <body>
-
 <div id="app" class="app">
-
-  <aside class="sidebar" id="sidebar">
-
-    <div class="brand">
-      <div class="brand-logo">W</div>
-      <div>
-        <div class="brand-name">WASLA</div>
-        <div class="brand-sub">GLOBAL BUSINESS NETWORK</div>
-      </div>
-    </div>
-
-    <nav class="nav">
-
-      <button class="nav-btn active" data-page="overview" onclick="navigate('overview')">
-        <span class="nav-icon">⌂</span>
-        <span>الرئيسية</span>
-      </button>
-
-      <button class="nav-btn" data-page="inbox" onclick="navigate('inbox')">
-        <span class="nav-icon">✉</span>
-        <span>الرسائل والاستفسارات</span>
-      </button>
-
-      <button class="nav-btn" data-page="profile" onclick="navigate('profile')">
-        <span class="nav-icon">♙</span>
-        <span>الملف الشخصي</span>
-      </button>
-
-      <button class="nav-btn" data-page="company" id="companyNav" onclick="navigate('company')">
-        <span class="nav-icon">▣</span>
-        <span>الشركة</span>
-      </button>
-
-      <button class="nav-btn" data-page="products" id="productsNav" onclick="navigate('products')">
-        <span class="nav-icon">◈</span>
-        <span>المنتجات</span>
-      </button>
-
-      <button class="nav-btn" data-page="discover" onclick="navigate('discover')">
-        <span class="nav-icon">⌕</span>
-        <span>اكتشاف</span>
-      </button>
-
-      <button class="nav-btn" data-page="settings" onclick="navigate('settings')">
-        <span class="nav-icon">⚙</span>
-        <span>الإعدادات</span>
-      </button>
-
-    </nav>
-
-    <div class="sidebar-bottom">
-
-      <div class="user-mini">
-        <div class="avatar" id="sideAvatar">W</div>
-        <div class="user-info">
-          <div class="user-name" id="sideName">WASLA User</div>
-          <div class="user-type" id="sideType">Account</div>
-        </div>
-      </div>
-
-      <button class="logout" onclick="logout()">تسجيل الخروج</button>
-
-    </div>
-  </aside>
-
-  <main class="main">
-
-    <header class="topbar">
-
-      <div>
-        <div class="page-title" id="pageTitle">WASLA WORKSPACE</div>
-        <div class="page-sub" id="pageSub">إدارة حضورك التجاري من مكان واحد</div>
-      </div>
-
-      <div class="top-actions">
-        <button class="lang-btn" onclick="toggleLanguage()">English</button>
-        <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
-      </div>
-
-    </header>
-
-    <div id="content" class="content">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div>جاري تحميل مساحة WASLA...</div>
-      </div>
-    </div>
-
-  </main>
-
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-logo">W</div><div><div class="brand-name">WASLA</div><div class="brand-sub">GLOBAL BUSINESS NETWORK</div></div></div>
+  <nav class="nav">
+    <button class="nav-btn active" data-page="overview" onclick="navigate('overview')"><span class="nav-icon">⌂</span><span>الرئيسية</span></button>
+    <button class="nav-btn" data-page="inbox" onclick="navigate('inbox')"><span class="nav-icon">✉</span><span>الرسائل والاستفسارات</span></button>
+    <button class="nav-btn" data-page="messages" onclick="navigate('messages')"><span class="nav-icon">💬</span><span>المحادثات</span></button>
+    <button class="nav-btn" data-page="profile" onclick="navigate('profile')"><span class="nav-icon">♙</span><span>الملف الشخصي</span></button>
+    <button class="nav-btn" data-page="company" id="companyNav" onclick="navigate('company')"><span class="nav-icon">▣</span><span>الشركة</span></button>
+    <button class="nav-btn" data-page="products" id="productsNav" onclick="navigate('products')"><span class="nav-icon">◈</span><span>المنتجات</span></button>
+    <button class="nav-btn" data-page="discover" onclick="navigate('discover')"><span class="nav-icon">⌕</span><span>اكتشاف</span></button>
+    <button class="nav-btn" data-page="settings" onclick="navigate('settings')"><span class="nav-icon">⚙</span><span>الإعدادات</span></button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-mini"><div class="avatar" id="sideAvatar">W</div><div class="user-info"><div class="user-name" id="sideName">WASLA User</div><div class="user-type" id="sideType">Account</div></div></div>
+    <button class="logout" onclick="logout()">تسجيل الخروج</button>
+  </div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div><div class="page-title" id="pageTitle">WASLA WORKSPACE</div><div class="page-sub" id="pageSub">إدارة حضورك التجاري من مكان واحد</div></div>
+    <div class="top-actions"><button class="lang-btn" onclick="toggleLanguage()">English</button><button class="mobile-menu" onclick="toggleSidebar()">☰</button></div>
+  </header>
+  <div id="content" class="content"><div class="loading"><div class="spinner"></div><div>جاري تحميل مساحة WASLA...</div></div></div>
+</main>
 </div>
-
 <div id="notice" class="notice"></div>
-
 <script>
 const SUPABASE_URL='https://bzrcbodvcuujdjupfgzw.supabase.co';
 const SUPABASE_KEY='sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const db=window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+let user=null,profile=null,company=null,products=[],inquiries=[];
+let page='overview',chat=null,channel=null;
+let language=(()=>{try{return localStorage.getItem('wasla_lang')||'ar'}catch(e){return 'ar'}})();
 
-let user=null;
-let profile=null;
-let company=null;
-let products=[];
-let inquiries=[];
-let language='ar';
-
-function rel(value){
-  if(Array.isArray(value)) return value[0] || null;
-  return value || null;
-}
-
-function status(value){
-  const names={
-    published:['منشور','Published'],
-    draft:['مسودة','Draft'],
-    pending:['قيد الانتظار','Pending'],
-    active:['نشط','Active'],
-    inactive:['غير نشط','Inactive'],
-    archived:['مؤرشف','Archived']
-  };
-
-  return names[value]
-    ? (language==='ar'?names[value][0]:names[value][1])
-    : (value||'');
-}
-
-function esc(value){
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
-}
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const L=(ar,en)=>language==='ar'?ar:en;
+const rel=v=>Array.isArray(v)?v[0]||null:v||null;
+const norm=s=>s.replace(/\s+/g,' ').trim();
+const fmt=t=>new Date(t).toLocaleString(language==='ar'?'ar':'en',{dateStyle:'medium',timeStyle:'short'});
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+const initials=n=>n?n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase():'W';
+const statusNames={published:['منشور','Published'],draft:['مسودة','Draft'],pending:['قيد الانتظار','Pending'],active:['نشط','Active'],inactive:['غير نشط','Inactive'],archived:['مؤرشف','Archived']};
+const status=v=>statusNames[v]?statusNames[v][language==='ar'?0:1]:(v||'');
+const typeNames={buyer:['مشتري','Buyer'],company:['شركة','Company'],manufacturer:['مصنّع','Manufacturer'],brand:['علامة تجارية','Brand'],trader:['تاجر','Trader']};
+const accountTypeName=t=>typeNames[t]?typeNames[t][language==='ar'?0:1]:(t||'');
+const displayName=()=>profile?.full_name||user?.email?.split('@')[0]||'WASLA User';
 
 function showNotice(message,error=false){
-  const el=document.getElementById('notice');
-
+  const el=$('notice');
   el.textContent=message;
   el.className='notice show '+(error?'error':'success');
-
-  setTimeout(()=>{
-    el.className='notice';
-  },4500);
+  setTimeout(()=>{el.className='notice'},4500);
 }
 
-function initials(name){
-  if(!name) return 'W';
+/* ---------- Arabic/English UI ---------- */
+const EN={'الرئيسية':'Home','الرسائل والاستفسارات':'Inquiries','المحادثات':'Chats','الملف الشخصي':'Profile','الشركة':'Company','المنتجات':'Products','اكتشاف':'Discover','الإعدادات':'Settings','تسجيل الخروج':'Log out','إدارة حضورك التجاري من مكان واحد':'Manage your business presence in one place','جاري تحميل مساحة WASLA...':'Loading your WASLA workspace...','يجب تسجيل الدخول أولاً':'Please log in first','تعذّر تحميل الحساب':'Could not load your account','تابع جميع استفساراتك وتواصلك التجاري':'Track all your inquiries and business communication','معلومات حسابك على WASLA':'Your WASLA account details','إدارة معلومات شركتك':'Manage your company details','إدارة المنتجات والخدمات المعروضة':'Manage your listed products and services','اكتشف المنتجات والشركات داخل شبكة WASLA':'Discover products and companies on the WASLA network','إعدادات حسابك':'Your account settings','مرحباً بك في WASLA 👋':'Welcome to WASLA 👋','مساحة واحدة لإدارة حضورك التجاري، اكتشاف الفرص، والتواصل مع الشركات والعملاء داخل شبكة أعمال عالمية.':'One space to manage your business presence, discover opportunities, and connect with companies and customers in a global business network.','إجمالي الاستفسارات':'Total inquiries','جميع استفساراتك':'All your inquiries','بانتظار الرد':'Awaiting reply','استفسارات تحتاج متابعة':'Inquiries that need follow-up','تم الرد عليها':'Answered','استفسارات تمت معالجتها':'Inquiries handled','آخر النشاطات':'Latest activity','فتح الوارد':'Open inbox','لا توجد استفسارات حتى الآن':'No inquiries yet','تم الرد':'Answered','استفسار تجاري':'Business inquiry','لا توجد رسالة':'No message','الرد:':'Reply:','كل التواصل التجاري في مكان واحد':'All business communication in one place','لا توجد رسائل بعد':'No messages yet','عندما يصلك استفسار تجاري سيظهر هنا.':'When you receive a business inquiry it will appear here.','لم يتم العثور على شركة مرتبطة بحسابك':'No company is linked to your account','معلومات الشركة':'Company information','بيانات شركتك داخل WASLA':'Your company data on WASLA','اسم الشركة':'Company name','الدولة':'Country','المدينة':'City','الموقع الإلكتروني':'Website','المنتجات متاحة للحسابات التجارية':'Products are available for business accounts','منتجات شركتك':'Your company products','لا توجد منتجات':'No products','ستظهر منتجات شركتك هنا.':'Your company products will appear here.','منتج':'Product','منتج تجاري':'Commercial product','لا يوجد وصف':'No description','إعدادات الحساب':'Account settings','إدارة تفضيلات WASLA':'Manage your WASLA preferences','اللغة':'Language','البريد الإلكتروني':'Email','الاسم الكامل':'Full name','نوع الحساب':'Account type','حالة الحساب':'Account status','● نشط':'● Active','غير محدد':'Not set'};
 
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0,2)
-    .map(x=>x[0])
-    .join('')
-    .toUpperCase();
+function trNode(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  let n;
+  while((n=w.nextNode())){
+    if(n.parentElement&&n.parentElement.closest('.lang-btn,script,style'))continue;
+    if(n.__ar===undefined&&EN[norm(n.nodeValue)])n.__ar=n.nodeValue;
+    if(n.__ar!==undefined){
+      const v=language==='en'?EN[norm(n.__ar)]:n.__ar;
+      if(n.nodeValue!==v)n.nodeValue=v;
+    }
+  }
 }
 
-function accountTypeName(type){
-  const names={
-    buyer:['مشتري','Buyer'],
-    company:['شركة','Company'],
-    manufacturer:['مصنّع','Manufacturer'],
-    brand:['علامة تجارية','Brand'],
-    trader:['تاجر','Trader']
-  };
-
-  return names[type]
-    ? (language==='ar'?names[type][0]:names[type][1])
-    : (type||'');
+function applyLang(){
+  document.documentElement.lang=language;
+  document.documentElement.dir=language==='ar'?'rtl':'ltr';
+  document.querySelector('.lang-btn').textContent=language==='ar'?'English':'العربية';
+  trNode(document.body);
 }
 
+function toggleLanguage(){
+  language=language==='ar'?'en':'ar';
+  try{localStorage.setItem('wasla_lang',language)}catch(e){}
+  applyLang();
+  if(user){updateUserUI();navigate(page)}
+}
+
+/* ---------- boot & data ---------- */
 async function boot(){
-
   try{
-
     const {data,error}=await db.auth.getSession();
-
-    if(error) throw error;
-
+    if(error)throw error;
     if(!data.session){
-      document.getElementById('content').innerHTML=`
-        <div class="section">
-          <div class="empty">
-            <div class="empty-icon">🔐</div>
-            <h3>يجب تسجيل الدخول أولاً</h3>
-          </div>
-        </div>
-      `;
+      $('content').innerHTML='<div class="section"><div class="empty"><div class="empty-icon">🔐</div><h3>يجب تسجيل الدخول أولاً</h3></div></div>';
       return;
     }
-
     user=data.session.user;
-
-    const profileResult=await db
-      .from('profiles')
-      .select('*')
-      .eq('id',user.id)
-      .single();
-
-    if(profileResult.error) throw profileResult.error;
-
-    profile=profileResult.data;
-
+    const pr=await db.from('profiles').select('*').eq('id',user.id).single();
+    if(pr.error)throw pr.error;
+    profile=pr.data;
     updateUserUI();
-
     await loadCompany();
     await loadProducts();
     await loadInquiries();
-
     navigate('overview');
-
   }catch(error){
-
     console.error('WASLA boot error:',error);
-
-    showNotice(
-      'تعذّر تحميل الحساب: '+(error.message || 'Unknown error'),
-      true
-    );
-
-    document.getElementById('content').innerHTML=`
-      <div class="section">
-        <div class="empty">
-          <div class="empty-icon">⚠️</div>
-          <h3>تعذّر تحميل الحساب</h3>
-          <p style="margin-top:8px">${esc(error.message || '')}</p>
-        </div>
-      </div>
-    `;
+    showNotice('تعذّر تحميل الحساب: '+(error.message||'Unknown error'),true);
+    $('content').innerHTML=`<div class="section"><div class="empty"><div class="empty-icon">⚠️</div><h3>تعذّر تحميل الحساب</h3><p style="margin-top:8px">${esc(error.message||'')}</p></div></div>`;
   }
 }
 
 function updateUserUI(){
-
-  const name=
-    profile?.full_name ||
-    user?.email?.split('@')[0] ||
-    'WASLA User';
-
-  const type=
-    profile?.account_type ||
-    'buyer';
-
-  document.getElementById('sideName').textContent=name;
-  document.getElementById('sideType').textContent=accountTypeName(type);
-  document.getElementById('sideAvatar').textContent=initials(name);
-
-  const business=type!=='buyer';
-
-  document.getElementById('companyNav').style.display=
-    business?'flex':'none';
-
-  document.getElementById('productsNav').style.display=
-    business?'flex':'none';
+  const name=displayName(),type=profile?.account_type||'buyer',business=type!=='buyer';
+  $('sideName').textContent=name;
+  $('sideType').textContent=accountTypeName(type);
+  $('sideAvatar').textContent=initials(name);
+  $('companyNav').style.display=business?'flex':'none';
+  $('productsNav').style.display=business?'flex':'none';
+  listen();
 }
 
 async function loadCompany(){
-
   company=null;
-
-  if(!user) return;
-
-  const {data,error}=await db
-    .from('companies')
-    .select('*')
-    .eq('owner_id',user.id)
-    .maybeSingle();
-
-  if(error){
-    console.warn('Company load:',error);
-    return;
-  }
-
+  if(!user)return;
+  const {data,error}=await db.from('companies').select('*').eq('owner_id',user.id).maybeSingle();
+  if(error){console.warn('Company load:',error);return}
   company=data;
 }
 
 async function loadProducts(){
-
   products=[];
-
-  if(!company) return;
-
-  const {data,error}=await db
-    .from('products')
-    .select('*')
-    .eq('company_id',company.id)
-    .order('created_at',{ascending:false});
-
-  if(error){
-    console.warn('Products load:',error);
-    return;
-  }
-
-  products=data || [];
+  if(!company)return;
+  const {data,error}=await db.from('products').select('*').eq('company_id',company.id).order('created_at',{ascending:false});
+  if(error){console.warn('Products load:',error);return}
+  products=data||[];
 }
 
 async function loadInquiries(){
-
   inquiries=[];
-
-  if(!user) return;
-
-  let query=db
-    .from('inquiries')
-    .select('*,products(name),companies(name)')
-    .order('created_at',{ascending:false});
-
-  if(profile?.account_type==='buyer'){
-    query=query.eq('buyer_id',user.id);
-  }else if(company){
-    query=query.eq('company_id',company.id);
-  }else{
-    return;
-  }
-
-  const {data,error}=await query;
-
-  if(error){
-    console.warn('Inquiries load:',error);
-    return;
-  }
-
-  inquiries=data || [];
+  if(!user)return;
+  let q=db.from('inquiries').select('*,products(name),companies(name)').order('created_at',{ascending:false});
+  if(profile?.account_type==='buyer')q=q.eq('buyer_id',user.id);
+  else if(company)q=q.eq('company_id',company.id);
+  else return;
+  const {data,error}=await q;
+  if(error){console.warn('Inquiries load:',error);return}
+  inquiries=data||[];
 }
 
-function navigate(page){
-
-  document.querySelectorAll('.nav-btn').forEach(btn=>{
-    btn.classList.toggle(
-      'active',
-      btn.dataset.page===page
-    );
-  });
-
+/* ---------- navigation ---------- */
+function navigate(p){
+  page=p;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
   const titles={
     overview:['WASLA WORKSPACE','إدارة حضورك التجاري من مكان واحد'],
     inbox:['الرسائل والاستفسارات','تابع جميع استفساراتك وتواصلك التجاري'],
+    messages:[L('المحادثات','Chats'),L('تواصل مباشر مع الأعضاء والشركات','Direct conversations with members and companies')],
     profile:['الملف الشخصي','معلومات حسابك على WASLA'],
     company:['الشركة','إدارة معلومات شركتك'],
     products:['المنتجات','إدارة المنتجات والخدمات المعروضة'],
     discover:['اكتشاف','اكتشف المنتجات والشركات داخل شبكة WASLA'],
     settings:['الإعدادات','إعدادات حسابك']
   };
-
-  document.getElementById('pageTitle').textContent=titles[page][0];
-  document.getElementById('pageSub').textContent=titles[page][1];
-
-  const content=document.getElementById('content');
-
-  if(page==='overview') renderOverview(content);
-  if(page==='inbox') renderInbox(content);
-  if(page==='profile') renderProfile(content);
-  if(page==='company') renderCompany(content);
-  if(page==='products') renderProducts(content);
-  if(page==='discover') renderDiscover(content);
-  if(page==='settings') renderSettings(content);
-
-  document.getElementById('sidebar').classList.remove('open');
-
+  $('pageTitle').textContent=titles[p][0];
+  $('pageSub').textContent=titles[p][1];
+  const el=$('content');
+  ({overview:renderOverview,inbox:renderInbox,messages:renderMessages,profile:renderProfile,company:renderCompany,products:renderProducts,discover:renderDiscover,settings:renderSettings})[p](el);
+  $('sidebar').classList.remove('open');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+/* ---------- overview & inquiries ---------- */
 function renderOverview(el){
-
-  const answered=inquiries.filter(x=>
-    x.status==='answered' ||
-    x.status==='responded' ||
-    x.reply
-  ).length;
-
-  const pending=inquiries.length-answered;
-
-  const name=
-    profile?.full_name ||
-    user?.email?.split('@')[0] ||
-    'صديقي';
-
-  const latest=inquiries.slice(0,3);
-
+  const answered=inquiries.filter(x=>x.status==='answered'||x.status==='responded'||x.reply).length;
+  const pending=inquiries.length-answered,latest=inquiries.slice(0,3);
   el.innerHTML=`
-
-    <div class="hero">
-      <h1>مرحباً بك في WASLA 👋</h1>
-      <p>
-        مساحة واحدة لإدارة حضورك التجاري،
-        اكتشاف الفرص، والتواصل مع الشركات والعملاء
-        داخل شبكة أعمال عالمية.
-      </p>
-    </div>
-
+    <div class="hero"><h1>مرحباً بك في WASLA 👋</h1><p>مساحة واحدة لإدارة حضورك التجاري، اكتشاف الفرص، والتواصل مع الشركات والعملاء داخل شبكة أعمال عالمية.</p></div>
     <div class="stats">
-
-      <div class="stat">
-        <div class="stat-top">
-          <div class="stat-label">إجمالي الاستفسارات</div>
-          <div class="stat-icon">✉</div>
-        </div>
-        <div class="stat-number">${inquiries.length}</div>
-        <div class="stat-label">جميع استفساراتك</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-top">
-          <div class="stat-label">بانتظار الرد</div>
-          <div class="stat-icon" style="background:var(--orange-soft);color:var(--orange)">◷</div>
-        </div>
-        <div class="stat-number">${pending}</div>
-        <div class="stat-label">استفسارات تحتاج متابعة</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-top">
-          <div class="stat-label">تم الرد عليها</div>
-          <div class="stat-icon" style="background:var(--green-soft);color:var(--green)">✓</div>
-        </div>
-        <div class="stat-number">${answered}</div>
-        <div class="stat-label">استفسارات تمت معالجتها</div>
-      </div>
-
+      <div class="stat"><div class="stat-top"><div class="stat-label">إجمالي الاستفسارات</div><div class="stat-icon">✉</div></div><div class="stat-number">${inquiries.length}</div><div class="stat-label">جميع استفساراتك</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-label">بانتظار الرد</div><div class="stat-icon" style="background:var(--orange-soft);color:var(--orange)">◷</div></div><div class="stat-number">${pending}</div><div class="stat-label">استفسارات تحتاج متابعة</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-label">تم الرد عليها</div><div class="stat-icon" style="background:var(--green-soft);color:var(--green)">✓</div></div><div class="stat-number">${answered}</div><div class="stat-label">استفسارات تمت معالجتها</div></div>
     </div>
-
-    <div class="section">
-
-      <div class="section-head">
-        <div class="section-title">آخر النشاطات</div>
-
-        <button class="secondary-btn" onclick="navigate('inbox')">
-          فتح الوارد
-        </button>
-      </div>
-
-      <div class="section-body">
-
-        ${
-          latest.length
-          ? latest.map(renderInquiry).join('')
-          : `
-            <div class="empty">
-              <div class="empty-icon">📭</div>
-              <div>لا توجد استفسارات حتى الآن</div>
-            </div>
-          `
-        }
-
-      </div>
-
-    </div>
-
-  `;
+    <div class="section"><div class="section-head"><div class="section-title">آخر النشاطات</div><button class="secondary-btn" onclick="navigate('inbox')">فتح الوارد</button></div>
+      <div class="section-body">${latest.length?latest.map(renderInquiry).join(''):'<div class="empty"><div class="empty-icon">📭</div><div>لا توجد استفسارات حتى الآن</div></div>'}</div></div>
+    <div class="section"><div class="section-head"><div class="section-title">${L('من المجتمع','From the community')}</div></div><div class="section-body" id="feed"></div></div>`;
+  loadPosts('feed');
 }
 
 function renderInquiry(item){
-
-  const product=rel(item.products);
-
-  const productName=
-    product?.name ||
-    'استفسار تجاري';
-
-  const replied=
-    !!item.reply ||
-    item.status==='answered' ||
-    item.status==='responded';
-
-  return `
-
-    <div class="inquiry">
-
-      <div class="inquiry-head">
-
-        <div class="product-name">
-          ${esc(productName)}
-        </div>
-
-        <span class="badge ${replied?'badge-green':'badge-orange'}">
-          ${replied?'تم الرد':'بانتظار الرد'}
-        </span>
-
-      </div>
-
-      <div class="inquiry-message">
-        ${esc(item.message || 'لا توجد رسالة')}
-      </div>
-
-      ${
-        item.reply
-        ? `
-          <div class="reply">
-            <strong>الرد:</strong><br>
-            ${esc(item.reply)}
-          </div>
-        `
-        : ''
-      }
-
-    </div>
-  `;
+  const productName=rel(item.products)?.name||'استفسار تجاري';
+  const replied=!!item.reply||item.status==='answered'||item.status==='responded';
+  return `<div class="inquiry"><div class="inquiry-head"><div class="product-name">${esc(productName)}</div>
+    <span class="badge ${replied?'badge-green':'badge-orange'}">${replied?'تم الرد':'بانتظار الرد'}</span></div>
+    <div class="inquiry-message">${esc(item.message||'لا توجد رسالة')}</div>
+    ${item.reply?`<div class="reply"><strong>الرد:</strong><br>${esc(item.reply)}</div>`:''}</div>`;
 }
 
 function renderInbox(el){
-
-  el.innerHTML=`
-
-    <div class="section">
-
-      <div class="section-head">
-        <div>
-          <div class="section-title">الرسائل والاستفسارات</div>
-          <div class="page-sub">كل التواصل التجاري في مكان واحد</div>
-        </div>
-      </div>
-
-      <div class="section-body">
-
-        ${
-          inquiries.length
-          ? inquiries.map(renderInquiry).join('')
-          : `
-            <div class="empty">
-              <div class="empty-icon">💬</div>
-              <h3>لا توجد رسائل بعد</h3>
-              <p style="margin-top:8px">
-                عندما يصلك استفسار تجاري سيظهر هنا.
-              </p>
-            </div>
-          `
-        }
-
-      </div>
-
-    </div>
-
-  `;
+  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">الرسائل والاستفسارات</div><div class="page-sub">كل التواصل التجاري في مكان واحد</div></div></div>
+    <div class="section-body">${inquiries.length?inquiries.map(renderInquiry).join(''):'<div class="empty"><div class="empty-icon">💬</div><h3>لا توجد رسائل بعد</h3><p style="margin-top:8px">عندما يصلك استفسار تجاري سيظهر هنا.</p></div>'}</div></div>`;
 }
 
+/* ---------- profile & posts ---------- */
 function renderProfile(el){
-
-  const name=
-    profile?.full_name ||
-    user?.email?.split('@')[0] ||
-    'WASLA User';
-
-  const type=
-    profile?.account_type ||
-    'buyer';
-
+  const name=displayName(),type=profile?.account_type||'buyer';
+  const meta=[accountTypeName(type),profile?.country,profile?.website,user?.email].filter(Boolean);
+  const fields=[['full_name',L('الاسم الكامل','Full name')],['headline',L('المسمى أو الشعار','Headline')],['country',L('الدولة','Country')],['website',L('الموقع الإلكتروني','Website')]];
   el.innerHTML=`
-
-    <div class="profile-card">
-
-      <div class="profile-cover"></div>
-
-      <div class="profile-main">
-
-        <div class="profile-avatar">
-          ${esc(initials(name))}
-        </div>
-
-        <div class="profile-name">
-          ${esc(name)}
-        </div>
-
-        <div class="profile-role">
-          ${esc(accountTypeName(type))}
-        </div>
-
-        <div class="profile-grid">
-
-          <div class="profile-field">
-            <div class="field-label">الاسم الكامل</div>
-            <div class="field-value">
-              ${esc(profile?.full_name || 'غير محدد')}
-            </div>
-          </div>
-
-          <div class="profile-field">
-            <div class="field-label">البريد الإلكتروني</div>
-            <div class="field-value">
-              ${esc(user?.email || '')}
-            </div>
-          </div>
-
-          <div class="profile-field">
-            <div class="field-label">نوع الحساب</div>
-            <div class="field-value">
-              ${esc(accountTypeName(type))}
-            </div>
-          </div>
-
-          <div class="profile-field">
-            <div class="field-label">حالة الحساب</div>
-            <div class="field-value" style="color:var(--green)">
-              ● نشط
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
+    <div class="profile-card"><div class="profile-cover"></div><div class="profile-main">
+      <div class="profile-top"><div class="profile-avatar">${esc(initials(name))}</div><button class="secondary-btn" id="pfEdit">${L('تعديل الملف','Edit profile')}</button></div>
+      <div class="profile-name">${esc(name)}</div>
+      <div class="profile-role">${esc(profile?.headline||accountTypeName(type))}</div>
+      <div class="profile-meta">${meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+      <p class="profile-bio">${esc(profile?.bio||L('أضف نبذة عن نشاطك التجاري.','Add a short bio about your business.'))}</p>
+      <div id="pfForm" class="form-grid" hidden>
+        ${fields.map(([k,l])=>`<div class="field"><label>${l}</label><input id="pf_${k}" maxlength="120" value="${esc(profile?.[k]||'')}"></div>`).join('')}
+        <div class="field full"><label>${L('نبذة','Bio')}</label><textarea id="pf_bio" rows="3" maxlength="500">${esc(profile?.bio||'')}</textarea></div>
+        <div class="field full"><button class="primary-btn" id="pfSave">${L('حفظ','Save')}</button></div>
+      </div></div></div>
+    <div class="section" style="margin-top:22px"><div class="section-head"><div class="section-title">${L('منشوراتي','My posts')}</div></div>
+      <div class="section-body"><div class="composer"><textarea id="postText" rows="2" maxlength="2000" placeholder="${L('شارك تحديثاً مع الشبكة...','Share an update with the network...')}"></textarea><button class="primary-btn" id="postBtn">${L('نشر','Post')}</button></div><div id="myPosts"></div></div></div>`;
+  $('pfEdit').onclick=()=>{$('pfForm').hidden=!$('pfForm').hidden};
+  $('pfSave').onclick=async()=>{
+    const v=k=>$('pf_'+k).value.trim()||null;
+    const upd={full_name:v('full_name'),headline:v('headline'),country:v('country'),website:v('website'),bio:v('bio')};
+    const {error}=await db.from('profiles').update(upd).eq('id',user.id);
+    if(error)return showNotice(error.message,true);
+    Object.assign(profile,upd);
+    updateUserUI();
+    showNotice(L('تم حفظ الملف','Profile saved'));
+    renderProfile(el);
+  };
+  $('postBtn').onclick=async()=>{
+    const body=$('postText').value.trim();
+    if(!body)return;
+    const {error}=await db.from('posts').insert({author_id:user.id,body});
+    if(error)return showNotice(error.message,true);
+    $('postText').value='';
+    loadPosts('myPosts',user.id);
+  };
+  loadPosts('myPosts',user.id);
 }
 
+async function loadPosts(target,authorId){
+  const box=$(target);
+  if(!box)return;
+  let q=db.from('posts').select('id,body,created_at,author_id,profiles(full_name)').order('created_at',{ascending:false}).limit(20);
+  if(authorId)q=q.eq('author_id',authorId);
+  const {data,error}=await q;
+  if(error){box.innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+  box.innerHTML=(data||[]).length?data.map(p=>{
+    const nm=rel(p.profiles)?.full_name||L('عضو','Member');
+    const act=p.author_id===user.id
+      ?`<button class="secondary-btn" data-del="${esc(p.id)}">${L('حذف','Delete')}</button>`
+      :`<button class="secondary-btn" data-msg="${esc(p.author_id)}" data-name="${esc(nm)}">${L('مراسلة','Message')}</button>`;
+    return `<div class="post"><div class="post-head"><div class="avatar">${esc(initials(nm))}</div><div><b>${esc(nm)}</b><div class="page-sub">${fmt(p.created_at)}</div></div>${act}</div><p class="post-body">${esc(p.body)}</p></div>`;
+  }).join(''):`<div class="empty"><div class="empty-icon">📝</div><div>${L('لا توجد منشورات بعد','No posts yet')}</div></div>`;
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const {error:e}=await db.from('posts').delete().eq('id',b.dataset.del);
+    if(e)return showNotice(e.message,true);
+    loadPosts(target,authorId);
+  });
+  box.querySelectorAll('[data-msg]').forEach(b=>b.onclick=()=>startChat(b.dataset.msg,b.dataset.name));
+}
+
+/* ---------- company & products ---------- */
 function renderCompany(el){
-
-  if(!company){
-
-    el.innerHTML=`
-      <div class="section">
-        <div class="empty">
-          <div class="empty-icon">🏢</div>
-          <h3>لم يتم العثور على شركة مرتبطة بحسابك</h3>
-        </div>
-      </div>
-    `;
-
-    return;
-  }
-
-  el.innerHTML=`
-
-    <div class="section">
-
-      <div class="section-head">
-        <div>
-          <div class="section-title">معلومات الشركة</div>
-          <div class="page-sub">بيانات شركتك داخل WASLA</div>
-        </div>
-      </div>
-
-      <div class="section-body">
-
-        <div class="form-grid">
-
-          <div class="field">
-            <label>اسم الشركة</label>
-            <input value="${esc(company.name || '')}" disabled>
-          </div>
-
-          <div class="field">
-            <label>الدولة</label>
-            <input value="${esc(company.country || '')}" disabled>
-          </div>
-
-          <div class="field">
-            <label>المدينة</label>
-            <input value="${esc(company.city || '')}" disabled>
-          </div>
-
-          <div class="field">
-            <label>الموقع الإلكتروني</label>
-            <input value="${esc(company.website || '')}" disabled>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
+  if(!company){el.innerHTML='<div class="section"><div class="empty"><div class="empty-icon">🏢</div><h3>لم يتم العثور على شركة مرتبطة بحسابك</h3></div></div>';return}
+  const f=(l,v)=>`<div class="field"><label>${l}</label><input value="${esc(v||'')}" disabled></div>`;
+  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">معلومات الشركة</div><div class="page-sub">بيانات شركتك داخل WASLA</div></div></div>
+    <div class="section-body"><div class="form-grid">${f('اسم الشركة',company.name)}${f('الدولة',company.country)}${f('المدينة',company.city)}${f('الموقع الإلكتروني',company.website)}</div></div></div>`;
 }
 
 function renderProducts(el){
-
-  if(!company){
-
-    el.innerHTML=`
-      <div class="section">
-        <div class="empty">
-          <div class="empty-icon">📦</div>
-          <h3>المنتجات متاحة للحسابات التجارية</h3>
-        </div>
-      </div>
-    `;
-
-    return;
-  }
-
-  el.innerHTML=`
-
-    <div class="section">
-
-      <div class="section-head">
-        <div>
-          <div class="section-title">منتجات شركتك</div>
-          <div class="page-sub">${products.length} منتج</div>
-        </div>
-      </div>
-
-      <div class="section-body">
-
-        ${
-          products.length
-          ? `
-            <div class="product-grid">
-              ${products.map(p=>`
-
-                <div class="product-card">
-
-                  <div class="product-image">
-
-                    ${
-                      p.image_url
-                      ? `<img src="${esc(p.image_url)}" alt="">`
-                      : '📦'
-                    }
-
-                  </div>
-
-                  <div class="product-name">
-                    ${esc(p.name || 'منتج')}
-                  </div>
-
-                  <div class="product-company">
-                    ${esc(p.category || 'منتج تجاري')}
-                  </div>
-
-                  <div class="product-desc">
-                    ${esc(p.description || 'لا يوجد وصف')}
-                  </div>
-
-                  <div style="margin-top:13px">
-                    <span class="badge ${
-                      p.status==='published'
-                      ? 'badge-green'
-                      : 'badge-orange'
-                    }">
-                      ${esc(status(p.status))}
-                    </span>
-                  </div>
-
-                </div>
-
-              `).join('')}
-            </div>
-          `
-          : `
-            <div class="empty">
-              <div class="empty-icon">📦</div>
-              <h3>لا توجد منتجات</h3>
-              <p style="margin-top:8px">
-                ستظهر منتجات شركتك هنا.
-              </p>
-            </div>
-          `
-        }
-
-      </div>
-
-    </div>
-
-  `;
+  if(!company){el.innerHTML='<div class="section"><div class="empty"><div class="empty-icon">📦</div><h3>المنتجات متاحة للحسابات التجارية</h3></div></div>';return}
+  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">منتجات شركتك</div><div class="page-sub">${products.length} ${L('منتج','products')}</div></div></div>
+    <div class="section-body">${products.length?`<div class="product-grid">${products.map(p=>`
+      <div class="product-card"><div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'📦'}</div>
+        <div class="product-name">${esc(p.name||'منتج')}</div><div class="product-company">${esc(p.category||'منتج تجاري')}</div>
+        <div class="product-desc">${esc(p.description||'لا يوجد وصف')}</div>
+        <div style="margin-top:13px"><span class="badge ${p.status==='published'?'badge-green':'badge-orange'}">${esc(status(p.status))}</span></div></div>`).join('')}</div>`
+      :'<div class="empty"><div class="empty-icon">📦</div><h3>لا توجد منتجات</h3><p style="margin-top:8px">ستظهر منتجات شركتك هنا.</p></div>'}</div></div>`;
 }
 
+/* ---------- discover ---------- */
 async function renderDiscover(el){
-
-  el.innerHTML=`
-
-    <div class="section">
-
-      <div class="section-head">
-        <div>
-          <div class="section-title">اكتشاف</div>
-          <div class="page-sub">
-            منتجات وشركات منشورة داخل شبكة WASLA
-          </div>
-        </div>
-      </div>
-
-      <div class="section-body">
-
-        <div id="discoverResults">
-
-          <div class="empty">
-            <div class="spinner" style="margin:auto"></div>
-            <div style="margin-top:12px">
-              جاري البحث...
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-  `;
-
-  try{
-
-    const {data,error}=await db
-      .from('products')
-      .select('*,companies(name,country,city)')
-      .eq('status','published')
-      .order('created_at',{ascending:false});
-
-    if(error) throw error;
-
-    const results=data || [];
-
-    document.getElementById('discoverResults').innerHTML=
-      results.length
-      ? `
-        <div class="discover-grid">
-
-          ${results.map(p=>{
-
-            const c=rel(p.companies);
-
-            return `
-
-              <div class="company-card">
-
-                <div class="company-logo">
-                  ${esc(initials(c?.name || 'WASLA'))}
-                </div>
-
-                <div class="company-name">
-                  ${esc(c?.name || 'شركة')}
-                </div>
-
-                <div class="company-location">
-                  ${esc(c?.country || '')}
-                  ${c?.city?' • '+esc(c.city):''}
-                </div>
-
-                <div style="margin-top:18px">
-
-                  <strong>
-                    ${esc(p.name || 'منتج')}
-                  </strong>
-
-                  <div class="product-desc">
-                    ${esc(p.description || '')}
-                  </div>
-
-                </div>
-
-              </div>
-
-            `;
-
-          }).join('')}
-
-        </div>
-      `
-      : `
-        <div class="empty">
-          <div class="empty-icon">🔎</div>
-          <h3>لا توجد منتجات منشورة حالياً</h3>
-        </div>
-      `;
-
-  }catch(error){
-
-    console.error(error);
-
-    document.getElementById('discoverResults').innerHTML=`
-      <div class="empty">
-        <div class="empty-icon">⚠️</div>
-        <h3>تعذّر تحميل المنتجات</h3>
-        <p style="margin-top:8px">${esc(error.message || '')}</p>
-      </div>
-    `;
-  }
+  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">${L('اكتشاف','Discover')}</div><div class="page-sub">${L('منتجات وشركات منشورة داخل شبكة WASLA','Products and companies published on the WASLA network')}</div></div></div>
+    <div class="section-body" id="discoverResults"><div class="empty"><div class="spinner" style="margin:auto"></div></div></div></div>`;
+  const {data,error}=await db.from('products').select('*,companies(name,country,city,owner_id)').eq('status','published').order('created_at',{ascending:false});
+  const box=$('discoverResults');
+  if(!box)return;
+  if(error){box.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><h3>${L('تعذّر تحميل المنتجات','Could not load products')}</h3><p>${esc(error.message)}</p></div>`;return}
+  box.innerHTML=(data||[]).length?`<div class="discover-grid">${data.map(p=>{
+    const c=rel(p.companies)||{},canMsg=c.owner_id&&c.owner_id!==user.id;
+    return `<div class="company-card"><div class="company-logo">${esc(initials(c.name||'WASLA'))}</div>
+      <div class="company-name">${esc(c.name||L('شركة','Company'))}</div>
+      <div class="company-location">${esc(c.country||'')}${c.city?' • '+esc(c.city):''}</div>
+      <div style="margin-top:16px"><strong>${esc(p.name||L('منتج','Product'))}</strong><div class="product-desc">${esc(p.description||'')}</div></div>
+      ${canMsg?`<button class="primary-btn" style="margin-top:14px" data-msg="${esc(c.owner_id)}" data-name="${esc(c.name||'')}">${L('مراسلة الشركة','Message company')}</button>`:''}</div>`;
+  }).join('')}</div>`:`<div class="empty"><div class="empty-icon">🔎</div><h3>${L('لا توجد منتجات منشورة حالياً','No published products yet')}</h3></div>`;
+  box.querySelectorAll('[data-msg]').forEach(b=>b.onclick=()=>startChat(b.dataset.msg,b.dataset.name));
 }
 
+/* ---------- direct messages ---------- */
+function startChat(id,name){chat={id,name};navigate('messages')}
+
+async function renderMessages(el){
+  el.innerHTML=`<div class="chat${chat?' open':''}"><aside class="chat-list" id="cList"></aside><section class="chat-thread" id="cThread"></section></div>`;
+  const {data,error}=await db.from('messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:true}).limit(500);
+  if(error){$('cList').innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+  const rows=data||[],last=new Map();
+  rows.forEach(m=>last.set(m.sender_id===user.id?m.receiver_id:m.sender_id,m));
+  if(chat&&!last.has(chat.id))last.set(chat.id,null);
+  const ids=[...last.keys()],names={};
+  if(ids.length){
+    const r=await db.from('profiles').select('id,full_name').in('id',ids);
+    (r.data||[]).forEach(p=>names[p.id]=p.full_name);
+  }
+  if(chat&&!names[chat.id])names[chat.id]=chat.name;
+  ids.sort((a,b)=>(last.get(b)?.created_at||'9').localeCompare(last.get(a)?.created_at||'9'));
+  $('cList').innerHTML=ids.length?ids.map(id=>`<button class="chat-item${chat?.id===id?' on':''}" data-id="${esc(id)}"><div class="avatar">${esc(initials(names[id]||'?'))}</div><div class="chat-meta"><b>${esc(names[id]||L('عضو','Member'))}</b><span>${esc(last.get(id)?.body||L('محادثة جديدة','New conversation'))}</span></div></button>`).join('')
+    :`<div class="empty"><div class="empty-icon">💬</div><div>${L('لا توجد محادثات بعد. ابدأ من صفحة اكتشاف.','No conversations yet. Start from Discover.')}</div></div>`;
+  $('cList').querySelectorAll('.chat-item').forEach(b=>b.onclick=()=>{chat={id:b.dataset.id,name:names[b.dataset.id]};renderMessages(el)});
+  const th=$('cThread');
+  if(!chat){th.innerHTML=`<div class="empty"><div class="empty-icon">✉</div><div>${L('اختر محادثة','Select a conversation')}</div></div>`;return}
+  const msgs=rows.filter(m=>m.sender_id===chat.id||m.receiver_id===chat.id);
+  th.innerHTML=`<div class="chat-head"><button class="secondary-btn chat-back" id="cBack">${L('→','←')}</button><b>${esc(names[chat.id]||chat.name||'')}</b></div>
+    <div class="chat-msgs" id="cMsgs">${msgs.map(m=>`<div class="bubble ${m.sender_id===user.id?'me':'them'}">${esc(m.body)}<small>${fmt(m.created_at)}</small></div>`).join('')||`<div class="empty">${L('ابدأ المحادثة بإرسال رسالة','Say hello to start the conversation')}</div>`}</div>
+    <form class="chat-form" id="cForm"><input id="cInput" maxlength="2000" autocomplete="off" placeholder="${L('اكتب رسالة...','Write a message...')}"><button class="primary-btn" type="submit">${L('إرسال','Send')}</button></form>`;
+  const box=$('cMsgs');
+  box.scrollTop=box.scrollHeight;
+  $('cBack').onclick=()=>{chat=null;renderMessages(el)};
+  $('cForm').onsubmit=async e=>{
+    e.preventDefault();
+    const body=$('cInput').value.trim();
+    if(!body)return;
+    const {error:err}=await db.from('messages').insert({sender_id:user.id,receiver_id:chat.id,body});
+    if(err)return showNotice(err.message,true);
+    await renderMessages(el);
+    $('cInput')?.focus();
+  };
+}
+
+function listen(){
+  if(channel||!user)return;
+  channel=db.channel('wasla-messages')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'receiver_id=eq.'+user.id},()=>{
+      if(page==='messages')renderMessages($('content'));
+      else showNotice(L('وصلتك رسالة جديدة','You have a new message'));
+    }).subscribe();
+}
+
+/* ---------- settings & session ---------- */
 function renderSettings(el){
-
-  el.innerHTML=`
-
-    <div class="section">
-
-      <div class="section-head">
-        <div>
-          <div class="section-title">إعدادات الحساب</div>
-          <div class="page-sub">إدارة تفضيلات WASLA</div>
-        </div>
-      </div>
-
-      <div class="section-body">
-
-        <div class="profile-field" style="margin-bottom:12px">
-          <div class="field-label">اللغة</div>
-          <div class="field-value">العربية</div>
-        </div>
-
-        <div class="profile-field" style="margin-bottom:12px">
-          <div class="field-label">البريد الإلكتروني</div>
-          <div class="field-value">${esc(user?.email || '')}</div>
-        </div>
-
-        <button class="primary-btn" onclick="logout()">
-          تسجيل الخروج
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
+  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">إعدادات الحساب</div><div class="page-sub">إدارة تفضيلات WASLA</div></div></div>
+    <div class="section-body">
+      <div class="profile-field" style="margin-bottom:12px"><div class="field-label">اللغة</div><div class="field-value">${language==='ar'?'العربية':'English'}</div></div>
+      <div class="profile-field" style="margin-bottom:12px"><div class="field-label">البريد الإلكتروني</div><div class="field-value">${esc(user?.email||'')}</div></div>
+      <button class="primary-btn" onclick="logout()">تسجيل الخروج</button></div></div>`;
 }
 
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-}
-
-function toggleLanguage(){
-
-  language=language==='ar'?'en':'ar';
-
-  document.documentElement.lang=language;
-  document.documentElement.dir=language==='ar'?'rtl':'ltr';
-
-  const active=document.querySelector('.nav-btn.active');
-
-  if(active){
-    navigate(active.dataset.page);
-  }
-
-  document.querySelector('.lang-btn').textContent=
-    language==='ar'?'English':'العربية';
-}
+function toggleSidebar(){$('sidebar').classList.toggle('open')}
 
 async function logout(){
-
   await db.auth.signOut();
-
   window.location.href='index.html';
 }
 
+new MutationObserver(()=>trNode(document.body)).observe(document.body,{childList:true,subtree:true,characterData:true});
+applyLang();
 boot();
 </script>
-
 </body>
 </html>
