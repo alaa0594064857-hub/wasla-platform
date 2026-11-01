@@ -1,547 +1,2046 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WASLA — Workspace</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{--bg:#F3F1EC;--surface:#fff;--surface-2:#F7F5F0;--text:#10172A;--muted:#667085;--border:#E4E0D6;--primary:#4F46E5;--primary-dark:#4038C9;--primary-soft:#ECEBFD;--on-primary:#fff;--gold:#F5B544;--green:#0E9F6E;--green-soft:#DDF5EB;--green-t:#0A6B49;--orange:#E8890C;--orange-soft:#FDEBD0;--orange-t:#9A5B00;--red:#E5484D;--ink:#0B1220;--shadow:0 1px 2px rgba(16,23,42,.05),0 12px 32px rgba(16,23,42,.07);color-scheme:light}
-[data-theme=dark]{--bg:#0A0F1C;--surface:#121A2B;--surface-2:#182236;--text:#EDF0F7;--muted:#98A2B8;--border:#243049;--primary:#8B91FF;--primary-dark:#A3A8FF;--primary-soft:#1E2550;--on-primary:#0B1220;--green:#34D399;--green-soft:#0F3328;--green-t:#6EE7B7;--orange:#F5A623;--orange-soft:#3A2A0C;--orange-t:#FBBF4A;--shadow:0 12px 32px rgba(0,0,0,.4);color-scheme:dark}
-*{box-sizing:border-box;margin:0;padding:0}
-[hidden]{display:none!important}
-body{font-family:"Plus Jakarta Sans","IBM Plex Sans Arabic",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;transition:background .2s,color .2s}
-button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer}
-:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.app{display:flex;min-height:100vh}
-.sidebar{width:272px;background:var(--ink);color:#fff;padding:24px 16px;position:fixed;inset-inline-end:0;top:0;bottom:0;z-index:50;display:flex;flex-direction:column;transition:transform .25s}
-.brand{display:flex;align-items:center;gap:12px;padding:2px 10px 28px}
-.brand-logo{width:44px;height:44px;border-radius:14px;background:conic-gradient(from 210deg,#F5B544,#8B91FF,#4F46E5,#F5B544);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800}
-.brand-name{font-size:21px;font-weight:800;letter-spacing:1px}
-.brand-sub{font-size:9px;color:#8F9AB3;margin-top:2px;letter-spacing:1.6px}
-.nav{display:flex;flex-direction:column;gap:4px}
-.nav-btn{position:relative;border:0;background:transparent;color:#A9B3C9;width:100%;display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:12px;text-align:start;transition:.15s}
-.nav-btn:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-btn.active{background:rgba(255,255,255,.1);color:#fff;font-weight:700}
-.nav-btn.active:before{content:"";position:absolute;inset-inline-start:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--gold)}
-.nav-icon{width:22px;text-align:center;font-size:18px}
-.sidebar-bottom{margin-top:auto}
-.user-mini{background:rgba(255,255,255,.06);border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4F46E5,#8B91FF);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
-.user-info{min-width:0}
-.user-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.user-type{color:#8F9AB3;font-size:11px;margin-top:2px}
-.logout{width:100%;border:1px solid rgba(255,255,255,.14);background:transparent;color:#C9D1E3;border-radius:12px;padding:10px}
-.logout:hover{background:rgba(255,255,255,.08)}
-.main{width:calc(100% - 272px);margin-inline-end:272px;min-height:100vh}
-.topbar{height:76px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:30}
-.page-title{font-size:20px;font-weight:800;letter-spacing:-.2px}
-.page-sub{font-size:12px;color:var(--muted);margin-top:3px}
-.top-actions{display:flex;align-items:center;gap:8px}
-.lang-btn,.mobile-menu{border:1px solid var(--border);background:var(--surface);border-radius:11px;padding:9px 13px;font-weight:600}
-.mobile-menu{display:none}
-.content{padding:30px;max-width:1400px;margin:auto}
-.hero{background:linear-gradient(135deg,#0B1220 0%,#1B2250 55%,#3730A3 100%);border-radius:24px;padding:38px;color:#fff;position:relative;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow)}
-.hero:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1.5px);background-size:22px 22px;-webkit-mask-image:linear-gradient(to left,#000,transparent 70%);mask-image:linear-gradient(to left,#000,transparent 70%)}
-.hero:after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,181,68,.35),transparent 65%);inset-inline-start:-80px;bottom:-140px}
-.hero h1{font-size:30px;line-height:1.3;margin-bottom:10px;position:relative;z-index:2}
-.hero p{color:rgba(255,255,255,.78);max-width:640px;line-height:1.8;position:relative;z-index:2}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px}
-.stat{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow);overflow:hidden}
-.stat:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--primary),var(--gold))}
-.stat-top{display:flex;justify-content:space-between;align-items:center}
-.stat-icon{width:42px;height:42px;border-radius:13px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:19px}
-.stat-number{font-size:32px;font-weight:800;margin-top:16px;letter-spacing:-.5px}
-.stat-label{color:var(--muted);font-size:13px;margin-top:4px}
-.section{background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden}
-.section-head{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.section-title{font-size:17px;font-weight:800}
-.section-body{padding:20px}
-.inquiry{border:1px solid var(--border);border-radius:16px;padding:17px;margin-bottom:12px;background:var(--surface)}
-.inquiry:last-child{margin-bottom:0}
-.inquiry-head{display:flex;justify-content:space-between;gap:15px;margin-bottom:10px}
-.badge{display:inline-flex;align-items:center;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700}
-.badge-green{background:var(--green-soft);color:var(--green-t)}
-.badge-orange{background:var(--orange-soft);color:var(--orange-t)}
-.inquiry-message{color:var(--muted);font-size:13px;line-height:1.8;background:var(--surface-2);border-radius:12px;padding:12px}
-.reply{margin-top:10px;border-inline-start:3px solid var(--green);background:var(--green-soft);padding:12px;border-radius:10px;font-size:13px;line-height:1.8}
-.product-grid,.discover-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.product-card,.company-card{border:1px solid var(--border);border-radius:18px;padding:18px;background:var(--surface);transition:.2s}
-.product-card:hover,.company-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--primary)}
-.product-image{height:130px;background:linear-gradient(135deg,var(--primary-soft),var(--surface-2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:15px;overflow:hidden}
-.product-image img{width:100%;height:100%;object-fit:cover}
-.product-name{font-weight:800;margin-bottom:7px}
-.product-company,.company-location{color:var(--muted);font-size:12px}
-.company-location{margin-top:6px}
-.product-desc{color:var(--muted);font-size:12px;line-height:1.7;margin-top:10px}
-.company-logo{width:52px;height:52px;border-radius:15px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;margin-bottom:14px}
-.company-name{font-weight:800;font-size:16px}
-.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
-.profile-cover{height:180px;background:linear-gradient(135deg,#0B1220,#2A2F7A 60%,#4F46E5);position:relative}
-.profile-cover:after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.15) 1px,transparent 1.5px);background-size:20px 20px}
-.profile-main{padding:0 26px 26px}
-.profile-top{display:flex;justify-content:space-between;align-items:flex-end}
-.profile-top .secondary-btn{margin-top:14px}
-.profile-avatar{width:96px;height:96px;border-radius:28px;background:linear-gradient(135deg,#4F46E5,#8B91FF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;border:5px solid var(--surface);margin-top:-48px;position:relative;z-index:2}
-.profile-name{font-size:24px;font-weight:800;margin-top:12px}
-.profile-role{color:var(--muted);margin-top:4px}
-.profile-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.profile-meta span{background:var(--primary-soft);color:var(--primary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700}
-.profile-bio{margin:14px 0;color:var(--muted);line-height:1.8}
-.profile-grid,.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-.profile-field{background:var(--surface-2);border:1px solid var(--border);padding:15px;border-radius:14px}
-.field-label{font-size:11px;color:var(--muted);margin-bottom:6px}
-.field-value{font-weight:700;font-size:14px}
-.field{display:flex;flex-direction:column;gap:7px}
-.field.full{grid-column:1/-1}
-.field label{font-size:12px;font-weight:700;color:var(--muted)}
-.field input,.field textarea,.composer textarea,.chat-form input{border:1px solid var(--border);border-radius:12px;padding:12px;outline:none;background:var(--surface-2)}
-.field input:focus,.field textarea:focus,.composer textarea:focus,.chat-form input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
-.primary-btn{border:0;background:var(--primary);color:var(--on-primary);border-radius:12px;padding:12px 18px;font-weight:700;transition:.15s}
-.primary-btn:hover{background:var(--primary-dark)}
-.secondary-btn{border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 16px;font-weight:600}
-.secondary-btn:hover{border-color:var(--primary);color:var(--primary)}
-.composer{display:flex;gap:10px;margin-bottom:18px}
-.composer textarea{flex:1;resize:vertical}
-.post{border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;background:var(--surface)}
-.post-head{display:flex;align-items:center;gap:10px}
-.post-head>div:nth-child(2){flex:1}
-.post-body{margin-top:12px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
-.chat{display:grid;grid-template-columns:320px 1fr;gap:18px;height:calc(100vh - 150px);min-height:420px}
-.chat-list,.chat-thread{background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:auto;display:flex;flex-direction:column}
-.chat-item{display:flex;gap:10px;align-items:center;border:0;background:none;padding:14px;width:100%;text-align:start;border-bottom:1px solid var(--border)}
-.chat-item.on,.chat-item:hover{background:var(--primary-soft)}
-.chat-meta{min-width:0;display:flex;flex-direction:column}
-.chat-meta span{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
-.chat-back{display:none}
-.chat-msgs{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
-.bubble{max-width:75%;padding:10px 14px;border-radius:16px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
-.bubble small{display:block;font-size:10px;opacity:.7;margin-top:4px}
-.bubble.me{background:var(--primary);color:var(--on-primary)}
-.bubble.them{background:var(--surface-2);border:1px solid var(--border)}
-[dir="rtl"] .bubble.me,[dir="ltr"] .bubble.them{align-self:flex-start}
-[dir="rtl"] .bubble.them,[dir="ltr"] .bubble.me{align-self:flex-end}
-.chat-form{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border)}
-.chat-form input{flex:1}
-.empty{padding:45px 20px;text-align:center;color:var(--muted)}
-.empty-icon{font-size:38px;margin-bottom:10px;opacity:.7}
-.loading{min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;color:var(--muted)}
-.spinner{width:42px;height:42px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.notice{position:fixed;inset-inline-start:25px;bottom:25px;max-width:420px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:15px;padding:15px 18px;z-index:100;display:none;font-size:13px}
-.notice.show{display:block}
-.notice.error{border-inline-start:4px solid var(--red)}
-.notice.success{border-inline-start:4px solid var(--green)}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media(max-width:1050px){.product-grid,.discover-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:800px){
-.sidebar{transform:translateX(100%)}
-[dir="ltr"] .sidebar{transform:translateX(-100%)}
-.sidebar.open,[dir="ltr"] .sidebar.open{transform:none}
-.main{width:100%;margin-inline-end:0}
-.mobile-menu{display:block}
-.topbar{padding:0 16px}
-.content{padding:18px}
-.stats,.product-grid,.discover-grid,.profile-grid,.form-grid{grid-template-columns:1fr}
-.hero{padding:26px}.hero h1{font-size:24px}
-.chat{grid-template-columns:1fr;height:calc(100vh - 130px)}
-.chat.open .chat-list,.chat:not(.open) .chat-thread{display:none}
-.chat-back{display:inline-block}.composer{flex-direction:column}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WASLA | لوحة التحكم</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #175cd3;
+      --primary-dark: #1249a8;
+      --primary-light: #eaf2ff;
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --text: #172b4d;
+      --muted: #718096;
+      --border: #e6ebf2;
+      --success: #138a55;
+      --danger: #d92d20;
+      --warning: #b7791f;
+      --shadow: 0 8px 28px rgba(20, 45, 90, .06);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Cairo", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button, input, textarea, select {
+      font-family: inherit;
+    }
+
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: #10284f;
+      color: #fff;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      padding: 25px 17px;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .brand {
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 0 12px 27px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+
+    .brand span { color: #68a5ff; }
+
+    .side-label {
+      color: #8fa6c8;
+      font-size: 11px;
+      margin: 25px 12px 10px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: #d3deef;
+      text-align: right;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: .2s;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: rgba(74, 137, 230, .22);
+      color: white;
+    }
+
+    .nav button.active {
+      border-right: 3px solid #66a4ff;
+    }
+
+    .nav-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 25px;
+    }
+
+    .main {
+      margin-right: 250px;
+      width: calc(100% - 250px);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 76px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 34px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-avatar {
+      width: 39px;
+      height: 39px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+
+    .content {
+      padding: 30px 34px;
+      max-width: 1500px;
+      margin: auto;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .page-heading h1 {
+      font-size: 24px;
+      margin: 0 0 5px;
+    }
+
+    .page-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 17px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card, .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card { padding: 21px; }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 17px;
+    }
+
+    .stat-icon {
+      width: 43px;
+      height: 43px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      font-size: 21px;
+    }
+
+    .stat-number {
+      font-size: 27px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .card { padding: 23px; margin-bottom: 22px; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 19px;
+      flex-wrap: wrap;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 17px;
+      font-size: 13px;
+      font-weight: 700;
+      transition: .2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-light {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .btn-danger {
+      background: #fff0ee;
+      color: var(--danger);
+    }
+
+    .btn-outline {
+      background: white;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 17px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(23,92,211,.08);
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    th, td {
+      padding: 13px 12px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      background: #fafbfd;
+    }
+
+    td { vertical-align: middle; }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-success { background: #e8f7ef; color: var(--success); }
+    .badge-warning { background: #fff6df; color: var(--warning); }
+    .badge-danger { background: #fff0ee; color: var(--danger); }
+    .badge-neutral { background: #edf1f6; color: #52647d; }
+
+    .empty {
+      padding: 35px 15px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .empty-icon {
+      font-size: 35px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .product-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .product-image {
+      height: 175px;
+      background: #eef3fb;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: #91a5c1;
+      font-size: 35px;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-body { padding: 17px; }
+
+    .product-body h3 {
+      margin: 0 0 7px;
+      font-size: 15px;
+    }
+
+    .product-body p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      min-height: 42px;
+      margin: 0 0 13px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 13px;
+    }
+
+    .product-actions .btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 11px;
+    }
+
+    .inbox-layout {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      min-height: 570px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .inbox-list {
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      max-height: 650px;
+    }
+
+    .inbox-list h3 {
+      padding: 17px;
+      margin: 0;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .inquiry-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .inquiry-item:hover,
+    .inquiry-item.selected {
+      background: var(--primary-light);
+    }
+
+    .inquiry-item strong {
+      font-size: 13px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .inquiry-item small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .chat-messages {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 450px;
+      background: #fafbfd;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 11px 14px;
+      border-radius: 13px;
+      margin-bottom: 13px;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .message.mine {
+      background: var(--primary);
+      color: white;
+      margin-right: auto;
+      border-bottom-left-radius: 3px;
+    }
+
+    .message.theirs {
+      background: white;
+      border: 1px solid var(--border);
+      margin-left: auto;
+      border-bottom-right-radius: 3px;
+    }
+
+    .message small {
+      display: block;
+      font-size: 10px;
+      opacity: .7;
+      margin-top: 5px;
+    }
+
+    .chat-form {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-form input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px;
+      outline: none;
+    }
+
+    .chat-placeholder {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      height: 100%;
+      min-height: 300px;
+      padding: 20px;
+    }
+
+    .notice {
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: #eef5ff;
+      color: #28518d;
+      font-size: 12px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .loading {
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 22, 45, .55);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 17px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+    }
+
+    .modal h2 {
+      font-size: 19px;
+      margin: 0 0 20px;
+    }
+
+    .modal-close {
+      float: left;
+      border: 0;
+      background: #f1f3f7;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      left: 25px;
+      z-index: 500;
+      background: #152c4e;
+      color: white;
+      padding: 13px 19px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      display: none;
+      max-width: calc(100% - 50px);
+    }
+
+    .toast.show { display: block; }
+
+    .mobile-menu {
+      display: none;
+      border: 0;
+      background: transparent;
+      font-size: 23px;
+      color: var(--text);
+    }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        transform: translateX(100%);
+        transition: .25s;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+
+      .main {
+        margin-right: 0;
+        width: 100%;
+      }
+
+      .topbar { padding: 0 17px; }
+      .content { padding: 22px 15px; }
+      .mobile-menu { display: block; }
+      .inbox-layout { grid-template-columns: 1fr; }
+      .inbox-list {
+        border-left: 0;
+        border-bottom: 1px solid var(--border);
+        max-height: 230px;
+      }
+      .chat-area { min-height: 400px; }
+    }
+
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px; }
+      .stat-number { font-size: 22px; }
+      .form-grid, .product-grid { grid-template-columns: 1fr; }
+      .page-heading h1 { font-size: 20px; }
+      .card { padding: 16px; }
+      .topbar-title { font-size: 14px; }
+    }
+  </style>
 </head>
+
 <body>
-<div id="app" class="app">
-<aside class="sidebar" id="sidebar">
-  <div class="brand"><div class="brand-logo">W</div><div><div class="brand-name">WASLA</div><div class="brand-sub">GLOBAL BUSINESS NETWORK</div></div></div>
-  <nav class="nav">
-    <button class="nav-btn active" data-page="overview" onclick="navigate('overview')"><span class="nav-icon">⌂</span><span>الرئيسية</span></button>
-    <button class="nav-btn" data-page="inbox" onclick="navigate('inbox')"><span class="nav-icon">✉</span><span>الرسائل والاستفسارات</span></button>
-    <button class="nav-btn" data-page="messages" onclick="navigate('messages')"><span class="nav-icon">💬</span><span>المحادثات</span></button>
-    <button class="nav-btn" data-page="profile" onclick="navigate('profile')"><span class="nav-icon">♙</span><span>الملف الشخصي</span></button>
-    <button class="nav-btn" data-page="company" id="companyNav" onclick="navigate('company')"><span class="nav-icon">▣</span><span>الشركة</span></button>
-    <button class="nav-btn" data-page="products" id="productsNav" onclick="navigate('products')"><span class="nav-icon">◈</span><span>المنتجات</span></button>
-    <button class="nav-btn" data-page="discover" onclick="navigate('discover')"><span class="nav-icon">⌕</span><span>اكتشاف</span></button>
-    <button class="nav-btn" data-page="settings" onclick="navigate('settings')"><span class="nav-icon">⚙</span><span>الإعدادات</span></button>
-  </nav>
-  <div class="sidebar-bottom">
-    <div class="user-mini"><div class="avatar" id="sideAvatar">W</div><div class="user-info"><div class="user-name" id="sideName">WASLA User</div><div class="user-type" id="sideType">Account</div></div></div>
-    <button class="logout" onclick="logout()">تسجيل الخروج</button>
-  </div>
-</aside>
-<main class="main">
-  <header class="topbar">
-    <div><div class="page-title" id="pageTitle">WASLA WORKSPACE</div><div class="page-sub" id="pageSub">إدارة حضورك التجاري من مكان واحد</div></div>
-    <div class="top-actions">
-      <button class="lang-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Theme">☾</button>
-      <button class="lang-btn" id="langBtn" onclick="toggleLanguage()">English</button>
-      <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">WAS<span>LA</span></div>
+
+    <div class="side-label">القائمة الرئيسية</div>
+
+    <nav class="nav">
+      <button class="active" data-page="overview" onclick="showPage('overview',this)">
+        <span class="nav-icon">▦</span> الرئيسية
+      </button>
+
+      <button data-page="inbox" onclick="showPage('inbox',this)">
+        <span class="nav-icon">✉</span> الاستفسارات والرسائل
+      </button>
+
+      <button data-page="profile" onclick="showPage('profile',this)">
+        <span class="nav-icon">♙</span> الملف الشخصي
+      </button>
+
+      <button data-page="company" onclick="showPage('company',this)">
+        <span class="nav-icon">▣</span> بيانات الشركة
+      </button>
+
+      <button data-page="products" onclick="showPage('products',this)">
+        <span class="nav-icon">▤</span> منتجاتي
+      </button>
+
+      <button data-page="discover" onclick="showPage('discover',this)">
+        <span class="nav-icon">⌕</span> اكتشف المنتجات
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <nav class="nav">
+        <button onclick="logout()">
+          <span class="nav-icon">⇥</span> تسجيل الخروج
+        </button>
+      </nav>
     </div>
-  </header>
-  <div id="content" class="content"><div class="loading"><div class="spinner"></div><div>جاري تحميل مساحة WASLA...</div></div></div>
-</main>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar-right">
+        <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+        <div class="topbar-title" id="topbarTitle">الرئيسية</div>
+      </div>
+
+      <div class="topbar-right">
+        <div>
+          <div id="topUserName" style="font-size:13px;font-weight:700">مرحباً بك</div>
+          <div id="topAccountType" style="font-size:11px;color:#718096">حساب WASLA</div>
+        </div>
+        <div class="user-avatar" id="avatar">W</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <section class="page active" id="page-overview">
+        <div class="page-heading">
+          <div>
+            <h1>مرحباً بك في WASLA 👋</h1>
+            <p>إدارة أعمالك التجارية والتواصل مع الشركات من مكان واحد.</p>
+          </div>
+          <button class="btn btn-primary" onclick="showPage('discover')">
+            اكتشف المنتجات
+          </button>
+        </div>
+
+        <div class="grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-icon">📦</span>
+            </div>
+            <div class="stat-number" id="statProducts">0</div>
+            <div class="stat-label">إجمالي المنتجات</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-icon">✉️</span>
+            </div>
+            <div class="stat-number" id="statInquiries">0</div>
+            <div class="stat-label">الاستفسارات</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-icon">🏢</span>
+            </div>
+            <div class="stat-number" id="statCompany">—</div>
+            <div class="stat-label">حالة الشركة</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-icon">🌐</span>
+            </div>
+            <div class="stat-number" id="statDiscover">0</div>
+            <div class="stat-label">منتجات متاحة للاكتشاف</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>آخر الاستفسارات</h3>
+            <button class="btn btn-light" onclick="showPage('inbox')">عرض الكل</button>
+          </div>
+          <div id="recentInquiries" class="loading">جاري تحميل البيانات...</div>
+        </div>
+
+        <div class="notice">
+          <strong>مرحباً بك في WASLA</strong><br>
+          منصتك للتواصل التجاري واكتشاف المنتجات وبناء العلاقات بين الشركات والمشترين.
+        </div>
+      </section>
+
+      <!-- INBOX -->
+      <section class="page" id="page-inbox">
+        <div class="page-heading">
+          <div>
+            <h1>الاستفسارات والرسائل</h1>
+            <p>تابع استفساراتك وتواصل مع الأطراف التجارية.</p>
+          </div>
+          <button class="btn btn-outline" onclick="loadInquiries()">↻ تحديث</button>
+        </div>
+
+        <div class="inbox-layout">
+          <div class="inbox-list">
+            <h3>قائمة الاستفسارات</h3>
+            <div id="inquiryList">
+              <div class="empty">جاري التحميل...</div>
+            </div>
+          </div>
+
+          <div class="chat-area" id="chatArea">
+            <div class="chat-placeholder">
+              <div>
+                <div style="font-size:45px;margin-bottom:10px">💬</div>
+                <strong>اختر استفساراً لفتح المحادثة</strong>
+                <p style="font-size:12px">ستظهر الرسائل هنا.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="page" id="page-profile">
+        <div class="page-heading">
+          <div>
+            <h1>الملف الشخصي</h1>
+            <p>إدارة معلومات حسابك الشخصية.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>معلومات الحساب</h3>
+          </div>
+
+          <form id="profileForm">
+            <div class="form-grid">
+              <div class="field">
+                <label>الاسم الكامل</label>
+                <input id="profileName" type="text" required placeholder="الاسم الكامل">
+              </div>
+
+              <div class="field">
+                <label>البريد الإلكتروني</label>
+                <input id="profileEmail" type="email" disabled>
+              </div>
+
+              <div class="field">
+                <label>نوع الحساب</label>
+                <input id="profileType" type="text" disabled>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">حفظ التغييرات</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- COMPANY -->
+      <section class="page" id="page-company">
+        <div class="page-heading">
+          <div>
+            <h1>بيانات الشركة</h1>
+            <p>أضف معلومات شركتك حتى يتمكن الآخرون من التعرف عليها.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>معلومات النشاط التجاري</h3>
+          </div>
+
+          <form id="companyForm">
+            <div class="form-grid">
+              <div class="field full">
+                <label>اسم الشركة أو النشاط التجاري</label>
+                <input id="companyName" required placeholder="اسم الشركة">
+              </div>
+
+              <div class="field">
+                <label>الدولة</label>
+                <input id="companyCountry" placeholder="الدولة">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">حفظ بيانات الشركة</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="notice">
+          يتم ربط الشركة بحسابك من خلال معرف المستخدم الخاص بك.
+        </div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section class="page" id="page-products">
+        <div class="page-heading">
+          <div>
+            <h1>منتجاتي</h1>
+            <p>أضف منتجاتك أو عدّلها أو احذفها.</p>
+          </div>
+
+          <button class="btn btn-primary" onclick="openProductModal()">
+            + إضافة منتج
+          </button>
+        </div>
+
+        <div id="myProducts" class="product-grid">
+          <div class="empty">جاري تحميل المنتجات...</div>
+        </div>
+      </section>
+
+      <!-- DISCOVER -->
+      <section class="page" id="page-discover">
+        <div class="page-heading">
+          <div>
+            <h1>اكتشف المنتجات</h1>
+            <p>استعرض المنتجات المنشورة من الشركات الأخرى.</p>
+          </div>
+
+          <button class="btn btn-outline" onclick="loadDiscover()">↻ تحديث</button>
+        </div>
+
+        <div class="card" style="padding:15px">
+          <div class="field">
+            <label>ابحث عن منتج</label>
+            <input id="discoverSearch" placeholder="اكتب اسم المنتج أو التصنيف..." oninput="filterDiscover()">
+          </div>
+        </div>
+
+        <div id="discoverProducts" class="product-grid">
+          <div class="empty">جاري تحميل المنتجات...</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
 </div>
-<div id="notice" class="notice"></div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-backdrop" id="productModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProductModal()">×</button>
+    <h2 id="productModalTitle">إضافة منتج جديد</h2>
+
+    <form id="productForm">
+      <input type="hidden" id="productId">
+
+      <div class="form-grid">
+        <div class="field full">
+          <label>اسم المنتج</label>
+          <input id="productName" required placeholder="اسم المنتج">
+        </div>
+
+        <div class="field">
+          <label>التصنيف</label>
+          <input id="productCategory" placeholder="مثال: مواد غذائية">
+        </div>
+
+        <div class="field">
+          <label>رابط صورة المنتج</label>
+          <input id="productImage" type="url" placeholder="https://example.com/image.jpg">
+        </div>
+
+        <div class="field full">
+          <label>وصف المنتج</label>
+          <textarea id="productDescription" placeholder="اكتب تفاصيل المنتج..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>حالة المنتج</label>
+          <select id="productStatus">
+            <option value="published">منشور</option>
+            <option value="draft">مسودة</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">حفظ المنتج</button>
+        <button class="btn btn-outline" type="button" onclick="closeProductModal()">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL='https://bzrcbodvcuujdjupfgzw.supabase.co';
-const SUPABASE_KEY='sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u';
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+/* =========================================
+   WASLA - SUPABASE CONFIGURATION
+========================================= */
 
-let user=null,profile=null,company=null,products=[],inquiries=[];
-let page='overview',chat=null,channel=null;
-let language=(()=>{try{return localStorage.getItem('wasla_lang')||'ar'}catch(e){return 'ar'}})();
+const SUPABASE_URL = "https://bzrcbodvcuujdjupfgzw.supabase.co";
 
-/* ---------- helpers ---------- */
-const $=id=>document.getElementById(id);
-const L=(ar,en)=>language==='ar'?ar:en;
-const rel=v=>Array.isArray(v)?v[0]||null:v||null;
-const norm=s=>s.replace(/\s+/g,' ').trim();
-const fmt=t=>new Date(t).toLocaleString(language==='ar'?'ar':'en',{dateStyle:'medium',timeStyle:'short'});
-const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-const initials=n=>n?n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase():'W';
-const statusNames={published:['منشور','Published'],draft:['مسودة','Draft'],pending:['قيد الانتظار','Pending'],active:['نشط','Active'],inactive:['غير نشط','Inactive'],archived:['مؤرشف','Archived']};
-const status=v=>statusNames[v]?statusNames[v][language==='ar'?0:1]:(v||'');
-const typeNames={buyer:['مشتري','Buyer'],company:['شركة','Company'],manufacturer:['مصنّع','Manufacturer'],brand:['علامة تجارية','Brand'],trader:['تاجر','Trader']};
-const accountTypeName=t=>typeNames[t]?typeNames[t][language==='ar'?0:1]:(t||'');
-const displayName=()=>profile?.full_name||user?.email?.split('@')[0]||'WASLA User';
+const SUPABASE_KEY = "sb_publishable_EAWH4688yaEOk537GOBWIg_Hz4DPN3u";
 
-function showNotice(message,error=false){
-  const el=$('notice');
-  el.textContent=message;
-  el.className='notice show '+(error?'error':'success');
-  setTimeout(()=>{el.className='notice'},4500);
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+/* =========================================
+   GLOBAL DATA
+========================================= */
+
+let currentUser = null;
+let currentProfile = null;
+let currentCompany = null;
+let products = [];
+let inquiries = [];
+let discoverProducts = [];
+let activeInquiry = null;
+let chatMessages = [];
+let chatChannel = null;
+
+/* =========================================
+   HELPERS
+========================================= */
+
+function toast(message) {
+  const element = document.getElementById("toast");
+  element.textContent = message;
+  element.classList.add("show");
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(() => {
+    element.classList.remove("show");
+  }, 3500);
 }
 
-/* ---------- theme (light / dark) ---------- */
-function applyTheme(t){
-  document.documentElement.dataset.theme=t;
-  try{localStorage.setItem('wasla_theme',t)}catch(e){}
-  $('themeBtn').textContent=t==='dark'?'☀':'☾';
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
 }
-function toggleTheme(){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')}
-(function(){
-  let s=null;
-  try{s=localStorage.getItem('wasla_theme')}catch(e){}
-  applyTheme(s||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
-})();
 
-/* ---------- Arabic/English UI ---------- */
-const EN={'الرئيسية':'Home','الرسائل والاستفسارات':'Inquiries','المحادثات':'Chats','الملف الشخصي':'Profile','الشركة':'Company','المنتجات':'Products','اكتشاف':'Discover','الإعدادات':'Settings','تسجيل الخروج':'Log out','إدارة حضورك التجاري من مكان واحد':'Manage your business presence in one place','جاري تحميل مساحة WASLA...':'Loading your WASLA workspace...','يجب تسجيل الدخول أولاً':'Please log in first','تعذّر تحميل الحساب':'Could not load your account','تابع جميع استفساراتك وتواصلك التجاري':'Track all your inquiries and business communication','معلومات حسابك على WASLA':'Your WASLA account details','إدارة معلومات شركتك':'Manage your company details','إدارة المنتجات والخدمات المعروضة':'Manage your listed products and services','اكتشف المنتجات والشركات داخل شبكة WASLA':'Discover products and companies on the WASLA network','إعدادات حسابك':'Your account settings','مرحباً بك في WASLA 👋':'Welcome to WASLA 👋','مساحة واحدة لإدارة حضورك التجاري، اكتشاف الفرص، والتواصل مع الشركات والعملاء داخل شبكة أعمال عالمية.':'One space to manage your business presence, discover opportunities, and connect with companies and customers in a global business network.','إجمالي الاستفسارات':'Total inquiries','جميع استفساراتك':'All your inquiries','بانتظار الرد':'Awaiting reply','استفسارات تحتاج متابعة':'Inquiries that need follow-up','تم الرد عليها':'Answered','استفسارات تمت معالجتها':'Inquiries handled','آخر النشاطات':'Latest activity','فتح الوارد':'Open inbox','لا توجد استفسارات حتى الآن':'No inquiries yet','تم الرد':'Answered','استفسار تجاري':'Business inquiry','لا توجد رسالة':'No message','الرد:':'Reply:','كل التواصل التجاري في مكان واحد':'All business communication in one place','لا توجد رسائل بعد':'No messages yet','عندما يصلك استفسار تجاري سيظهر هنا.':'When you receive a business inquiry it will appear here.','لم يتم العثور على شركة مرتبطة بحسابك':'No company is linked to your account','معلومات الشركة':'Company information','بيانات شركتك داخل WASLA':'Your company data on WASLA','اسم الشركة':'Company name','الدولة':'Country','المدينة':'City','الموقع الإلكتروني':'Website','المنتجات متاحة للحسابات التجارية':'Products are available for business accounts','منتجات شركتك':'Your company products','لا توجد منتجات':'No products','ستظهر منتجات شركتك هنا.':'Your company products will appear here.','منتج':'Product','منتج تجاري':'Commercial product','لا يوجد وصف':'No description','إعدادات الحساب':'Account settings','إدارة تفضيلات WASLA':'Manage your WASLA preferences','اللغة':'Language','البريد الإلكتروني':'Email','الاسم الكامل':'Full name','نوع الحساب':'Account type','حالة الحساب':'Account status','● نشط':'● Active','غير محدد':'Not set'};
+function formatDate(value) {
+  if (!value) return "";
+  return new Date(value).toLocaleDateString("ar");
+}
 
-function trNode(root){
-  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-  let n;
-  while((n=w.nextNode())){
-    if(n.parentElement&&n.parentElement.closest('.lang-btn,script,style'))continue;
-    if(n.__ar===undefined&&EN[norm(n.nodeValue)])n.__ar=n.nodeValue;
-    if(n.__ar!==undefined){
-      const v=language==='en'?EN[norm(n.__ar)]:n.__ar;
-      if(n.nodeValue!==v)n.nodeValue=v;
-    }
+function accountTypeLabel(type) {
+  const labels = {
+    company: "شركة",
+    manufacturer: "مصنّع",
+    brand: "علامة تجارية",
+    trader: "تاجر",
+    buyer: "مشتري"
+  };
+
+  return labels[type] || type || "مستخدم";
+}
+
+function statusLabel(status) {
+  if (status === "published") return "منشور";
+  if (status === "draft") return "مسودة";
+  if (status === "pending") return "قيد الانتظار";
+  if (status === "answered") return "تم الرد";
+  if (status === "closed") return "مغلق";
+  return status || "غير محدد";
+}
+
+function statusBadge(status) {
+  let cls = "badge-neutral";
+
+  if (status === "published" || status === "answered") {
+    cls = "badge-success";
+  } else if (status === "pending" || status === "draft") {
+    cls = "badge-warning";
+  } else if (status === "closed") {
+    cls = "badge-danger";
   }
+
+  return `<span class="badge ${cls}">${escapeHTML(statusLabel(status))}</span>`;
 }
 
-function applyLang(){
-  document.documentElement.lang=language;
-  document.documentElement.dir=language==='ar'?'rtl':'ltr';
-  $('langBtn').textContent=language==='ar'?'English':'العربية';
-  trNode(document.body);
+function getCompanyName(inquiry) {
+  return inquiry.companies?.name || "شركة";
 }
 
-function toggleLanguage(){
-  language=language==='ar'?'en':'ar';
-  try{localStorage.setItem('wasla_lang',language)}catch(e){}
-  applyLang();
-  if(user){updateUserUI();navigate(page)}
+function getProductName(inquiry) {
+  return inquiry.products?.name || "منتج";
 }
 
-/* ---------- boot & data ---------- */
-async function boot(){
-  try{
-    const {data,error}=await db.auth.getSession();
-    if(error)throw error;
-    if(!data.session){
-      $('content').innerHTML='<div class="section"><div class="empty"><div class="empty-icon">🔐</div><h3>يجب تسجيل الدخول أولاً</h3></div></div>';
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+function showPage(page, button) {
+  document.querySelectorAll(".page").forEach(element => {
+    element.classList.remove("active");
+  });
+
+  const target = document.getElementById("page-" + page);
+
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(".nav button").forEach(element => {
+    element.classList.remove("active");
+  });
+
+  const selected = button || document.querySelector(
+    `.nav button[data-page="${page}"]`
+  );
+
+  if (selected) selected.classList.add("active");
+
+  const titles = {
+    overview: "الرئيسية",
+    inbox: "الاستفسارات والرسائل",
+    profile: "الملف الشخصي",
+    company: "بيانات الشركة",
+    products: "منتجاتي",
+    discover: "اكتشف المنتجات"
+  };
+
+  document.getElementById("topbarTitle").textContent =
+    titles[page] || "WASLA";
+
+  document.getElementById("sidebar").classList.remove("open");
+
+  if (page === "inbox") loadInquiries();
+  if (page === "products") loadProducts();
+  if (page === "discover") loadDiscover();
+}
+
+/* =========================================
+   AUTHENTICATION
+========================================= */
+
+async function boot() {
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error) throw error;
+
+    if (!data.session) {
+      window.location.href = "index.html";
       return;
     }
-    user=data.session.user;
-    const pr=await db.from('profiles').select('*').eq('id',user.id).single();
-    if(pr.error)throw pr.error;
-    profile=pr.data;
-    updateUserUI();
+
+    currentUser = data.session.user;
+
+    await loadProfile();
     await loadCompany();
+    await Promise.all([
+      loadProducts(),
+      loadInquiries(),
+      loadDiscover()
+    ]);
+
+    updateDashboard();
+
+  } catch (error) {
+    console.error("Boot error:", error);
+    toast("تعذر تحميل لوحة التحكم: " + error.message);
+  }
+}
+
+async function logout() {
+  if (!confirm("هل تريد تسجيل الخروج؟")) return;
+
+  if (chatChannel) {
+    await supabaseClient.removeChannel(chatChannel);
+    chatChannel = null;
+  }
+
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    toast("تعذر تسجيل الخروج: " + error.message);
+    return;
+  }
+
+  window.location.href = "index.html";
+}
+
+/* =========================================
+   PROFILE
+========================================= */
+
+async function loadProfile() {
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  currentProfile = data || {};
+
+  const name = currentProfile.full_name || "مستخدم WASLA";
+
+  document.getElementById("profileName").value =
+    currentProfile.full_name || "";
+
+  document.getElementById("profileEmail").value =
+    currentUser.email || "";
+
+  document.getElementById("profileType").value =
+    accountTypeLabel(currentProfile.account_type);
+
+  document.getElementById("topUserName").textContent = name;
+
+  document.getElementById("topAccountType").textContent =
+    accountTypeLabel(currentProfile.account_type);
+
+  document.getElementById("avatar").textContent =
+    name.trim().charAt(0) || "W";
+}
+
+document.getElementById("profileForm").addEventListener(
+  "submit",
+  async function(event) {
+    event.preventDefault();
+
+    const fullName = document.getElementById("profileName").value.trim();
+
+    if (!fullName) {
+      toast("يرجى إدخال الاسم.");
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .update({ full_name: fullName })
+      .eq("id", currentUser.id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      toast("تعذر حفظ الملف الشخصي: " + error.message);
+      return;
+    }
+
+    if (!data) {
+      toast("لم يتم العثور على سجل الملف الشخصي لتحديثه.");
+      return;
+    }
+
+    currentProfile = data;
+    await loadProfile();
+
+    toast("تم حفظ الملف الشخصي بنجاح.");
+  }
+);
+
+/* =========================================
+   COMPANY
+========================================= */
+
+async function loadCompany() {
+  const { data, error } = await supabaseClient
+    .from("companies")
+    .select("*")
+    .eq("owner_id", currentUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  currentCompany = data || null;
+
+  document.getElementById("companyName").value =
+    currentCompany?.name || "";
+
+  document.getElementById("companyCountry").value =
+    currentCompany?.country || "";
+}
+
+document.getElementById("companyForm").addEventListener(
+  "submit",
+  async function(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("companyName").value.trim();
+    const country = document.getElementById("companyCountry").value.trim();
+
+    if (!name) {
+      toast("يرجى إدخال اسم الشركة.");
+      return;
+    }
+
+    const companyData = {
+      owner_id: currentUser.id,
+      name,
+      country
+    };
+
+    let result;
+
+    if (currentCompany) {
+      result = await supabaseClient
+        .from("companies")
+        .update({
+          name,
+          country
+        })
+        .eq("id", currentCompany.id)
+        .select()
+        .single();
+    } else {
+      result = await supabaseClient
+        .from("companies")
+        .insert(companyData)
+        .select()
+        .single();
+    }
+
+    if (result.error) {
+      toast("تعذر حفظ الشركة: " + result.error.message);
+      return;
+    }
+
+    currentCompany = result.data;
+
+    updateDashboard();
+
+    toast("تم حفظ بيانات الشركة بنجاح.");
+
     await loadProducts();
-    await loadInquiries();
-    navigate('overview');
-  }catch(error){
-    console.error('WASLA boot error:',error);
-    showNotice('تعذّر تحميل الحساب: '+(error.message||'Unknown error'),true);
-    $('content').innerHTML=`<div class="section"><div class="empty"><div class="empty-icon">⚠️</div><h3>تعذّر تحميل الحساب</h3><p style="margin-top:8px">${esc(error.message||'')}</p></div></div>`;
   }
+);
+
+/* =========================================
+   PRODUCTS
+========================================= */
+
+async function loadProducts() {
+  if (!currentCompany) {
+    products = [];
+    renderMyProducts();
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .eq("company_id", currentCompany.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    toast("تعذر تحميل المنتجات: " + error.message);
+    return;
+  }
+
+  products = data || [];
+
+  renderMyProducts();
+  updateDashboard();
 }
 
-function updateUserUI(){
-  const name=displayName(),type=profile?.account_type||'buyer',business=type!=='buyer';
-  $('sideName').textContent=name;
-  $('sideType').textContent=accountTypeName(type);
-  $('sideAvatar').textContent=initials(name);
-  $('companyNav').style.display=business?'flex':'none';
-  $('productsNav').style.display=business?'flex':'none';
-  listen();
-}
+function renderMyProducts() {
+  const container = document.getElementById("myProducts");
 
-async function loadCompany(){
-  company=null;
-  if(!user)return;
-  const {data,error}=await db.from('companies').select('*').eq('owner_id',user.id).maybeSingle();
-  if(error){console.warn('Company load:',error);return}
-  company=data;
-}
+  if (!currentCompany) {
+    container.innerHTML = `
+      <div class="card empty" style="grid-column:1/-1">
+        <span class="empty-icon">🏢</span>
+        يرجى إضافة بيانات شركتك أولاً حتى تتمكن من إضافة المنتجات.
+        <br><br>
+        <button class="btn btn-primary" onclick="showPage('company')">
+          إضافة بيانات الشركة
+        </button>
+      </div>
+    `;
+    return;
+  }
 
-async function loadProducts(){
-  products=[];
-  if(!company)return;
-  const {data,error}=await db.from('products').select('*').eq('company_id',company.id).order('created_at',{ascending:false});
-  if(error){console.warn('Products load:',error);return}
-  products=data||[];
-}
+  if (!products.length) {
+    container.innerHTML = `
+      <div class="card empty" style="grid-column:1/-1">
+        <span class="empty-icon">📦</span>
+        لا توجد منتجات حتى الآن.
+        <br><br>
+        <button class="btn btn-primary" onclick="openProductModal()">
+          إضافة أول منتج
+        </button>
+      </div>
+    `;
+    return;
+  }
 
-async function loadInquiries(){
-  inquiries=[];
-  if(!user)return;
-  let q=db.from('inquiries').select('*,products(name),companies(name)').order('created_at',{ascending:false});
-  if(profile?.account_type==='buyer')q=q.eq('buyer_id',user.id);
-  else if(company)q=q.eq('company_id',company.id);
-  else return;
-  const {data,error}=await q;
-  if(error){console.warn('Inquiries load:',error);return}
-  inquiries=data||[];
-}
+  container.innerHTML = products.map(product => `
+    <div class="product-card">
+      <div class="product-image">
+        ${
+          product.image_url
+            ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" onerror="this.style.display='none'">`
+            : "📦"
+        }
+      </div>
 
-/* ---------- navigation ---------- */
-function navigate(p){
-  page=p;
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
-  const titles={
-    overview:['WASLA WORKSPACE','إدارة حضورك التجاري من مكان واحد'],
-    inbox:['الرسائل والاستفسارات','تابع جميع استفساراتك وتواصلك التجاري'],
-    messages:[L('المحادثات','Chats'),L('تواصل مباشر مع الأعضاء والشركات','Direct conversations with members and companies')],
-    profile:['الملف الشخصي','معلومات حسابك على WASLA'],
-    company:['الشركة','إدارة معلومات شركتك'],
-    products:['المنتجات','إدارة المنتجات والخدمات المعروضة'],
-    discover:['اكتشاف','اكتشف المنتجات والشركات داخل شبكة WASLA'],
-    settings:['الإعدادات','إعدادات حسابك']
-  };
-  $('pageTitle').textContent=titles[p][0];
-  $('pageSub').textContent=titles[p][1];
-  const el=$('content');
-  ({overview:renderOverview,inbox:renderInbox,messages:renderMessages,profile:renderProfile,company:renderCompany,products:renderProducts,discover:renderDiscover,settings:renderSettings})[p](el);
-  $('sidebar').classList.remove('open');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+      <div class="product-body">
+        <h3>${escapeHTML(product.name)}</h3>
 
-/* ---------- overview & inquiries ---------- */
-function renderOverview(el){
-  const answered=inquiries.filter(x=>x.status==='answered'||x.status==='responded'||x.reply).length;
-  const pending=inquiries.length-answered,latest=inquiries.slice(0,3);
-  el.innerHTML=`
-    <div class="hero"><h1>مرحباً بك في WASLA 👋</h1><p>مساحة واحدة لإدارة حضورك التجاري، اكتشاف الفرص، والتواصل مع الشركات والعملاء داخل شبكة أعمال عالمية.</p></div>
-    <div class="stats">
-      <div class="stat"><div class="stat-top"><div class="stat-label">إجمالي الاستفسارات</div><div class="stat-icon">✉</div></div><div class="stat-number">${inquiries.length}</div><div class="stat-label">جميع استفساراتك</div></div>
-      <div class="stat"><div class="stat-top"><div class="stat-label">بانتظار الرد</div><div class="stat-icon" style="background:var(--orange-soft);color:var(--orange)">◷</div></div><div class="stat-number">${pending}</div><div class="stat-label">استفسارات تحتاج متابعة</div></div>
-      <div class="stat"><div class="stat-top"><div class="stat-label">تم الرد عليها</div><div class="stat-icon" style="background:var(--green-soft);color:var(--green)">✓</div></div><div class="stat-number">${answered}</div><div class="stat-label">استفسارات تمت معالجتها</div></div>
+        <p>${escapeHTML(product.description || "لا يوجد وصف للمنتج.")}</p>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <small style="color:#718096">
+            ${escapeHTML(product.category || "بدون تصنيف")}
+          </small>
+          ${statusBadge(product.status)}
+        </div>
+
+        <div class="product-actions">
+          <button class="btn btn-light" onclick="editProduct('${product.id}')">
+            تعديل
+          </button>
+
+          <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">
+            حذف
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="section"><div class="section-head"><div class="section-title">آخر النشاطات</div><button class="secondary-btn" onclick="navigate('inbox')">فتح الوارد</button></div>
-      <div class="section-body">${latest.length?latest.map(renderInquiry).join(''):'<div class="empty"><div class="empty-icon">📭</div><div>لا توجد استفسارات حتى الآن</div></div>'}</div></div>
-    <div class="section"><div class="section-head"><div class="section-title">${L('من المجتمع','From the community')}</div></div><div class="section-body" id="feed"></div></div>`;
-  loadPosts('feed');
+  `).join("");
 }
 
-function renderInquiry(item){
-  const productName=rel(item.products)?.name||'استفسار تجاري';
-  const replied=!!item.reply||item.status==='answered'||item.status==='responded';
-  return `<div class="inquiry"><div class="inquiry-head"><div class="product-name">${esc(productName)}</div>
-    <span class="badge ${replied?'badge-green':'badge-orange'}">${replied?'تم الرد':'بانتظار الرد'}</span></div>
-    <div class="inquiry-message">${esc(item.message||'لا توجد رسالة')}</div>
-    ${item.reply?`<div class="reply"><strong>الرد:</strong><br>${esc(item.reply)}</div>`:''}</div>`;
-}
-
-function renderInbox(el){
-  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">الرسائل والاستفسارات</div><div class="page-sub">كل التواصل التجاري في مكان واحد</div></div></div>
-    <div class="section-body">${inquiries.length?inquiries.map(renderInquiry).join(''):'<div class="empty"><div class="empty-icon">💬</div><h3>لا توجد رسائل بعد</h3><p style="margin-top:8px">عندما يصلك استفسار تجاري سيظهر هنا.</p></div>'}</div></div>`;
-}
-
-/* ---------- profile & posts ---------- */
-function renderProfile(el){
-  const name=displayName(),type=profile?.account_type||'buyer';
-  const meta=[accountTypeName(type),profile?.country,profile?.website,user?.email].filter(Boolean);
-  const fields=[['full_name',L('الاسم الكامل','Full name')],['headline',L('المسمى أو الشعار','Headline')],['country',L('الدولة','Country')],['website',L('الموقع الإلكتروني','Website')]];
-  el.innerHTML=`
-    <div class="profile-card"><div class="profile-cover"></div><div class="profile-main">
-      <div class="profile-top"><div class="profile-avatar">${esc(initials(name))}</div><button class="secondary-btn" id="pfEdit">${L('تعديل الملف','Edit profile')}</button></div>
-      <div class="profile-name">${esc(name)}</div>
-      <div class="profile-role">${esc(profile?.headline||accountTypeName(type))}</div>
-      <div class="profile-meta">${meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
-      <p class="profile-bio">${esc(profile?.bio||L('أضف نبذة عن نشاطك التجاري.','Add a short bio about your business.'))}</p>
-      <div id="pfForm" class="form-grid" hidden>
-        ${fields.map(([k,l])=>`<div class="field"><label>${l}</label><input id="pf_${k}" maxlength="120" value="${esc(profile?.[k]||'')}"></div>`).join('')}
-        <div class="field full"><label>${L('نبذة','Bio')}</label><textarea id="pf_bio" rows="3" maxlength="500">${esc(profile?.bio||'')}</textarea></div>
-        <div class="field full"><button class="primary-btn" id="pfSave">${L('حفظ','Save')}</button></div>
-      </div></div></div>
-    <div class="section" style="margin-top:22px"><div class="section-head"><div class="section-title">${L('منشوراتي','My posts')}</div></div>
-      <div class="section-body"><div class="composer"><textarea id="postText" rows="2" maxlength="2000" placeholder="${L('شارك تحديثاً مع الشبكة...','Share an update with the network...')}"></textarea><button class="primary-btn" id="postBtn">${L('نشر','Post')}</button></div><div id="myPosts"></div></div></div>`;
-  $('pfEdit').onclick=()=>{$('pfForm').hidden=!$('pfForm').hidden};
-  $('pfSave').onclick=async()=>{
-    const v=k=>$('pf_'+k).value.trim()||null;
-    const upd={full_name:v('full_name'),headline:v('headline'),country:v('country'),website:v('website'),bio:v('bio')};
-    const {error}=await db.from('profiles').update(upd).eq('id',user.id);
-    if(error)return showNotice(error.message,true);
-    Object.assign(profile,upd);
-    updateUserUI();
-    showNotice(L('تم حفظ الملف','Profile saved'));
-    renderProfile(el);
-  };
-  $('postBtn').onclick=async()=>{
-    const body=$('postText').value.trim();
-    if(!body)return;
-    const {error}=await db.from('posts').insert({author_id:user.id,body});
-    if(error)return showNotice(error.message,true);
-    $('postText').value='';
-    loadPosts('myPosts',user.id);
-  };
-  loadPosts('myPosts',user.id);
-}
-
-async function loadPosts(target,authorId){
-  const box=$(target);
-  if(!box)return;
-  let q=db.from('posts').select('id,body,created_at,author_id,profiles(full_name)').order('created_at',{ascending:false}).limit(20);
-  if(authorId)q=q.eq('author_id',authorId);
-  const {data,error}=await q;
-  if(error){box.innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
-  box.innerHTML=(data||[]).length?data.map(p=>{
-    const nm=rel(p.profiles)?.full_name||L('عضو','Member');
-    const act=p.author_id===user.id
-      ?`<button class="secondary-btn" data-del="${esc(p.id)}">${L('حذف','Delete')}</button>`
-      :`<button class="secondary-btn" data-msg="${esc(p.author_id)}" data-name="${esc(nm)}">${L('مراسلة','Message')}</button>`;
-    return `<div class="post"><div class="post-head"><div class="avatar">${esc(initials(nm))}</div><div><b>${esc(nm)}</b><div class="page-sub">${fmt(p.created_at)}</div></div>${act}</div><p class="post-body">${esc(p.body)}</p></div>`;
-  }).join(''):`<div class="empty"><div class="empty-icon">📝</div><div>${L('لا توجد منشورات بعد','No posts yet')}</div></div>`;
-  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
-    const {error:e}=await db.from('posts').delete().eq('id',b.dataset.del);
-    if(e)return showNotice(e.message,true);
-    loadPosts(target,authorId);
-  });
-  box.querySelectorAll('[data-msg]').forEach(b=>b.onclick=()=>startChat(b.dataset.msg,b.dataset.name));
-}
-
-/* ---------- company & products ---------- */
-function renderCompany(el){
-  if(!company){el.innerHTML='<div class="section"><div class="empty"><div class="empty-icon">🏢</div><h3>لم يتم العثور على شركة مرتبطة بحسابك</h3></div></div>';return}
-  const f=(l,v)=>`<div class="field"><label>${l}</label><input value="${esc(v||'')}" disabled></div>`;
-  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">معلومات الشركة</div><div class="page-sub">بيانات شركتك داخل WASLA</div></div></div>
-    <div class="section-body"><div class="form-grid">${f('اسم الشركة',company.name)}${f('الدولة',company.country)}${f('المدينة',company.city)}${f('الموقع الإلكتروني',company.website)}</div></div></div>`;
-}
-
-function renderProducts(el){
-  if(!company){el.innerHTML='<div class="section"><div class="empty"><div class="empty-icon">📦</div><h3>المنتجات متاحة للحسابات التجارية</h3></div></div>';return}
-  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">منتجات شركتك</div><div class="page-sub">${products.length} ${L('منتج','products')}</div></div></div>
-    <div class="section-body">${products.length?`<div class="product-grid">${products.map(p=>`
-      <div class="product-card"><div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'📦'}</div>
-        <div class="product-name">${esc(p.name||'منتج')}</div><div class="product-company">${esc(p.category||'منتج تجاري')}</div>
-        <div class="product-desc">${esc(p.description||'لا يوجد وصف')}</div>
-        <div style="margin-top:13px"><span class="badge ${p.status==='published'?'badge-green':'badge-orange'}">${esc(status(p.status))}</span></div></div>`).join('')}</div>`
-      :'<div class="empty"><div class="empty-icon">📦</div><h3>لا توجد منتجات</h3><p style="margin-top:8px">ستظهر منتجات شركتك هنا.</p></div>'}</div></div>`;
-}
-
-/* ---------- discover ---------- */
-async function renderDiscover(el){
-  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">${L('اكتشاف','Discover')}</div><div class="page-sub">${L('منتجات وشركات منشورة داخل شبكة WASLA','Products and companies published on the WASLA network')}</div></div></div>
-    <div class="section-body" id="discoverResults"><div class="empty"><div class="spinner" style="margin:auto"></div></div></div></div>`;
-  const {data,error}=await db.from('products').select('*,companies(name,country,city,owner_id)').eq('status','published').order('created_at',{ascending:false});
-  const box=$('discoverResults');
-  if(!box)return;
-  if(error){box.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><h3>${L('تعذّر تحميل المنتجات','Could not load products')}</h3><p>${esc(error.message)}</p></div>`;return}
-  box.innerHTML=(data||[]).length?`<div class="discover-grid">${data.map(p=>{
-    const c=rel(p.companies)||{},canMsg=c.owner_id&&c.owner_id!==user.id;
-    return `<div class="company-card"><div class="company-logo">${esc(initials(c.name||'WASLA'))}</div>
-      <div class="company-name">${esc(c.name||L('شركة','Company'))}</div>
-      <div class="company-location">${esc(c.country||'')}${c.city?' • '+esc(c.city):''}</div>
-      <div style="margin-top:16px"><strong>${esc(p.name||L('منتج','Product'))}</strong><div class="product-desc">${esc(p.description||'')}</div></div>
-      ${canMsg?`<button class="primary-btn" style="margin-top:14px" data-msg="${esc(c.owner_id)}" data-name="${esc(c.name||'')}">${L('مراسلة الشركة','Message company')}</button>`:''}</div>`;
-  }).join('')}</div>`:`<div class="empty"><div class="empty-icon">🔎</div><h3>${L('لا توجد منتجات منشورة حالياً','No published products yet')}</h3></div>`;
-  box.querySelectorAll('[data-msg]').forEach(b=>b.onclick=()=>startChat(b.dataset.msg,b.dataset.name));
-}
-
-/* ---------- direct messages ---------- */
-function startChat(id,name){chat={id,name};navigate('messages')}
-
-async function renderMessages(el){
-  el.innerHTML=`<div class="chat${chat?' open':''}"><aside class="chat-list" id="cList"></aside><section class="chat-thread" id="cThread"></section></div>`;
-  const {data,error}=await db.from('messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:true}).limit(500);
-  if(error){$('cList').innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
-  const rows=data||[],last=new Map();
-  rows.forEach(m=>last.set(m.sender_id===user.id?m.receiver_id:m.sender_id,m));
-  if(chat&&!last.has(chat.id))last.set(chat.id,null);
-  const ids=[...last.keys()],names={};
-  if(ids.length){
-    const r=await db.from('profiles').select('id,full_name').in('id',ids);
-    (r.data||[]).forEach(p=>names[p.id]=p.full_name);
+function openProductModal() {
+  if (!currentCompany) {
+    toast("أضف بيانات شركتك أولاً.");
+    showPage("company");
+    return;
   }
-  if(chat&&!names[chat.id])names[chat.id]=chat.name;
-  ids.sort((a,b)=>(last.get(b)?.created_at||'9').localeCompare(last.get(a)?.created_at||'9'));
-  $('cList').innerHTML=ids.length?ids.map(id=>`<button class="chat-item${chat?.id===id?' on':''}" data-id="${esc(id)}"><div class="avatar">${esc(initials(names[id]||'?'))}</div><div class="chat-meta"><b>${esc(names[id]||L('عضو','Member'))}</b><span>${esc(last.get(id)?.body||L('محادثة جديدة','New conversation'))}</span></div></button>`).join('')
-    :`<div class="empty"><div class="empty-icon">💬</div><div>${L('لا توجد محادثات بعد. ابدأ من صفحة اكتشاف.','No conversations yet. Start from Discover.')}</div></div>`;
-  $('cList').querySelectorAll('.chat-item').forEach(b=>b.onclick=()=>{chat={id:b.dataset.id,name:names[b.dataset.id]};renderMessages(el)});
-  const th=$('cThread');
-  if(!chat){th.innerHTML=`<div class="empty"><div class="empty-icon">✉</div><div>${L('اختر محادثة','Select a conversation')}</div></div>`;return}
-  const msgs=rows.filter(m=>m.sender_id===chat.id||m.receiver_id===chat.id);
-  th.innerHTML=`<div class="chat-head"><button class="secondary-btn chat-back" id="cBack">${L('→','←')}</button><b>${esc(names[chat.id]||chat.name||'')}</b></div>
-    <div class="chat-msgs" id="cMsgs">${msgs.map(m=>`<div class="bubble ${m.sender_id===user.id?'me':'them'}">${esc(m.body)}<small>${fmt(m.created_at)}</small></div>`).join('')||`<div class="empty">${L('ابدأ المحادثة بإرسال رسالة','Say hello to start the conversation')}</div>`}</div>
-    <form class="chat-form" id="cForm"><input id="cInput" maxlength="2000" autocomplete="off" placeholder="${L('اكتب رسالة...','Write a message...')}"><button class="primary-btn" type="submit">${L('إرسال','Send')}</button></form>`;
-  const box=$('cMsgs');
-  box.scrollTop=box.scrollHeight;
-  $('cBack').onclick=()=>{chat=null;renderMessages(el)};
-  $('cForm').onsubmit=async e=>{
-    e.preventDefault();
-    const body=$('cInput').value.trim();
-    if(!body)return;
-    const {error:err}=await db.from('messages').insert({sender_id:user.id,receiver_id:chat.id,body});
-    if(err)return showNotice(err.message,true);
-    await renderMessages(el);
-    $('cInput')?.focus();
-  };
+
+  document.getElementById("productForm").reset();
+  document.getElementById("productId").value = "";
+  document.getElementById("productModalTitle").textContent =
+    "إضافة منتج جديد";
+
+  document.getElementById("productStatus").value = "published";
+
+  document.getElementById("productModal").classList.add("show");
 }
 
-function listen(){
-  if(channel||!user)return;
-  channel=db.channel('wasla-messages')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'receiver_id=eq.'+user.id},()=>{
-      if(page==='messages')renderMessages($('content'));
-      else showNotice(L('وصلتك رسالة جديدة','You have a new message'));
-    }).subscribe();
+function closeProductModal() {
+  document.getElementById("productModal").classList.remove("show");
 }
 
-/* ---------- settings & session ---------- */
-function renderSettings(el){
-  el.innerHTML=`<div class="section"><div class="section-head"><div><div class="section-title">إعدادات الحساب</div><div class="page-sub">إدارة تفضيلات WASLA</div></div></div>
-    <div class="section-body">
-      <div class="profile-field" style="margin-bottom:12px"><div class="field-label">اللغة</div><div class="field-value">${language==='ar'?'العربية':'English'}</div></div>
-      <div class="profile-field" style="margin-bottom:12px"><div class="field-label">البريد الإلكتروني</div><div class="field-value">${esc(user?.email||'')}</div></div>
-      <button class="primary-btn" onclick="logout()">تسجيل الخروج</button></div></div>`;
+function editProduct(id) {
+  const product = products.find(item => String(item.id) === String(id));
+
+  if (!product) return;
+
+  document.getElementById("productId").value = product.id;
+  document.getElementById("productName").value = product.name || "";
+  document.getElementById("productCategory").value = product.category || "";
+  document.getElementById("productImage").value = product.image_url || "";
+  document.getElementById("productDescription").value =
+    product.description || "";
+  document.getElementById("productStatus").value =
+    product.status || "published";
+
+  document.getElementById("productModalTitle").textContent =
+    "تعديل المنتج";
+
+  document.getElementById("productModal").classList.add("show");
 }
 
-function toggleSidebar(){$('sidebar').classList.toggle('open')}
+document.getElementById("productForm").addEventListener(
+  "submit",
+  async function(event) {
+    event.preventDefault();
 
-async function logout(){
-  await db.auth.signOut();
-  window.location.href='index.html';
+    if (!currentCompany) {
+      toast("لا توجد شركة مرتبطة بحسابك.");
+      return;
+    }
+
+    const id = document.getElementById("productId").value;
+
+    const productData = {
+      name: document.getElementById("productName").value.trim(),
+      category: document.getElementById("productCategory").value.trim(),
+      image_url: document.getElementById("productImage").value.trim() || null,
+      description: document.getElementById("productDescription").value.trim(),
+      status: document.getElementById("productStatus").value
+    };
+
+    if (!productData.name) {
+      toast("يرجى إدخال اسم المنتج.");
+      return;
+    }
+
+    let result;
+
+    if (id) {
+      result = await supabaseClient
+        .from("products")
+        .update(productData)
+        .eq("id", id)
+        .eq("company_id", currentCompany.id);
+    } else {
+      result = await supabaseClient
+        .from("products")
+        .insert({
+          ...productData,
+          company_id: currentCompany.id
+        });
+    }
+
+    if (result.error) {
+      toast("تعذر حفظ المنتج: " + result.error.message);
+      return;
+    }
+
+    closeProductModal();
+
+    await loadProducts();
+    await loadDiscover();
+
+    toast(id ? "تم تعديل المنتج." : "تمت إضافة المنتج بنجاح.");
+  }
+);
+
+async function deleteProduct(id) {
+  if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+
+  const { error } = await supabaseClient
+    .from("products")
+    .delete()
+    .eq("id", id)
+    .eq("company_id", currentCompany.id);
+
+  if (error) {
+    toast("تعذر حذف المنتج: " + error.message);
+    return;
+  }
+
+  await loadProducts();
+  await loadDiscover();
+
+  toast("تم حذف المنتج.");
 }
 
-new MutationObserver(()=>trNode(document.body)).observe(document.body,{childList:true,subtree:true,characterData:true});
-applyLang();
+/* =========================================
+   DISCOVER PRODUCTS
+========================================= */
+
+async function loadDiscover() {
+  const container = document.getElementById("discoverProducts");
+
+  container.innerHTML = `<div class="empty">جاري تحميل المنتجات...</div>`;
+
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*,companies(name,country)")
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `
+      <div class="card empty" style="grid-column:1/-1">
+        تعذر تحميل المنتجات: ${escapeHTML(error.message)}
+      </div>
+    `;
+    return;
+  }
+
+  discoverProducts = (data || []).filter(product =>
+    product.company_id !== currentCompany?.id
+  );
+
+  renderDiscoverProducts();
+  updateDashboard();
+}
+
+function renderDiscoverProducts(list) {
+  const container = document.getElementById("discoverProducts");
+
+  const items = list || discoverProducts;
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="card empty" style="grid-column:1/-1">
+        <span class="empty-icon">🔎</span>
+        لا توجد منتجات متاحة حالياً.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = items.map(product => `
+    <div class="product-card">
+      <div class="product-image">
+        ${
+          product.image_url
+            ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" onerror="this.style.display='none'">`
+            : "📦"
+        }
+      </div>
+
+      <div class="product-body">
+        <h3>${escapeHTML(product.name)}</h3>
+
+        <p>${escapeHTML(product.description || "لا يوجد وصف للمنتج.")}</p>
+
+        <div style="font-size:12px;color:#718096;line-height:1.8">
+          الشركة: ${escapeHTML(product.companies?.name || "غير محدد")}
+          <br>
+          الدولة: ${escapeHTML(product.companies?.country || "غير محدد")}
+          <br>
+          التصنيف: ${escapeHTML(product.category || "غير محدد")}
+        </div>
+
+        <div class="product-actions">
+          ${
+            currentProfile?.account_type === "buyer"
+              ? `<button class="btn btn-primary" onclick="contactAboutProduct('${product.id}')">إرسال استفسار</button>`
+              : `<button class="btn btn-light" onclick="toast('إرسال الاستفسارات متاح لحسابات المشترين.')">عرض المنتج</button>`
+          }
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function filterDiscover() {
+  const search = document.getElementById("discoverSearch")
+    .value.trim().toLowerCase();
+
+  const filtered = discoverProducts.filter(product => {
+    const name = (product.name || "").toLowerCase();
+    const category = (product.category || "").toLowerCase();
+    const company = (product.companies?.name || "").toLowerCase();
+
+    return name.includes(search) ||
+      category.includes(search) ||
+      company.includes(search);
+  });
+
+  renderDiscoverProducts(filtered);
+}
+
+/* =========================================
+   CREATE INQUIRY
+========================================= */
+
+async function contactAboutProduct(productId) {
+  if (currentProfile?.account_type !== "buyer") {
+    toast("إرسال الاستفسارات متاح لحسابات المشترين فقط.");
+    return;
+  }
+
+  const product = discoverProducts.find(item =>
+    String(item.id) === String(productId)
+  );
+
+  if (!product) {
+    toast("لم يتم العثور على المنتج.");
+    return;
+  }
+
+  const message = prompt(
+    "اكتب استفسارك حول المنتج: " + product.name
+  );
+
+  if (message === null) return;
+
+  if (!message.trim()) {
+    toast("يرجى كتابة رسالة الاستفسار.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("inquiries")
+    .insert({
+      product_id: product.id,
+      company_id: product.company_id,
+      buyer_id: currentUser.id,
+      message: message.trim(),
+      status: "pending"
+    });
+
+  if (error) {
+    toast("تعذر إرسال الاستفسار: " + error.message);
+    return;
+  }
+
+  toast("تم إرسال استفسارك بنجاح.");
+
+  await loadInquiries();
+  showPage("inbox");
+}
+
+/* =========================================
+   INQUIRIES
+========================================= */
+
+async function loadInquiries() {
+  const container = document.getElementById("inquiryList");
+
+  container.innerHTML = `<div class="empty">جاري تحميل الاستفسارات...</div>`;
+
+  const isBuyer = currentProfile?.account_type === "buyer";
+
+  let query = supabaseClient
+    .from("inquiries")
+    .select("*,products(name),companies(name)")
+    .order("created_at", { ascending: false });
+
+  if (isBuyer) {
+    query = query.eq("buyer_id", currentUser.id);
+  } else {
+    if (!currentCompany) {
+      inquiries = [];
+      renderInquiries();
+      updateDashboard();
+      return;
+    }
+
+    query = query.eq("company_id", currentCompany.id);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    container.innerHTML = `
+      <div class="empty">
+        تعذر تحميل الاستفسارات:
+        ${escapeHTML(error.message)}
+      </div>
+    `;
+    return;
+  }
+
+  inquiries = data || [];
+
+  renderInquiries();
+  renderRecentInquiries();
+  updateDashboard();
+}
+
+function renderInquiries() {
+  const container = document.getElementById("inquiryList");
+
+  if (!inquiries.length) {
+    container.innerHTML = `
+      <div class="empty">
+        <span class="empty-icon">✉️</span>
+        لا توجد استفسارات حتى الآن.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = inquiries.map(inquiry => `
+    <div class="inquiry-item ${
+      String(activeInquiry?.id) === String(inquiry.id) ? "selected" : ""
+    }" onclick="openInquiry('${inquiry.id}')">
+
+      <strong>${escapeHTML(getProductName(inquiry))}</strong>
+
+      <small>
+        ${escapeHTML(getCompanyName(inquiry))}
+        · ${formatDate(inquiry.created_at)}
+      </small>
+
+      <div style="margin-top:8px">
+        ${statusBadge(inquiry.status)}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderRecentInquiries() {
+  const container = document.getElementById("recentInquiries");
+
+  const recent = inquiries.slice(0, 5);
+
+  if (!recent.length) {
+    container.innerHTML = `<div class="empty">لا توجد استفسارات جديدة.</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>المنتج</th>
+            <th>الشركة</th>
+            <th>التاريخ</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${recent.map(inquiry => `
+            <tr>
+              <td>${escapeHTML(getProductName(inquiry))}</td>
+              <td>${escapeHTML(getCompanyName(inquiry))}</td>
+              <td>${formatDate(inquiry.created_at)}</td>
+              <td>${statusBadge(inquiry.status)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* =========================================
+   CHAT
+========================================= */
+
+async function openInquiry(id) {
+  const inquiry = inquiries.find(item =>
+    String(item.id) === String(id)
+  );
+
+  if (!inquiry) return;
+
+  activeInquiry = inquiry;
+
+  renderInquiries();
+
+  const chatArea = document.getElementById("chatArea");
+
+  chatArea.innerHTML = `
+    <div class="chat-header">
+      ${escapeHTML(getProductName(inquiry))}
+      <span style="color:#718096;font-size:11px;font-weight:400">
+        · ${escapeHTML(getCompanyName(inquiry))}
+      </span>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="empty">جاري تحميل الرسائل...</div>
+    </div>
+
+    <form class="chat-form" id="chatForm">
+      <input id="chatInput" placeholder="اكتب رسالتك هنا..." autocomplete="off" required>
+      <button class="btn btn-primary" type="submit">إرسال</button>
+    </form>
+  `;
+
+  document.getElementById("chatForm").addEventListener(
+    "submit",
+    sendChatMessage
+  );
+
+  await loadChatMessages();
+
+  subscribeToChat();
+}
+
+async function loadChatMessages() {
+  if (!activeInquiry) return;
+
+  const container = document.getElementById("chatMessages");
+
+  if (!container) return;
+
+  const { data, error } = await supabaseClient
+    .from("inquiry_messages")
+    .select("*")
+    .eq("inquiry_id", activeInquiry.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    container.innerHTML = `
+      <div class="empty">
+        تعذر تحميل الرسائل:
+        ${escapeHTML(error.message)}
+      </div>
+    `;
+    return;
+  }
+
+  chatMessages = data || [];
+
+  renderChatMessages();
+}
+
+function renderChatMessages() {
+  const container = document.getElementById("chatMessages");
+
+  if (!container) return;
+
+  let html = `
+    <div class="message theirs">
+      ${escapeHTML(activeInquiry.message || "استفسار حول المنتج")}
+      <small>الاستفسار الأصلي · ${formatDate(activeInquiry.created_at)}</small>
+    </div>
+  `;
+
+  if (!chatMessages.length) {
+    html += `
+      <div style="text-align:center;color:#718096;font-size:12px;padding:15px">
+        لا توجد رسائل إضافية. ابدأ المحادثة الآن.
+      </div>
+    `;
+  }
+
+  html += chatMessages.map(message => {
+    const mine = message.sender_id === currentUser.id;
+
+    return `
+      <div class="message ${mine ? "mine" : "theirs"}">
+        ${escapeHTML(message.message)}
+        <small>${formatDate(message.created_at)}</small>
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = html;
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage(event) {
+  event.preventDefault();
+
+  if (!activeInquiry) return;
+
+  const input = document.getElementById("chatInput");
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  const button = event.submitter;
+
+  if (button) button.disabled = true;
+
+  const { error } = await supabaseClient
+    .from("inquiry_messages")
+    .insert({
+      inquiry_id: activeInquiry.id,
+      sender_id: currentUser.id,
+      message
+    });
+
+  if (button) button.disabled = false;
+
+  if (error) {
+    toast("تعذر إرسال الرسالة: " + error.message);
+    return;
+  }
+
+  input.value = "";
+
+  await loadChatMessages();
+}
+
+function subscribeToChat() {
+  if (chatChannel) {
+    supabaseClient.removeChannel(chatChannel);
+    chatChannel = null;
+  }
+
+  if (!activeInquiry) return;
+
+  chatChannel = supabaseClient
+    .channel("inquiry-chat-" + activeInquiry.id)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "inquiry_messages",
+        filter: "inquiry_id=eq." + activeInquiry.id
+      },
+      payload => {
+        const newMessage = payload.new;
+
+        if (!chatMessages.some(message =>
+          String(message.id) === String(newMessage.id)
+        )) {
+          chatMessages.push(newMessage);
+          renderChatMessages();
+        }
+      }
+    )
+    .subscribe();
+}
+
+/* =========================================
+   DASHBOARD STATS
+========================================= */
+
+function updateDashboard() {
+  document.getElementById("statProducts").textContent =
+    products.length;
+
+  document.getElementById("statInquiries").textContent =
+    inquiries.length;
+
+  document.getElementById("statCompany").textContent =
+    currentCompany ? "مضافة" : "غير مضافة";
+
+  document.getElementById("statDiscover").textContent =
+    discoverProducts.length;
+
+  renderRecentInquiries();
+}
+
+/* =========================================
+   START
+========================================= */
+
 boot();
+
 </script>
+
 </body>
 </html>
