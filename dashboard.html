@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -375,6 +376,13 @@ let selectedDirectProfile=null;
 let directMessagesChannel=null;
 let directTab="contacts";
 
+/* حماية عمليات الرسائل المباشرة من الطلبات المتزامنة والقديمة */
+let directMessagesRequestId=0;
+let directOpenRequestId=0;
+let directConversationsRequestId=0;
+let directStartLocks=new Set();
+let directSending=false;
+
 function showToast(message){
  const toast=document.getElementById("toast");
  toast.textContent=message;
@@ -519,7 +527,6 @@ async function loadAccountData(){
  if(!data){showToast("لم يتم العثور على ملف شخصي لهذا الحساب.");return;}
  currentProfile=data;
 
- /* تحديث اسم القسم تلقائياً حسب نوع الحساب */
  updateAccountSectionLabel(data.account_type);
 
  const name=data.full_name||"مستخدم WASLA";
@@ -777,7 +784,7 @@ document.getElementById("chatForm").addEventListener("submit",async e=>{
  input.value="";await loadMessages(selectedInquiry);
 });
 
-/* دليل الحسابات */
+/* دليل الحسابات والرسائل المباشرة */
 async function loadDirectPage(){
  await Promise.all([loadDirectProfiles(),loadDirectConversations()]);
  renderDirectList();
@@ -788,16 +795,30 @@ async function loadDirectProfiles(){
   .neq("id",currentUser.id)
   .order("full_name",{ascending:true})
   .limit(300);
- if(error){console.error("Profiles directory error:",error);directProfiles=[];document.getElementById("directList").innerHTML='<div class="empty">تعذر تحميل دليل الحسابات: '+esc(error.message)+'</div>';return;}
+ if(error){
+  console.error("Profiles directory error:",error);
+  directProfiles=[];
+  document.getElementById("directList").innerHTML='<div class="empty">تعذر تحميل دليل الحسابات: '+esc(error.message)+'</div>';
+  return;
+ }
  directProfiles=data||[];
 }
+
+/* منع نتائج تحميل المحادثات القديمة من استبدال النتائج الأحدث */
 async function loadDirectConversations(){
+ const requestId=++directConversationsRequestId;
  const uid=currentUser.id;
  const {data,error}=await db.from("conversations")
   .select("id,user_one,user_two,created_at,updated_at")
   .or(`user_one.eq.${uid},user_two.eq.${uid}`)
   .order("updated_at",{ascending:false});
- if(error){console.error("Conversations error:",error);directConversations=[];return;}
+
+ if(requestId!==directConversationsRequestId)return;
+
+ if(error){
+  console.error("Conversations error:",error);
+  return;
+ }
  directConversations=data||[];
 }
 function getOtherId(conversation){
@@ -821,12 +842,16 @@ function switchDirectTab(tab){
 function renderDirectList(){
  const container=document.getElementById("directList");
  const term=document.getElementById("contactSearch").value.trim().toLowerCase();
+
  if(directTab==="contacts"){
   const filtered=directProfiles.filter(p=>{
    const text=[p.full_name,p.account_type,accountLabel(p.account_type),p.tagline,p.bio,p.country].join(" ").toLowerCase();
    return text.includes(term);
   });
-  if(!filtered.length){container.innerHTML='<div class="empty"><p>لا توجد حسابات مطابقة لبحثك.</p></div>';return;}
+  if(!filtered.length){
+   container.innerHTML='<div class="empty"><p>لا توجد حسابات مطابقة لبحثك.</p></div>';
+   return;
+  }
   container.innerHTML=filtered.map(p=>`<div class="contact-item ${String(selectedDirectProfile?.id)===String(p.id)?"selected":""}" onclick="startDirectChat('${p.id}')">${avatarMarkup(p)}<div class="contact-info"><strong>${esc(p.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(p.account_type))}${p.country?" · "+esc(p.country):""}</small></div><button class="contact-start" type="button" title="مراسلة"><i class="fa-solid fa-message"></i></button></div>`).join("");
  }else{
   const rows=directConversations.map(c=>({conversation:c,profile:profileFor(getOtherId(c))}))
@@ -834,7 +859,10 @@ function renderDirectList(){
     const p=x.profile;
     return !term||[p?.full_name,p?.account_type,accountLabel(p?.account_type),p?.country].join(" ").toLowerCase().includes(term);
    });
-  if(!rows.length){container.innerHTML='<div class="empty"><p>لا توجد محادثات مباشرة بعد. اختر حساباً من دليل الحسابات لبدء محادثة.</p></div>';return;}
+  if(!rows.length){
+   container.innerHTML='<div class="empty"><p>لا توجد محادثات مباشرة بعد. اختر حساباً من دليل الحسابات لبدء محادثة.</p></div>';
+   return;
+  }
   container.innerHTML=rows.map(x=>{
    const p=x.profile||{id:getOtherId(x.conversation),full_name:"حساب WASLA"};
    return `<div class="contact-item ${String(selectedDirectConversation?.id)===String(x.conversation.id)?"selected":""}" onclick="openDirectConversation('${x.conversation.id}')">${avatarMarkup(p)}<div class="contact-info"><strong>${esc(p.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(p.account_type))} · ${dateText(x.conversation.updated_at||x.conversation.created_at)}</small></div></div>`;
@@ -843,97 +871,280 @@ function renderDirectList(){
 }
 document.getElementById("contactSearch").addEventListener("input",renderDirectList());
 
-/* إنشاء أو استرجاع محادثة مباشرة */
+/* إنشاء محادثة أو استرجاع المحادثة الموجودة */
 async function startDirectChat(targetId){
  if(!targetId||String(targetId)===String(currentUser.id))return;
- let target=profileFor(targetId);
- if(!target){
-  const {data,error}=await db.from("profiles")
-   .select("id,full_name,account_type,avatar_url,tagline,bio,country")
-   .eq("id",targetId).maybeSingle();
-  if(error||!data){showToast("لم نتمكن من العثور على هذا الحساب.");return;}
-  target=data;
-  if(!profileFor(targetId))directProfiles.push(target);
+
+ const targetKey=String(targetId);
+
+ /* منع الضغط المتكرر على مراسلة الحساب نفسه */
+ if(directStartLocks.has(targetKey))return;
+ directStartLocks.add(targetKey);
+
+ /* أحدث عملية فتح هي التي يحق لها تغيير واجهة المحادثة */
+ const openRequestId=++directOpenRequestId;
+
+ try{
+  let target=profileFor(targetId);
+
+  if(!target){
+   const {data,error}=await db.from("profiles")
+    .select("id,full_name,account_type,avatar_url,tagline,bio,country")
+    .eq("id",targetId).maybeSingle();
+
+   if(openRequestId!==directOpenRequestId)return;
+
+   if(error||!data){
+    showToast("لم نتمكن من العثور على هذا الحساب.");
+    return;
+   }
+
+   target=data;
+   if(!profileFor(targetId))directProfiles.push(target);
+  }
+
+  if(openRequestId!==directOpenRequestId)return;
+
+  const ids=[String(currentUser.id),targetKey].sort();
+
+  /* البحث أولاً عن محادثة سابقة */
+  let {data:conversation,error}=await db.from("conversations")
+   .select("id,user_one,user_two,created_at,updated_at")
+   .eq("user_one",ids[0])
+   .eq("user_two",ids[1])
+   .maybeSingle();
+
+  if(openRequestId!==directOpenRequestId)return;
+
+  if(error){
+   showToast("تعذر البحث عن المحادثة: "+error.message);
+   return;
+  }
+
+  /* إنشاء محادثة فقط إذا لم تكن موجودة */
+  if(!conversation){
+   const result=await db.from("conversations")
+    .insert({user_one:ids[0],user_two:ids[1]})
+    .select("id,user_one,user_two,created_at,updated_at")
+    .single();
+
+   if(openRequestId!==directOpenRequestId)return;
+
+   if(result.error){
+    /*
+      قد يكون الطرف الآخر أنشأ المحادثة في اللحظة نفسها.
+      نعيد البحث بدلاً من افتراض وجود اسم constraint معين.
+    */
+    const retry=await db.from("conversations")
+     .select("id,user_one,user_two,created_at,updated_at")
+     .eq("user_one",ids[0])
+     .eq("user_two",ids[1])
+     .maybeSingle();
+
+    if(openRequestId!==directOpenRequestId)return;
+
+    if(retry.error||!retry.data){
+     showToast("تعذر إنشاء المحادثة: "+result.error.message);
+     return;
+    }
+
+    conversation=retry.data;
+   }else{
+    conversation=result.data;
+   }
+  }
+
+  if(openRequestId!==directOpenRequestId)return;
+
+  selectedDirectProfile=target;
+  selectedDirectConversation=conversation;
+
+  goTo("direct");
+
+  await loadDirectConversations();
+
+  if(openRequestId!==directOpenRequestId)return;
+
+  switchDirectTab("conversations");
+  renderDirectList();
+
+  await showDirectChat(target,conversation);
+
+ }catch(error){
+  console.error("Start direct chat error:",error);
+  if(openRequestId===directOpenRequestId){
+   showToast("حدث خطأ أثناء فتح المحادثة.");
+  }
+ }finally{
+  directStartLocks.delete(targetKey);
  }
- selectedDirectProfile=target;
- const ids=[String(currentUser.id),String(targetId)].sort();
- let {data:conversation,error}=await db.from("conversations")
-  .select("id,user_one,user_two,created_at,updated_at")
-  .eq("user_one",ids[0]).eq("user_two",ids[1]).maybeSingle();
- if(error){showToast("تعذر فتح المحادثة: "+error.message);return;}
- if(!conversation){
-  const result=await db.from("conversations")
-   .insert({user_one:ids[0],user_two:ids[1]})
-   .select("id,user_one,user_two,created_at,updated_at").single();
-  if(result.error){
-   const retry=await db.from("conversations").select("id,user_one,user_two,created_at,updated_at")
-    .eq("user_one",ids[0]).eq("user_two",ids[1]).maybeSingle();
-   if(retry.error||!retry.data){showToast("تعذر إنشاء المحادثة: "+result.error.message);return;}
-   conversation=retry.data;
-  }else conversation=result.data;
- }
- selectedDirectConversation=conversation;
- goTo("direct");
- await loadDirectConversations();
- switchDirectTab("conversations");
- renderDirectList();
- await showDirectChat(target,conversation);
 }
+
+/* فتح محادثة سابقة مع حماية من تأخر تحميل الملف الشخصي */
 async function openDirectConversation(id){
+ const requestId=++directOpenRequestId;
+
  const conversation=directConversations.find(c=>String(c.id)===String(id));
  if(!conversation)return;
+
  const otherId=getOtherId(conversation);
  let profile=profileFor(otherId);
+
  if(!profile){
-  const {data}=await db.from("profiles").select("id,full_name,account_type,avatar_url,tagline,bio,country").eq("id",otherId).maybeSingle();
+  const {data,error}=await db.from("profiles")
+   .select("id,full_name,account_type,avatar_url,tagline,bio,country")
+   .eq("id",otherId)
+   .maybeSingle();
+
+  if(requestId!==directOpenRequestId)return;
+
+  if(error){
+   console.error("Direct profile error:",error);
+  }
+
   profile=data||{id:otherId,full_name:"حساب WASLA"};
-  if(data)directProfiles.push(data);
+  if(data&&!profileFor(otherId))directProfiles.push(data);
  }
+
+ if(requestId!==directOpenRequestId)return;
+
  selectedDirectProfile=profile;
  selectedDirectConversation=conversation;
+
  await showDirectChat(profile,conversation);
- renderDirectList();
+
+ if(requestId===directOpenRequestId)renderDirectList();
 }
+
+/* عرض المحادثة المختارة */
 async function showDirectChat(profile,conversation){
+ if(!profile||!conversation)return;
+
+ /* تثبيت المحادثة المختارة قبل بدء تحميل الرسائل */
+ selectedDirectConversation=conversation;
+ selectedDirectProfile=profile;
+
  const head=document.getElementById("directChatHead");
- head.innerHTML=`${avatarMarkup(profile)}<div><strong>${esc(profile.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(profile.account_type))}${profile.country?" · "+esc(profile.country):""}</small></div>`;
- document.getElementById("directMessageInput").disabled=false;
- document.getElementById("directSendButton").disabled=false;
- await loadDirectMessages(conversation.id);
-}
-async function loadDirectMessages(conversationId){
+ const input=document.getElementById("directMessageInput");
+ const send=document.getElementById("directSendButton");
  const container=document.getElementById("directMessages");
+
+ head.innerHTML=`${avatarMarkup(profile)}<div><strong>${esc(profile.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(profile.account_type))}${profile.country?" · "+esc(profile.country):""}</small></div>`;
+
+ /* لا تسمح بالإرسال حتى يكتمل تحميل المحادثة */
+ input.disabled=true;
+ send.disabled=true;
+ container.innerHTML='<div class="loading">جارٍ تحميل الرسائل...</div>';
+
+ await loadDirectMessages(conversation.id);
+
+ /* لا تفعّل الإرسال إذا انتقل المستخدم لمحادثة أخرى */
+ if(String(selectedDirectConversation?.id)===String(conversation.id)){
+  input.disabled=false;
+  send.disabled=directSending;
+ }
+}
+
+/* تحميل الرسائل مع تجاهل أي استجابة قديمة */
+async function loadDirectMessages(conversationId){
+ const requestId=++directMessagesRequestId;
+ const container=document.getElementById("directMessages");
+
+ if(String(selectedDirectConversation?.id)!==String(conversationId))return;
+
+ container.innerHTML='<div class="loading">جارٍ تحميل الرسائل...</div>';
+
  const {data,error}=await db.from("conversation_messages")
   .select("id,conversation_id,sender_id,message,created_at")
-  .eq("conversation_id",conversationId).order("created_at",{ascending:true});
- if(error){container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';return;}
+  .eq("conversation_id",conversationId)
+  .order("created_at",{ascending:true});
+
+ /* تجاهل نتيجة الطلب إذا تغيّرت المحادثة أو بدأ طلب أحدث */
+ if(requestId!==directMessagesRequestId)return;
+ if(String(selectedDirectConversation?.id)!==String(conversationId))return;
+
+ if(error){
+  container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';
+  return;
+ }
+
  container.innerHTML=data?.length?data.map(m=>`<div class="bubble ${String(m.sender_id)===String(currentUser.id)?"mine":"theirs"}">${esc(m.message)}<small>${dateText(m.created_at)} · ${new Date(m.created_at).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</small></div>`).join(""):'<div class="direct-empty"><div><i class="fa-regular fa-message"></i><p>هذه بداية المحادثة. أرسل رسالتك الأولى.</p></div></div>';
+
  container.scrollTop=container.scrollHeight;
 }
+
+/* إرسال الرسائل المباشرة مع منع الإرسال المكرر */
 document.getElementById("directChatForm").addEventListener("submit",async e=>{
  e.preventDefault();
- if(!selectedDirectConversation)return;
+
+ if(directSending||!selectedDirectConversation)return;
+
  const input=document.getElementById("directMessageInput");
- const message=input.value.trim();if(!message)return;
  const send=document.getElementById("directSendButton");
+
+ const message=input.value.trim();
+ if(!message)return;
+
+ /* حفظ معرف المحادثة قبل أي await */
+ const conversationId=selectedDirectConversation.id;
+ const messageText=message;
+
+ directSending=true;
+ input.disabled=true;
  send.disabled=true;
- const {error}=await db.from("conversation_messages").insert({
-  conversation_id:selectedDirectConversation.id,
-  sender_id:currentUser.id,
-  message
- });
- send.disabled=false;
- if(error){showToast("تعذر إرسال الرسالة: "+error.message);return;}
- input.value="";
- await loadDirectMessages(selectedDirectConversation.id);
- await loadDirectConversations();
- renderDirectList();
-});
-async function refreshDirectRealtimeMessage(payload){
- const msg=payload.new;
- if(selectedDirectConversation&&String(msg.conversation_id)===String(selectedDirectConversation.id)){
-  await loadDirectMessages(selectedDirectConversation.id);
+
+ try{
+  const {error}=await db.from("conversation_messages").insert({
+   conversation_id:conversationId,
+   sender_id:currentUser.id,
+   message:messageText
+  });
+
+  if(error){
+   showToast("تعذر إرسال الرسالة: "+error.message);
+   return;
+  }
+
+  /* لا نمسح محتوى حقل محادثة أخرى */
+  if(String(selectedDirectConversation?.id)===String(conversationId)){
+   if(input.value.trim()===messageText)input.value="";
+   await loadDirectMessages(conversationId);
+  }
+
+  /* تحديث القائمة بعد نجاح الإرسال */
+  await loadDirectConversations();
+  renderDirectList();
+
+ }catch(error){
+  console.error("Direct message send error:",error);
+  showToast("حدث خطأ أثناء إرسال الرسالة.");
+ }finally{
+  directSending=false;
+
+  /*
+    إعادة تفعيل الحقل وفق المحادثة المختارة حالياً،
+    وليس المحادثة التي بدأ منها الإرسال.
+  */
+  input.disabled=!selectedDirectConversation;
+  send.disabled=!selectedDirectConversation;
  }
+});
+
+/* تحديث الرسائل والقائمة عند وصول رسالة Realtime */
+async function refreshDirectRealtimeMessage(payload){
+ const msg=payload?.new;
+
+ if(!msg||!msg.conversation_id)return;
+
+ const conversationId=String(msg.conversation_id);
+ const selectedId=String(selectedDirectConversation?.id||"");
+
+ /* تحديث رسائل المحادثة الحالية فقط */
+ if(selectedId&&conversationId===selectedId){
+  await loadDirectMessages(conversationId);
+ }
+
+ /* تحديث قائمة المحادثات دون السماح لطلب قديم باستبدال الجديد */
  await loadDirectConversations();
  renderDirectList();
 }
