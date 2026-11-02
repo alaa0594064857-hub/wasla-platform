@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -111,7 +110,7 @@ button{cursor:pointer}
 .product-info h4{margin:0 0 5px;font-size:14px}
 .product-info p{font-size:11px;color:var(--muted);margin:0 0 12px;line-height:1.7}
 .company-tag{font-size:10px;color:#2865a5;font-weight:800;margin-bottom:5px}
-.product-actions{display:flex;gap:7px}
+.product-actions{display:flex;gap:7px;flex-wrap:wrap}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:550px}
 th,td{text-align:right;padding:13px 11px;border-bottom:1px solid #f0eee9;font-size:12px}
@@ -187,9 +186,16 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 .direct-chat-head strong{font-size:12px;display:block}
 .direct-chat-head small{font-size:10px;color:var(--muted)}
 .direct-compose input:disabled,.direct-compose button:disabled{opacity:.5;cursor:not-allowed}
+.messaging-tabs{display:flex;gap:9px;margin-bottom:16px;background:#fff;padding:8px;border:1px solid var(--border);border-radius:14px;width:max-content;max-width:100%}
+.messaging-tab{border:0;border-radius:10px;padding:11px 18px;background:transparent;color:var(--muted);font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px}
+.messaging-tab.active{background:var(--navy);color:#fff}
+.messaging-panel{display:none}
+.messaging-panel.active{display:block}
+.inquiry-original{border:1px solid #eadbbd;background:#fffaf0;border-radius:12px;padding:12px;margin:0 0 16px;font-size:12px;line-height:1.8}
+.inquiry-original strong{display:block;color:#9a6c22;margin-bottom:4px;font-size:10px}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}.profile-layout{grid-template-columns:1fr}.profile-card{display:flex;align-items:center;text-align:right;gap:18px}.profile-avatar-wrap{margin:0}.profile-note{margin-top:0}}
 @media(max-width:760px){.sidebar{transform:translateX(100%)}.sidebar.open{transform:translateX(0)}.main{margin-right:0;width:100%}.menu-toggle{display:inline-grid;place-items:center}.topbar{padding:0 13px;height:65px}.search{width:40vw;padding:9px 10px}.top-profile .profile-text{display:none}.content{padding:19px 13px 35px}.welcome{padding:22px;min-height:165px}.welcome h2{font-size:18px}.welcome-art{width:75px;height:75px}.welcome-art i{font-size:32px}.grid-two{grid-template-columns:1fr}.inbox-layout,.direct-layout{grid-template-columns:1fr}.inbox-list,.direct-side{max-height:230px}.profile-card{display:block;text-align:center}.profile-avatar-wrap{margin:0 auto 15px}.profile-note{margin-top:18px}}
-@media(max-width:480px){.stats{gap:8px}.stat{padding:11px;gap:7px}.stat-icon{width:37px;height:37px;font-size:14px}.stat strong{font-size:19px}.stat small{font-size:9px}.product-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.quick-grid{grid-template-columns:repeat(2,1fr)}.top-left{gap:7px}.top-left .top-icon{width:35px;height:35px}}
+@media(max-width:480px){.stats{gap:8px}.stat{padding:11px;gap:7px}.stat-icon{width:37px;height:37px;font-size:14px}.stat strong{font-size:19px}.stat small{font-size:9px}.product-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.quick-grid{grid-template-columns:repeat(2,1fr)}.top-left{gap:7px}.top-left .top-icon{width:35px;height:35px}.messaging-tabs{width:100%}.messaging-tab{flex:1;justify-content:center;padding:10px 7px;font-size:10px}}
 </style>
 </head>
 
@@ -204,8 +210,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
  <button class="nav-btn" data-page="discover"><i class="fa-solid fa-compass"></i> اكتشف المنتجات</button>
  <div class="nav-label">التواصل والتجارة</div>
  <button class="nav-btn" data-page="inquiries"><i class="fa-solid fa-file-invoice"></i> الاستفسارات</button>
- <button class="nav-btn" data-page="inbox"><i class="fa-solid fa-comments"></i> محادثات الاستفسارات</button>
- <button class="nav-btn" data-page="direct"><i class="fa-solid fa-message"></i> الرسائل المباشرة</button>
+ <button class="nav-btn" data-page="inbox" data-messaging-mode="inquiries"><i class="fa-solid fa-comments"></i> المراسلات</button>
  <div class="nav-label">حسابك</div>
  <button class="nav-btn" data-page="profile"><i class="fa-solid fa-user"></i> الملف الشخصي</button>
  <button class="nav-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
@@ -224,7 +229,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
  </div>
  <div class="top-left">
   <button class="top-icon" onclick="goTo('inquiries')" title="الاستفسارات"><i class="fa-regular fa-bell"></i></button>
-  <button class="top-icon" onclick="goTo('direct')" title="الرسائل المباشرة"><i class="fa-regular fa-comments"></i></button>
+  <button class="top-icon" onclick="goTo('inbox')" title="المراسلات"><i class="fa-regular fa-comments"></i></button>
   <div class="top-profile">
    <button class="avatar top-avatar-button" id="topAvatar" type="button" title="الملف الشخصي" aria-label="فتح الملف الشخصي">W</button>
    <div class="profile-text"><strong id="topName">مرحباً بك في WASLA</strong><small id="topCompany">مساحة أعمالك</small></div>
@@ -249,7 +254,7 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
    <button class="quick" onclick="goTo('products');openProductModal()"><i class="fa-solid fa-plus"></i><strong>إضافة منتج</strong></button>
    <button class="quick" onclick="goTo('company')"><i class="fa-solid fa-building"></i><strong>بيانات الحساب</strong></button>
    <button class="quick" onclick="goTo('discover')"><i class="fa-solid fa-magnifying-glass"></i><strong>تصفح المنتجات</strong></button>
-   <button class="quick" onclick="goTo('direct')"><i class="fa-solid fa-message"></i><strong>رسالة مباشرة</strong></button>
+   <button class="quick" onclick="goTo('inbox')"><i class="fa-solid fa-message"></i><strong>المراسلات</strong></button>
   </div></div>
   <div class="card panel"><div class="panel-head"><h3>آخر الاستفسارات</h3><button class="text-link" onclick="goTo('inquiries')">عرض الكل ←</button></div><div id="recentInquiries"><div class="loading">جارٍ تحميل البيانات...</div></div></div>
  </div>
@@ -283,29 +288,36 @@ th{color:var(--muted);font-size:10px;background:#faf9f6}
 </section>
 
 <section class="page" id="page-inbox">
- <div class="page-heading"><div><h2>محادثات الاستفسارات</h2><p>محادثات مرتبطة بالاستفسارات والمنتجات.</p></div></div>
- <div class="inbox-layout">
-  <div class="card inbox-list" id="inboxList"></div>
-  <div class="card chat-area">
-   <div class="chat-head" id="chatTitle">اختر استفساراً لعرض المحادثة</div>
-   <div class="chat-messages" id="chatMessages"><div class="empty">ستظهر الرسائل هنا</div></div>
-   <form class="chat-compose" id="chatForm"><input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button></form>
+ <div class="page-heading"><div><h2>المراسلات</h2><p>كل محادثاتك التجارية في مكان واحد.</p></div></div>
+
+ <div class="messaging-tabs">
+  <button class="messaging-tab active" id="inquiryMessagingTab" type="button" onclick="switchMessagingMode('inquiries')"><i class="fa-solid fa-file-invoice"></i> محادثات الاستفسارات</button>
+  <button class="messaging-tab" id="directMessagingTab" type="button" onclick="switchMessagingMode('direct')"><i class="fa-solid fa-message"></i> الرسائل المباشرة</button>
+ </div>
+
+ <div class="messaging-panel active" id="inquiryMessagingPanel">
+  <div class="inbox-layout">
+   <div class="card inbox-list" id="inboxList"></div>
+   <div class="card chat-area">
+    <div class="chat-head" id="chatTitle">اختر استفساراً لعرض المحادثة</div>
+    <div class="chat-messages" id="chatMessages"><div class="empty">ستظهر الرسائل هنا</div></div>
+    <form class="chat-compose" id="chatForm"><input id="chatInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="chatSend" disabled><i class="fa-solid fa-paper-plane"></i></button></form>
+   </div>
   </div>
  </div>
-</section>
 
-<section class="page" id="page-direct">
- <div class="page-heading"><div><h2>الرسائل المباشرة</h2><p>ابحث عن أي حساب على WASLA وابدأ محادثة مباشرة، دون الحاجة إلى منتج أو استفسار سابق.</p></div></div>
- <div class="direct-layout">
-  <div class="card direct-side">
-   <input class="direct-search" id="contactSearch" placeholder="ابحث بالاسم أو نوع الحساب أو الدولة...">
-   <div class="direct-tabs"><button id="contactsTab" class="active" type="button" onclick="switchDirectTab('contacts')">دليل الحسابات</button><button id="conversationsTab" type="button" onclick="switchDirectTab('conversations')">محادثاتي</button></div>
-   <div id="directList"><div class="loading">جارٍ تحميل الحسابات...</div></div>
-  </div>
-  <div class="card direct-chat">
-   <div class="direct-chat-head" id="directChatHead"><div class="contact-avatar"><i class="fa-solid fa-comments"></i></div><div><strong>التواصل المباشر</strong><small>اختر حساباً لبدء المحادثة</small></div></div>
-   <div class="chat-messages" id="directMessages"><div class="direct-empty"><div><i class="fa-regular fa-message"></i><p>اختر حساباً من دليل الحسابات أو محادثاتك السابقة.</p></div></div></div>
-   <form class="chat-compose direct-compose" id="directChatForm"><input id="directMessageInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="directSendButton" disabled><i class="fa-solid fa-paper-plane"></i></button></form>
+ <div class="messaging-panel" id="directMessagingPanel">
+  <div class="direct-layout">
+   <div class="card direct-side">
+    <input class="direct-search" id="contactSearch" placeholder="ابحث بالاسم أو نوع الحساب أو الدولة...">
+    <div class="direct-tabs"><button id="contactsTab" class="active" type="button" onclick="switchDirectTab('contacts')">دليل الحسابات</button><button id="conversationsTab" type="button" onclick="switchDirectTab('conversations')">محادثاتي</button></div>
+    <div id="directList"><div class="loading">جارٍ تحميل الحسابات...</div></div>
+   </div>
+   <div class="card direct-chat">
+    <div class="direct-chat-head" id="directChatHead"><div class="contact-avatar"><i class="fa-solid fa-comments"></i></div><div><strong>التواصل المباشر</strong><small>اختر حساباً لبدء المحادثة</small></div></div>
+    <div class="chat-messages" id="directMessages"><div class="direct-empty"><div><i class="fa-regular fa-message"></i><p>اختر حساباً من دليل الحسابات أو محادثاتك السابقة.</p></div></div></div>
+    <form class="chat-compose direct-compose" id="directChatForm"><input id="directMessageInput" placeholder="اكتب رسالتك..." disabled autocomplete="off"><button type="submit" id="directSendButton" disabled><i class="fa-solid fa-paper-plane"></i></button></form>
+   </div>
   </div>
  </div>
 </section>
@@ -375,13 +387,16 @@ let selectedDirectConversation=null;
 let selectedDirectProfile=null;
 let directMessagesChannel=null;
 let directTab="contacts";
+let messagingMode="inquiries";
 
-/* حماية عمليات الرسائل المباشرة من الطلبات المتزامنة والقديمة */
 let directMessagesRequestId=0;
 let directOpenRequestId=0;
 let directConversationsRequestId=0;
+let inquiryMessagesRequestId=0;
+let inquiryOpenRequestId=0;
 let directStartLocks=new Set();
 let directSending=false;
+let inquirySending=false;
 
 function showToast(message){
  const toast=document.getElementById("toast");
@@ -398,19 +413,16 @@ function dateText(v){
  const d=new Date(v);
  return isNaN(d)?"—":d.toLocaleDateString("ar");
 }
+function timeText(v){
+ if(!v)return "";
+ const d=new Date(v);
+ return isNaN(d)?"":d.toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"});
+}
 function accountLabel(t){
  return({company:"شركة",manufacturer:"مصنّع",brand:"علامة تجارية",trader:"تاجر",buyer:"مشتري"})[t]||t||"حساب WASLA";
 }
-
-/* اسم قسم الحساب حسب نوع الحساب */
 function accountSectionLabel(t){
- return({
-  company:"شركتي",
-  buyer:"مشتري",
-  trader:"تاجر",
-  manufacturer:"مصنّعي",
-  brand:"علامتي التجارية"
- })[t]||"حسابي";
+ return({company:"شركتي",buyer:"مشتري",trader:"تاجر",manufacturer:"مصنّعي",brand:"علامتي التجارية"})[t]||"حسابي";
 }
 function updateAccountSectionLabel(type){
  const label=accountSectionLabel(type);
@@ -463,13 +475,21 @@ function showDashboardPage(page,openOnly=false){
  currentOpenOnly=Boolean(openOnly);
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  target.classList.add("active");
- document.querySelectorAll(".nav-btn[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+
+ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{
+  const active=b.dataset.page===page;
+  b.classList.toggle("active",active);
+ });
+
  closeSidebar();
  window.scrollTo({top:0,behavior:"smooth"});
+
  if(page==="discover")loadDiscover();
- if(page==="inbox")loadInbox();
+ if(page==="inbox"){
+  loadInbox();
+  if(messagingMode==="direct")loadDirectPage();
+ }
  if(page==="inquiries")renderInquiries(currentOpenOnly);
- if(page==="direct")loadDirectPage();
  return true;
 }
 function goTo(page,openOnly=false){
@@ -498,6 +518,18 @@ document.addEventListener("keydown",e=>{
  const card=e.target.closest(".stat-clickable");
  if(card&&(e.key==="Enter"||e.key===" ")){e.preventDefault();goTo(card.dataset.page,card.dataset.openOnly==="true");}
 });
+
+/* التبديل بين نوعي المراسلات */
+function switchMessagingMode(mode){
+ messagingMode=mode==="direct"?"direct":"inquiries";
+ document.getElementById("inquiryMessagingTab").classList.toggle("active",messagingMode==="inquiries");
+ document.getElementById("directMessagingTab").classList.toggle("active",messagingMode==="direct");
+ document.getElementById("inquiryMessagingPanel").classList.toggle("active",messagingMode==="inquiries");
+ document.getElementById("directMessagingPanel").classList.toggle("active",messagingMode==="direct");
+
+ if(messagingMode==="inquiries")loadInbox();
+ else loadDirectPage();
+}
 
 /* بدء التشغيل */
 async function init(){
@@ -548,7 +580,9 @@ async function loadAccountData(){
  setAvatar("topAvatar",data.avatar_url,initial);
  setAvatar("sideAvatar",data.avatar_url,initial);
  setProfileAvatar(data.avatar_url,initial);
- await Promise.all([loadCompany(),loadMyProducts(),loadMyInquiries()]);
+
+ await loadCompany();
+ await Promise.all([loadMyProducts(),loadMyInquiries()]);
  renderOverview();
  setupRealtime();
 }
@@ -590,11 +624,16 @@ document.getElementById("profileImageInput").addEventListener("change",function(
  showToast("تم اختيار الصورة. اضغط حفظ الملف الشخصي لرفعها.");
 });
 
-/* الشركة */
+/* الشركة: استخدام معرّف سجل الشركة الحقيقي */
 async function loadCompany(){
- const {data,error}=await db.from("companies").select("owner_id,name,country").eq("owner_id",currentUser.id).maybeSingle();
- if(error){console.error(error);return;}
- currentCompany=data;
+ const {data,error}=await db.from("companies")
+  .select("id,owner_id,name,country")
+  .eq("owner_id",currentUser.id)
+  .maybeSingle();
+
+ if(error){console.error("Company load error:",error);return;}
+
+ currentCompany=data||null;
  document.getElementById("companyName").value=data?.name||"";
  document.getElementById("companyCountry").value=data?.country||"";
  document.getElementById("statCompany").textContent=data?.name?"مضاف":"غير مضاف";
@@ -604,42 +643,74 @@ document.getElementById("companyForm").addEventListener("submit",async e=>{
  const name=document.getElementById("companyName").value.trim();
  const country=document.getElementById("companyCountry").value.trim();
  if(!name)return showToast("يرجى إدخال اسم الشركة.");
- const result=currentCompany
-  ?await db.from("companies").update({name,country}).eq("owner_id",currentUser.id)
-  :await db.from("companies").insert({owner_id:currentUser.id,name,country});
+
+ let result;
+ if(currentCompany){
+  result=await db.from("companies")
+   .update({name,country})
+   .eq("owner_id",currentUser.id);
+ }else{
+  result=await db.from("companies")
+   .insert({owner_id:currentUser.id,name,country});
+ }
+
  if(result.error)return showToast("تعذر حفظ الشركة: "+result.error.message);
+
  showToast("تم حفظ بيانات الحساب.");
- await loadCompany();renderOverview();
+ await loadCompany();
+ await loadMyProducts();
+ await loadMyInquiries();
+ renderOverview();
 });
 
-/* المنتجات: جميع أنواع الحسابات تستطيع الإضافة */
+/* المنتجات */
 async function loadMyProducts(){
+ if(!currentCompany?.id){
+  products=[];
+  renderMyProducts();
+  document.getElementById("myProducts").innerHTML='<div class="empty card"><i class="fa-solid fa-building"></i><p>أكمل بيانات حسابك التجاري أولاً حتى تتمكن من إضافة المنتجات.</p><button class="btn btn-gold" onclick="goTo(\'company\')">إكمال بيانات الحساب</button></div>';
+  return;
+ }
+
  const {data,error}=await db.from("products")
   .select("id,company_id,name,description,category,image_url,status,created_at")
-  .eq("company_id",currentUser.id).order("created_at",{ascending:false});
+  .eq("company_id",currentCompany.id)
+  .order("created_at",{ascending:false});
+
  if(error){
   console.error(error);products=[];
-  document.getElementById("myProducts").innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;
+  document.getElementById("myProducts").innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';
+  return;
  }
- products=data||[];renderMyProducts();
+
+ products=data||[];
+ renderMyProducts();
 }
 function productCard(p,owner=false){
  return `<article class="card product-card">
   <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
   <div class="product-info"><div class="company-tag">${esc(p.category||"عام")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج حتى الآن.")}</p>
-  ${owner?`<div class="product-actions"><button class="btn btn-light" onclick="editProduct('${p.id}')">تعديل</button><button class="btn btn-danger" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button></div>`:`<div class="product-actions"><button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button><button class="btn btn-light" onclick="startDirectChat('${p.company_id}')"><i class="fa-solid fa-message"></i> مراسلة</button></div>`}
+  ${owner?`<div class="product-actions"><button class="btn btn-light" onclick="editProduct('${p.id}')">تعديل</button><button class="btn btn-danger" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button></div>`:`<div class="product-actions"><button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button><button class="btn btn-light" onclick="startDirectChat('${p.owner_user_id||""}')"><i class="fa-solid fa-message"></i> مراسلة</button></div>`}
   </div></article>`;
 }
 function renderMyProducts(){
  const container=document.getElementById("myProducts"),recent=document.getElementById("recentProducts");
  if(!products.length){
   container.innerHTML='<div class="empty card"><i class="fa-solid fa-box-open"></i><p>لم تضف أي منتجات بعد.</p><button class="btn btn-gold" onclick="openProductModal()">أضف أول منتج</button></div>';
-  recent.innerHTML='<div class="empty">ستظهر منتجاتك هنا بعد إضافتها.</div>';return;
+  recent.innerHTML='<div class="empty">ستظهر منتجاتك هنا بعد إضافتها.</div>';
+  document.getElementById("statProducts").textContent="0";
+  return;
  }
  container.innerHTML=products.map(p=>productCard(p,true)).join("");
  recent.innerHTML=products.slice(0,3).map(p=>productCard(p,true)).join("");
+ document.getElementById("statProducts").textContent=products.length;
 }
 function openProductModal(){
+ if(!currentCompany?.id){
+  showToast("احفظ بيانات حسابك التجاري أولاً قبل إضافة المنتجات.");
+  goTo("company");
+  return;
+ }
  document.getElementById("productForm").reset();
  document.getElementById("productId").value="";
  document.getElementById("productModalTitle").textContent="إضافة منتج جديد";
@@ -658,81 +729,156 @@ function editProduct(id){
 }
 document.getElementById("productForm").addEventListener("submit",async e=>{
  e.preventDefault();
+ if(!currentCompany?.id)return showToast("يجب حفظ بيانات الحساب التجاري أولاً.");
+
  const id=document.getElementById("productId").value;
  const payload={
-  company_id:currentUser.id,
+  company_id:currentCompany.id,
   name:document.getElementById("productName").value.trim(),
   category:document.getElementById("productCategory").value.trim(),
   description:document.getElementById("productDescription").value.trim(),
   image_url:document.getElementById("productImage").value.trim()||null
  };
  if(!payload.name)return showToast("اسم المنتج مطلوب.");
+
  const result=id
-  ?await db.from("products").update(payload).eq("id",id).eq("company_id",currentUser.id)
+  ?await db.from("products").update(payload).eq("id",id).eq("company_id",currentCompany.id)
   :await db.from("products").insert(payload);
+
  if(result.error)return showToast("تعذر حفظ المنتج: "+result.error.message);
- closeProductModal();showToast("تم حفظ المنتج بنجاح.");
- await loadMyProducts();renderOverview();
+ closeProductModal();
+ showToast("تم حفظ المنتج بنجاح.");
+ await loadMyProducts();
+ renderOverview();
 });
 async function deleteProduct(id){
  if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
- const {error}=await db.from("products").delete().eq("id",id).eq("company_id",currentUser.id);
+ const {error}=await db.from("products").delete().eq("id",id).eq("company_id",currentCompany?.id);
  if(error)return showToast("تعذر حذف المنتج: "+error.message);
- showToast("تم حذف المنتج.");await loadMyProducts();renderOverview();
+ showToast("تم حذف المنتج.");
+ await loadMyProducts();
+ renderOverview();
 }
 
 /* اكتشاف المنتجات */
 async function loadDiscover(){
  const container=document.getElementById("discoverProducts");
  container.innerHTML='<div class="loading">جارٍ البحث...</div>';
+
  const search=document.getElementById("discoverSearch").value.trim();
  const category=document.getElementById("discoverCategory").value;
- let query=db.from("products").select("id,company_id,name,description,category,image_url,status,created_at,companies(name,country)")
-  .eq("status","published").neq("company_id",currentUser.id).order("created_at",{ascending:false}).limit(60);
+
+ let query=db.from("products")
+  .select("id,company_id,name,description,category,image_url,status,created_at,companies(name,country,owner_id)")
+  .eq("status","published")
+  .order("created_at",{ascending:false})
+  .limit(60);
+
  if(search)query=query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
  if(category)query=query.eq("category",category);
+
  const {data,error}=await query;
- if(error){container.innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';return;}
- if(!data?.length){container.innerHTML='<div class="empty card"><i class="fa-solid fa-magnifying-glass"></i><p>لا توجد منتجات منشورة مطابقة لبحثك.</p></div>';return;}
- const categories=[...new Set(data.map(p=>p.category).filter(Boolean))];
- const select=document.getElementById("discoverCategory"),old=select.value;
+
+ if(error){
+  container.innerHTML='<div class="empty card">تعذر تحميل المنتجات: '+esc(error.message)+'</div>';
+  return;
+ }
+
+ const visible=(data||[]).filter(p=>String(p.companies?.owner_id||"")!==String(currentUser.id));
+
+ if(!visible.length){
+  container.innerHTML='<div class="empty card"><i class="fa-solid fa-magnifying-glass"></i><p>لا توجد منتجات منشورة مطابقة لبحثك.</p></div>';
+  return;
+ }
+
+ const categories=[...new Set((data||[]).map(p=>p.category).filter(Boolean))];
+ const select=document.getElementById("discoverCategory");
+ const old=select.value;
  select.innerHTML='<option value="">كل التصنيفات</option>'+categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
  select.value=old;
- container.innerHTML=data.map(p=>`
- <article class="card product-card"><div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
- <div class="product-info"><div class="company-tag">${esc(p.companies?.name||"حساب على WASLA")} · ${esc(p.companies?.country||"")}</div><h4>${esc(p.name)}</h4><p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p>
- <div class="product-actions"><button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button><button class="btn btn-light" onclick="startDirectChat('${p.company_id}')"><i class="fa-solid fa-message"></i> مراسلة</button></div>
- </div></article>`).join("");
+
+ container.innerHTML=visible.map(p=>`
+ <article class="card product-card">
+  <div class="product-image">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" onerror="this.style.display='none'">`:'<i class="fa-solid fa-box"></i>'}</div>
+  <div class="product-info">
+   <div class="company-tag">${esc(p.companies?.name||"حساب على WASLA")} · ${esc(p.companies?.country||"")}</div>
+   <h4>${esc(p.name)}</h4>
+   <p>${esc(p.description||"لا يوجد وصف لهذا المنتج.")}</p>
+   <div class="product-actions">
+    <button class="btn btn-gold" onclick="openInquiryModal('${p.id}')">إرسال استفسار</button>
+    <button class="btn btn-light" onclick="startDirectChat('${p.companies?.owner_id||""}')"><i class="fa-solid fa-message"></i> مراسلة</button>
+   </div>
+  </div>
+ </article>`).join("");
 }
 
 /* الاستفسارات */
 async function loadMyInquiries(){
- const {data,error}=await db.from("inquiries")
+ let query=db.from("inquiries")
   .select("id,product_id,company_id,buyer_id,quantity,message,status,created_at,reply,responded_at,products(name),companies(name)")
-  .or(`buyer_id.eq.${currentUser.id},company_id.eq.${currentUser.id}`).order("created_at",{ascending:false});
- if(error){console.error(error);inquiries=[];return;}
- inquiries=data||[];renderInquiries();
+  .order("created_at",{ascending:false});
+
+ if(currentCompany?.id){
+  query=query.or(`buyer_id.eq.${currentUser.id},company_id.eq.${currentCompany.id}`);
+ }else{
+  query=query.eq("buyer_id",currentUser.id);
+ }
+
+ const {data,error}=await query;
+
+ if(error){
+  console.error("Inquiries load error:",error);
+  inquiries=[];
+  renderInquiries();
+  return;
+ }
+
+ inquiries=data||[];
+ renderInquiries();
 }
 function renderInquiries(openOnly=false){
- const body=document.getElementById("inquiriesTable"),description=document.getElementById("inquiriesDescription");
+ const body=document.getElementById("inquiriesTable");
+ const description=document.getElementById("inquiriesDescription");
  if(!body)return;
+
  const rows=openOnly?inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status)):inquiries;
+
  if(description)description.textContent=openOnly?"هذه الاستفسارات التي تحتاج إلى متابعة.":"تابع الاستفسارات المرتبطة بمنتجاتك وطلباتك.";
+
  if(!rows.length){
-  body.innerHTML=openOnly?'<tr><td colspan="5"><div class="empty"><i class="fa-solid fa-check-circle"></i><p>لا توجد استفسارات مفتوحة حالياً.</p></div></td></tr>':'<tr><td colspan="5"><div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد استفسارات حتى الآن.</p></div></td></tr>';return;
+  body.innerHTML=openOnly
+   ?'<tr><td colspan="5"><div class="empty"><i class="fa-solid fa-check-circle"></i><p>لا توجد استفسارات مفتوحة حالياً.</p></div></td></tr>'
+   :'<tr><td colspan="5"><div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد استفسارات حتى الآن.</p></div></td></tr>';
+  return;
  }
- body.innerHTML=rows.map(i=>`<tr><td>${esc(i.products?.name||"منتج")}</td><td>${esc(i.quantity||"—")}</td><td><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></td><td>${dateText(i.created_at)}</td><td><button class="btn btn-light" onclick="openChat('${i.id}')">فتح المحادثة</button></td></tr>`).join("");
+
+ body.innerHTML=rows.map(i=>`
+ <tr>
+  <td>${esc(i.products?.name||"منتج")}</td>
+  <td>${esc(i.quantity||"—")}</td>
+  <td><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></td>
+  <td>${dateText(i.created_at)}</td>
+  <td><button class="btn btn-light" onclick="openChat('${i.id}')">فتح المحادثة</button></td>
+ </tr>`).join("");
 }
 function renderOverview(){
  document.getElementById("statProducts").textContent=products.length;
  document.getElementById("statInquiries").textContent=inquiries.length;
  document.getElementById("statOpen").textContent=inquiries.filter(i=>!["completed","closed","rejected"].includes(i.status)).length;
  document.getElementById("statCompany").textContent=currentCompany?.name?"مضاف":"غير مضاف";
+
  const recent=document.getElementById("recentInquiries");
- recent.innerHTML=inquiries.length?inquiries.slice(0,4).map(i=>`<div class="activity"><div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div><div><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${dateText(i.created_at)}</small></div><span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span></div>`).join(""):'<div class="empty"><i class="fa-regular fa-envelope"></i><p>لا توجد استفسارات حتى الآن.</p></div>';
+ recent.innerHTML=inquiries.length
+  ?inquiries.slice(0,4).map(i=>`
+   <div class="activity">
+    <div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div>
+    <div><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${dateText(i.created_at)}</small></div>
+    <span class="pill ${statusClass(i.status)}">${esc(statusLabel(i.status))}</span>
+   </div>`).join("")
+  :'<div class="empty"><i class="fa-regular fa-envelope"></i><p>لا توجد استفسارات حتى الآن.</p></div>';
 }
 
-/* الاستفسارات متاحة لجميع أنواع الحسابات */
+/* إنشاء استفسار */
 function openInquiryModal(id){
  document.getElementById("inquiryForm").reset();
  document.getElementById("inquiryProductId").value=id;
@@ -741,50 +887,182 @@ function openInquiryModal(id){
 function closeInquiryModal(){document.getElementById("inquiryModal").classList.remove("show");}
 document.getElementById("inquiryForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  const productId=document.getElementById("inquiryProductId").value;
- const product=await db.from("products").select("id,company_id").eq("id",productId).maybeSingle();
+ const product=await db.from("products")
+  .select("id,company_id")
+  .eq("id",productId)
+  .maybeSingle();
+
  if(product.error||!product.data)return showToast("لم نتمكن من العثور على المنتج.");
- if(String(product.data.company_id)===String(currentUser.id))return showToast("لا يمكنك إرسال استفسار إلى منتجك.");
+
+ const targetCompanyId=product.data.company_id;
+
+ if(currentCompany?.id&&String(targetCompanyId)===String(currentCompany.id)){
+  return showToast("لا يمكنك إرسال استفسار إلى منتجك.");
+ }
+
+ const quantity=document.getElementById("inquiryQuantity").value.trim();
+ const message=document.getElementById("inquiryMessage").value.trim();
+
+ if(!quantity||!message)return showToast("أكمل الكمية والرسالة.");
+
  const {error}=await db.from("inquiries").insert({
-  product_id:productId,company_id:product.data.company_id,buyer_id:currentUser.id,
-  quantity:document.getElementById("inquiryQuantity").value.trim(),
-  message:document.getElementById("inquiryMessage").value.trim(),status:"pending"
+  product_id:productId,
+  company_id:targetCompanyId,
+  buyer_id:currentUser.id,
+  quantity,
+  message,
+  status:"pending"
  });
+
  if(error)return showToast("تعذر إرسال الاستفسار: "+error.message);
- closeInquiryModal();showToast("تم إرسال الاستفسار بنجاح.");
- await loadMyInquiries();renderOverview();
+
+ closeInquiryModal();
+ showToast("تم إرسال الاستفسار بنجاح.");
+ await loadMyInquiries();
+ renderOverview();
 });
 
-/* محادثات الاستفسارات القديمة - مستقلة عن الرسائل المباشرة */
+/* صندوق محادثات الاستفسارات */
 async function loadInbox(){
  const list=document.getElementById("inboxList");
- if(!inquiries.length){list.innerHTML='<div class="empty"><i class="fa-regular fa-comments"></i><p>لا توجد محادثات بعد.</p></div>';return;}
- list.innerHTML=inquiries.map(i=>`<div class="inbox-item ${String(selectedInquiry)===String(i.id)?"selected":""}" onclick="openChat('${i.id}')"><strong>${esc(i.products?.name||"استفسار تجاري")}</strong><small>${esc(i.companies?.name||"محادثة تجارية")}</small><small>${dateText(i.created_at)} · ${esc(statusLabel(i.status))}</small></div>`).join("");
+ if(!inquiries.length){
+  list.innerHTML='<div class="empty"><i class="fa-regular fa-comments"></i><p>لا توجد محادثات استفسارات بعد.</p></div>';
+  return;
+ }
+
+ list.innerHTML=inquiries.map(i=>`
+  <div class="inbox-item ${String(selectedInquiry)===String(i.id)?"selected":""}" onclick="openChat('${i.id}')">
+   <strong>${esc(i.products?.name||"استفسار تجاري")}</strong>
+   <small>${esc(i.companies?.name||"محادثة تجارية")}</small>
+   <small>${dateText(i.created_at)} · ${esc(statusLabel(i.status))}</small>
+  </div>`).join("");
 }
 async function openChat(id){
- selectedInquiry=id;goTo("inbox");await loadInbox();
- const inquiry=inquiries.find(i=>String(i.id)===String(id));if(!inquiry)return;
+ const requestId=++inquiryOpenRequestId;
+ selectedInquiry=String(id);
+ switchMessagingMode("inquiries");
+ goTo("inbox");
+ await loadInbox();
+
+ const inquiry=inquiries.find(i=>String(i.id)===String(id));
+ if(!inquiry)return;
+
  document.getElementById("chatTitle").textContent="محادثة: "+(inquiry.products?.name||"استفسار تجاري");
  document.getElementById("chatInput").disabled=false;
  document.getElementById("chatSend").disabled=false;
- await loadMessages(id);
+
+ await loadMessages(id,requestId);
 }
-async function loadMessages(id){
+async function loadMessages(id,openRequestId=null){
+ const requestId=++inquiryMessagesRequestId;
  const container=document.getElementById("chatMessages");
- const {data,error}=await db.from("inquiry_messages").select("id,inquiry_id,sender_id,message,created_at").eq("inquiry_id",id).order("created_at",{ascending:true});
- if(error){container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';return;}
- container.innerHTML=data?.length?data.map(m=>`<div class="bubble ${m.sender_id===currentUser.id?"mine":"theirs"}">${esc(m.message)}<small>${dateText(m.created_at)}</small></div>`).join(""):'<div class="empty"><i class="fa-regular fa-message"></i><p>لا توجد رسائل في هذه المحادثة بعد.</p></div>';
+
+ const inquiry=inquiries.find(i=>String(i.id)===String(id));
+ if(!inquiry)return;
+
+ const {data,error}=await db.from("inquiry_messages")
+  .select("id,inquiry_id,sender_id,message,created_at")
+  .eq("inquiry_id",id)
+  .order("created_at",{ascending:true});
+
+ if(requestId!==inquiryMessagesRequestId)return;
+ if(String(selectedInquiry)!==String(id))return;
+ if(openRequestId!==null&&openRequestId!==inquiryOpenRequestId)return;
+
+ if(error){
+  container.innerHTML='<div class="empty">تعذر تحميل الرسائل: '+esc(error.message)+'</div>';
+  return;
+ }
+
+ const rows=data||[];
+ const originalMessage=String(inquiry.message||"").trim();
+
+ let html="";
+
+ if(originalMessage){
+  const originalExists=rows.some(m=>String(m.message||"").trim()===originalMessage&&String(m.sender_id)===String(inquiry.buyer_id));
+  if(!originalExists){
+   html+=`<div class="bubble ${String(inquiry.buyer_id)===String(currentUser.id)?"mine":"theirs"}">${esc(originalMessage)}<small>الرسالة الأصلية للاستفسار · ${dateText(inquiry.created_at)}</small></div>`;
+  }
+ }
+
+ html+=rows.map(m=>`
+  <div class="bubble ${String(m.sender_id)===String(currentUser.id)?"mine":"theirs"}">
+   ${esc(m.message)}
+   <small>${dateText(m.created_at)} · ${timeText(m.created_at)}</small>
+  </div>`).join("");
+
+ container.innerHTML=html||'<div class="empty"><i class="fa-regular fa-message"></i><p>لا توجد رسائل في هذه المحادثة بعد.</p></div>';
  container.scrollTop=container.scrollHeight;
 }
+
+/* إرسال رد على الاستفسار */
 document.getElementById("chatForm").addEventListener("submit",async e=>{
- e.preventDefault();if(!selectedInquiry)return;
- const input=document.getElementById("chatInput"),message=input.value.trim();if(!message)return;
- const {error}=await db.from("inquiry_messages").insert({inquiry_id:selectedInquiry,sender_id:currentUser.id,message});
- if(error)return showToast("تعذر إرسال الرسالة: "+error.message);
- input.value="";await loadMessages(selectedInquiry);
+ e.preventDefault();
+
+ if(inquirySending||!selectedInquiry)return;
+
+ const input=document.getElementById("chatInput");
+ const send=document.getElementById("chatSend");
+ const message=input.value.trim();
+
+ if(!message)return;
+
+ const inquiryId=String(selectedInquiry);
+ const inquiry=inquiries.find(i=>String(i.id)===inquiryId);
+ if(!inquiry)return;
+
+ inquirySending=true;
+ input.disabled=true;
+ send.disabled=true;
+
+ try{
+  const {error}=await db.from("inquiry_messages").insert({
+   inquiry_id:inquiryId,
+   sender_id:currentUser.id,
+   message
+  });
+
+  if(error){
+   showToast("تعذر إرسال الرسالة: "+error.message);
+   return;
+  }
+
+  if(String(selectedInquiry)===inquiryId){
+   if(input.value.trim()===message)input.value="";
+   await loadMessages(inquiryId);
+  }
+
+  /* لا نفترض أن تحديث الحالة مسموح؛ فشل التحديث لا يلغي إرسال الرسالة */
+  if(String(inquiry.buyer_id)!==String(currentUser.id)&&inquiry.status==="pending"){
+   const statusResult=await db.from("inquiries")
+    .update({status:"open"})
+    .eq("id",inquiryId)
+    .eq("company_id",currentCompany?.id);
+
+   if(!statusResult.error){
+    inquiry.status="open";
+    renderInquiries();
+    renderOverview();
+    loadInbox();
+   }else{
+    console.warn("Inquiry status update was not permitted:",statusResult.error);
+   }
+  }
+
+ }catch(error){
+  console.error("Inquiry message send error:",error);
+  showToast("حدث خطأ أثناء إرسال الرسالة.");
+ }finally{
+  inquirySending=false;
+  input.disabled=!selectedInquiry;
+  send.disabled=!selectedInquiry;
+ }
 });
 
-/* دليل الحسابات والرسائل المباشرة */
+/* الرسائل المباشرة */
 async function loadDirectPage(){
  await Promise.all([loadDirectProfiles(),loadDirectConversations()]);
  renderDirectList();
@@ -795,19 +1073,22 @@ async function loadDirectProfiles(){
   .neq("id",currentUser.id)
   .order("full_name",{ascending:true})
   .limit(300);
+
  if(error){
   console.error("Profiles directory error:",error);
   directProfiles=[];
   document.getElementById("directList").innerHTML='<div class="empty">تعذر تحميل دليل الحسابات: '+esc(error.message)+'</div>';
   return;
  }
+
  directProfiles=data||[];
 }
 
-/* منع نتائج تحميل المحادثات القديمة من استبدال النتائج الأحدث */
+/* جلب المحادثات */
 async function loadDirectConversations(){
  const requestId=++directConversationsRequestId;
  const uid=currentUser.id;
+
  const {data,error}=await db.from("conversations")
   .select("id,user_one,user_two,created_at,updated_at")
   .or(`user_one.eq.${uid},user_two.eq.${uid}`)
@@ -819,7 +1100,27 @@ async function loadDirectConversations(){
   console.error("Conversations error:",error);
   return;
  }
+
  directConversations=data||[];
+
+ /* تحميل الملفات الشخصية للأطراف التي لا تظهر ضمن أول 300 حساب */
+ const missingIds=[...new Set(directConversations.map(getOtherId))]
+  .filter(id=>id&&!profileFor(id));
+
+ if(missingIds.length){
+  const {data:extraProfiles,error:profilesError}=await db.from("profiles")
+   .select("id,full_name,account_type,avatar_url,tagline,bio,country")
+   .in("id",missingIds);
+
+  if(requestId!==directConversationsRequestId)return;
+
+  if(!profilesError&&extraProfiles?.length){
+   const existing=new Set(directProfiles.map(p=>String(p.id)));
+   extraProfiles.forEach(p=>{
+    if(!existing.has(String(p.id)))directProfiles.push(p);
+   });
+  }
+ }
 }
 function getOtherId(conversation){
  return String(conversation.user_one)===String(currentUser.id)?conversation.user_two:conversation.user_one;
@@ -848,40 +1149,57 @@ function renderDirectList(){
    const text=[p.full_name,p.account_type,accountLabel(p.account_type),p.tagline,p.bio,p.country].join(" ").toLowerCase();
    return text.includes(term);
   });
+
   if(!filtered.length){
    container.innerHTML='<div class="empty"><p>لا توجد حسابات مطابقة لبحثك.</p></div>';
    return;
   }
-  container.innerHTML=filtered.map(p=>`<div class="contact-item ${String(selectedDirectProfile?.id)===String(p.id)?"selected":""}" onclick="startDirectChat('${p.id}')">${avatarMarkup(p)}<div class="contact-info"><strong>${esc(p.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(p.account_type))}${p.country?" · "+esc(p.country):""}</small></div><button class="contact-start" type="button" title="مراسلة"><i class="fa-solid fa-message"></i></button></div>`).join("");
+
+  container.innerHTML=filtered.map(p=>`
+   <div class="contact-item ${String(selectedDirectProfile?.id)===String(p.id)?"selected":""}" onclick="startDirectChat('${p.id}')">
+    ${avatarMarkup(p)}
+    <div class="contact-info">
+     <strong>${esc(p.full_name||"مستخدم WASLA")}</strong>
+     <small>${esc(accountLabel(p.account_type))}${p.country?" · "+esc(p.country):""}</small>
+    </div>
+    <button class="contact-start" type="button" title="مراسلة"><i class="fa-solid fa-message"></i></button>
+   </div>`).join("");
+
  }else{
   const rows=directConversations.map(c=>({conversation:c,profile:profileFor(getOtherId(c))}))
    .filter(x=>{
     const p=x.profile;
     return !term||[p?.full_name,p?.account_type,accountLabel(p?.account_type),p?.country].join(" ").toLowerCase().includes(term);
    });
+
   if(!rows.length){
    container.innerHTML='<div class="empty"><p>لا توجد محادثات مباشرة بعد. اختر حساباً من دليل الحسابات لبدء محادثة.</p></div>';
    return;
   }
+
   container.innerHTML=rows.map(x=>{
    const p=x.profile||{id:getOtherId(x.conversation),full_name:"حساب WASLA"};
-   return `<div class="contact-item ${String(selectedDirectConversation?.id)===String(x.conversation.id)?"selected":""}" onclick="openDirectConversation('${x.conversation.id}')">${avatarMarkup(p)}<div class="contact-info"><strong>${esc(p.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(p.account_type))} · ${dateText(x.conversation.updated_at||x.conversation.created_at)}</small></div></div>`;
+   return `
+    <div class="contact-item ${String(selectedDirectConversation?.id)===String(x.conversation.id)?"selected":""}" onclick="openDirectConversation('${x.conversation.id}')">
+     ${avatarMarkup(p)}
+     <div class="contact-info">
+      <strong>${esc(p.full_name||"مستخدم WASLA")}</strong>
+      <small>${esc(accountLabel(p.account_type))} · ${dateText(x.conversation.updated_at||x.conversation.created_at)}</small>
+     </div>
+    </div>`;
   }).join("");
  }
 }
 document.getElementById("contactSearch").addEventListener("input",renderDirectList());
 
-/* إنشاء محادثة أو استرجاع المحادثة الموجودة */
+/* إنشاء أو استرجاع محادثة واحدة بين الحسابين */
 async function startDirectChat(targetId){
  if(!targetId||String(targetId)===String(currentUser.id))return;
 
  const targetKey=String(targetId);
-
- /* منع الضغط المتكرر على مراسلة الحساب نفسه */
  if(directStartLocks.has(targetKey))return;
- directStartLocks.add(targetKey);
 
- /* أحدث عملية فتح هي التي يحق لها تغيير واجهة المحادثة */
+ directStartLocks.add(targetKey);
  const openRequestId=++directOpenRequestId;
 
  try{
@@ -890,7 +1208,8 @@ async function startDirectChat(targetId){
   if(!target){
    const {data,error}=await db.from("profiles")
     .select("id,full_name,account_type,avatar_url,tagline,bio,country")
-    .eq("id",targetId).maybeSingle();
+    .eq("id",targetId)
+    .maybeSingle();
 
    if(openRequestId!==directOpenRequestId)return;
 
@@ -907,7 +1226,6 @@ async function startDirectChat(targetId){
 
   const ids=[String(currentUser.id),targetKey].sort();
 
-  /* البحث أولاً عن محادثة سابقة */
   let {data:conversation,error}=await db.from("conversations")
    .select("id,user_one,user_two,created_at,updated_at")
    .eq("user_one",ids[0])
@@ -921,7 +1239,6 @@ async function startDirectChat(targetId){
    return;
   }
 
-  /* إنشاء محادثة فقط إذا لم تكن موجودة */
   if(!conversation){
    const result=await db.from("conversations")
     .insert({user_one:ids[0],user_two:ids[1]})
@@ -931,10 +1248,7 @@ async function startDirectChat(targetId){
    if(openRequestId!==directOpenRequestId)return;
 
    if(result.error){
-    /*
-      قد يكون الطرف الآخر أنشأ المحادثة في اللحظة نفسها.
-      نعيد البحث بدلاً من افتراض وجود اسم constraint معين.
-    */
+    /* إعادة البحث في حال أن الطرف الآخر أنشأ المحادثة في الوقت نفسه */
     const retry=await db.from("conversations")
      .select("id,user_one,user_two,created_at,updated_at")
      .eq("user_one",ids[0])
@@ -959,10 +1273,10 @@ async function startDirectChat(targetId){
   selectedDirectProfile=target;
   selectedDirectConversation=conversation;
 
-  goTo("direct");
+  switchMessagingMode("direct");
+  goTo("inbox");
 
   await loadDirectConversations();
-
   if(openRequestId!==directOpenRequestId)return;
 
   switchDirectTab("conversations");
@@ -972,15 +1286,13 @@ async function startDirectChat(targetId){
 
  }catch(error){
   console.error("Start direct chat error:",error);
-  if(openRequestId===directOpenRequestId){
-   showToast("حدث خطأ أثناء فتح المحادثة.");
-  }
+  if(openRequestId===directOpenRequestId)showToast("حدث خطأ أثناء فتح المحادثة.");
  }finally{
   directStartLocks.delete(targetKey);
  }
 }
 
-/* فتح محادثة سابقة مع حماية من تأخر تحميل الملف الشخصي */
+/* فتح محادثة سابقة */
 async function openDirectConversation(id){
  const requestId=++directOpenRequestId;
 
@@ -998,9 +1310,7 @@ async function openDirectConversation(id){
 
   if(requestId!==directOpenRequestId)return;
 
-  if(error){
-   console.error("Direct profile error:",error);
-  }
+  if(error)console.error("Direct profile error:",error);
 
   profile=data||{id:otherId,full_name:"حساب WASLA"};
   if(data&&!profileFor(otherId))directProfiles.push(data);
@@ -1011,6 +1321,9 @@ async function openDirectConversation(id){
  selectedDirectProfile=profile;
  selectedDirectConversation=conversation;
 
+ switchMessagingMode("direct");
+ goTo("inbox");
+
  await showDirectChat(profile,conversation);
 
  if(requestId===directOpenRequestId)renderDirectList();
@@ -1020,7 +1333,6 @@ async function openDirectConversation(id){
 async function showDirectChat(profile,conversation){
  if(!profile||!conversation)return;
 
- /* تثبيت المحادثة المختارة قبل بدء تحميل الرسائل */
  selectedDirectConversation=conversation;
  selectedDirectProfile=profile;
 
@@ -1031,21 +1343,19 @@ async function showDirectChat(profile,conversation){
 
  head.innerHTML=`${avatarMarkup(profile)}<div><strong>${esc(profile.full_name||"مستخدم WASLA")}</strong><small>${esc(accountLabel(profile.account_type))}${profile.country?" · "+esc(profile.country):""}</small></div>`;
 
- /* لا تسمح بالإرسال حتى يكتمل تحميل المحادثة */
  input.disabled=true;
  send.disabled=true;
  container.innerHTML='<div class="loading">جارٍ تحميل الرسائل...</div>';
 
  await loadDirectMessages(conversation.id);
 
- /* لا تفعّل الإرسال إذا انتقل المستخدم لمحادثة أخرى */
  if(String(selectedDirectConversation?.id)===String(conversation.id)){
   input.disabled=false;
   send.disabled=directSending;
  }
 }
 
-/* تحميل الرسائل مع تجاهل أي استجابة قديمة */
+/* تحميل الرسائل المباشرة */
 async function loadDirectMessages(conversationId){
  const requestId=++directMessagesRequestId;
  const container=document.getElementById("directMessages");
@@ -1059,7 +1369,6 @@ async function loadDirectMessages(conversationId){
   .eq("conversation_id",conversationId)
   .order("created_at",{ascending:true});
 
- /* تجاهل نتيجة الطلب إذا تغيّرت المحادثة أو بدأ طلب أحدث */
  if(requestId!==directMessagesRequestId)return;
  if(String(selectedDirectConversation?.id)!==String(conversationId))return;
 
@@ -1068,12 +1377,18 @@ async function loadDirectMessages(conversationId){
   return;
  }
 
- container.innerHTML=data?.length?data.map(m=>`<div class="bubble ${String(m.sender_id)===String(currentUser.id)?"mine":"theirs"}">${esc(m.message)}<small>${dateText(m.created_at)} · ${new Date(m.created_at).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}</small></div>`).join(""):'<div class="direct-empty"><div><i class="fa-regular fa-message"></i><p>هذه بداية المحادثة. أرسل رسالتك الأولى.</p></div></div>';
+ container.innerHTML=data?.length
+  ?data.map(m=>`
+   <div class="bubble ${String(m.sender_id)===String(currentUser.id)?"mine":"theirs"}">
+    ${esc(m.message)}
+    <small>${dateText(m.created_at)} · ${timeText(m.created_at)}</small>
+   </div>`).join("")
+  :'<div class="direct-empty"><div><i class="fa-regular fa-message"></i><p>هذه بداية المحادثة. أرسل رسالتك الأولى.</p></div></div>';
 
  container.scrollTop=container.scrollHeight;
 }
 
-/* إرسال الرسائل المباشرة مع منع الإرسال المكرر */
+/* إرسال الرسائل المباشرة */
 document.getElementById("directChatForm").addEventListener("submit",async e=>{
  e.preventDefault();
 
@@ -1081,11 +1396,10 @@ document.getElementById("directChatForm").addEventListener("submit",async e=>{
 
  const input=document.getElementById("directMessageInput");
  const send=document.getElementById("directSendButton");
-
  const message=input.value.trim();
+
  if(!message)return;
 
- /* حفظ معرف المحادثة قبل أي await */
  const conversationId=selectedDirectConversation.id;
  const messageText=message;
 
@@ -1105,13 +1419,21 @@ document.getElementById("directChatForm").addEventListener("submit",async e=>{
    return;
   }
 
-  /* لا نمسح محتوى حقل محادثة أخرى */
   if(String(selectedDirectConversation?.id)===String(conversationId)){
    if(input.value.trim()===messageText)input.value="";
    await loadDirectMessages(conversationId);
   }
 
-  /* تحديث القائمة بعد نجاح الإرسال */
+  /*
+    نحاول تحديث وقت المحادثة لترتيبها في القائمة.
+    إذا لم تسمح سياسات التحديث بذلك، لا نفشل إرسال الرسالة.
+  */
+  const updateResult=await db.from("conversations")
+   .update({updated_at:new Date().toISOString()})
+   .eq("id",conversationId);
+
+  if(updateResult.error)console.warn("Conversation timestamp update:",updateResult.error);
+
   await loadDirectConversations();
   renderDirectList();
 
@@ -1120,31 +1442,23 @@ document.getElementById("directChatForm").addEventListener("submit",async e=>{
   showToast("حدث خطأ أثناء إرسال الرسالة.");
  }finally{
   directSending=false;
-
-  /*
-    إعادة تفعيل الحقل وفق المحادثة المختارة حالياً،
-    وليس المحادثة التي بدأ منها الإرسال.
-  */
   input.disabled=!selectedDirectConversation;
   send.disabled=!selectedDirectConversation;
  }
 });
 
-/* تحديث الرسائل والقائمة عند وصول رسالة Realtime */
+/* تحديث الرسائل والقوائم عند وصول رسالة جديدة */
 async function refreshDirectRealtimeMessage(payload){
  const msg=payload?.new;
-
  if(!msg||!msg.conversation_id)return;
 
  const conversationId=String(msg.conversation_id);
  const selectedId=String(selectedDirectConversation?.id||"");
 
- /* تحديث رسائل المحادثة الحالية فقط */
  if(selectedId&&conversationId===selectedId){
   await loadDirectMessages(conversationId);
  }
 
- /* تحديث قائمة المحادثات دون السماح لطلب قديم باستبدال الجديد */
  await loadDirectConversations();
  renderDirectList();
 }
@@ -1152,40 +1466,73 @@ async function refreshDirectRealtimeMessage(payload){
 /* الملف الشخصي */
 document.getElementById("profileForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  if(!currentUser)return showToast("لا توجد جلسة مستخدم.");
+
  const full_name=document.getElementById("fullName").value.trim();
  const tagline=document.getElementById("profileTagline").value.trim();
  const bio=document.getElementById("profileBio").value.trim();
  const whatsappInput=document.getElementById("profileWhatsapp").value.trim();
  const facebookInput=document.getElementById("profileFacebook").value.trim();
  const websiteInput=document.getElementById("profileWebsite").value.trim();
+
  if(!full_name)return showToast("يرجى إدخال الاسم.");
+
  const whatsapp_url=safeProfileUrl(whatsappInput,"whatsapp");
  if(whatsappInput&&!whatsapp_url)return showToast("رابط WhatsApp غير صالح.");
+
  const facebook_url=safeProfileUrl(facebookInput);
  if(facebookInput&&!facebook_url)return showToast("رابط Facebook غير صالح.");
+
  const website_url=safeProfileUrl(websiteInput);
  if(websiteInput&&!website_url)return showToast("رابط الموقع الإلكتروني غير صالح.");
+
  let avatar_url=currentProfile?.avatar_url||null;
+
  try{
-  if(pendingProfileImage){showToast("جارٍ رفع الصورة...");avatar_url=await uploadProfileImage(pendingProfileImage);}
- }catch(error){console.error(error);showToast(error.message||"تعذر رفع الصورة.");return;}
+  if(pendingProfileImage){
+   showToast("جارٍ رفع الصورة...");
+   avatar_url=await uploadProfileImage(pendingProfileImage);
+  }
+ }catch(error){
+  console.error(error);
+  showToast(error.message||"تعذر رفع الصورة.");
+  return;
+ }
+
  const payload={full_name,avatar_url,tagline,bio,whatsapp_url,facebook_url,website_url};
+
  const {error}=await db.from("profiles").update(payload).eq("id",currentUser.id);
  if(error)return showToast("تعذر تحديث الملف: "+error.message);
+
  currentProfile={...currentProfile,...payload};
  pendingProfileImage=null;
  document.getElementById("profileImageInput").value="";
- if(profilePreviewObjectUrl){URL.revokeObjectURL(profilePreviewObjectUrl);profilePreviewObjectUrl=null;}
+
+ if(profilePreviewObjectUrl){
+  URL.revokeObjectURL(profilePreviewObjectUrl);
+  profilePreviewObjectUrl=null;
+ }
+
  const initial=full_name.charAt(0)||"W";
+
  document.getElementById("topName").textContent="مرحباً، "+full_name;
  document.getElementById("sideName").textContent=full_name;
  document.getElementById("topCompany").textContent=accountLabel(currentProfile.account_type);
  document.getElementById("sideType").textContent=accountLabel(currentProfile.account_type);
- setAvatar("topAvatar",avatar_url,initial);setAvatar("sideAvatar",avatar_url,initial);setProfileAvatar(avatar_url,initial);
+
+ setAvatar("topAvatar",avatar_url,initial);
+ setAvatar("sideAvatar",avatar_url,initial);
+ setProfileAvatar(avatar_url,initial);
+
  document.getElementById("profilePreviewName").textContent=full_name;
  document.getElementById("profilePreviewType").textContent=accountLabel(currentProfile.account_type);
+
  showToast("تم تحديث الملف الشخصي بنجاح.");
+
+ /* تحديث بيانات الحساب في دليل المراسلات إن كان ظاهراً */
+ const profile=profileFor(currentUser.id);
+ if(profile)profile.full_name=full_name;
 });
 
 /* التنقل والبحث */
@@ -1193,34 +1540,62 @@ document.getElementById("menuToggle").addEventListener("click",toggleSidebar);
 document.getElementById("sidebarBackdrop").addEventListener("click",closeSidebar);
 document.getElementById("topAvatar").addEventListener("click",()=>goTo("profile"));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSidebar();});
-document.getElementById("discoverSearch").addEventListener("keydown",e=>{if(e.key==="Enter")loadDiscover();});
+
+document.getElementById("discoverSearch").addEventListener("keydown",e=>{
+ if(e.key==="Enter")loadDiscover();
+});
+
 document.getElementById("globalSearch").addEventListener("keydown",e=>{
- if(e.key==="Enter"){document.getElementById("discoverSearch").value=e.target.value;goTo("discover");}
+ if(e.key==="Enter"){
+  document.getElementById("discoverSearch").value=e.target.value;
+  goTo("discover");
+ }
 });
 
 /* تسجيل الخروج */
 document.getElementById("logoutBtn").addEventListener("click",async()=>{
- const button=document.getElementById("logoutBtn");button.disabled=true;
+ const button=document.getElementById("logoutBtn");
+ button.disabled=true;
+
  try{
   const {error}=await db.auth.signOut();
-  if(error){button.disabled=false;return showToast("تعذر تسجيل الخروج: "+error.message);}
+  if(error){
+   button.disabled=false;
+   return showToast("تعذر تسجيل الخروج: "+error.message);
+  }
   location.replace("index.html");
- }catch(error){button.disabled=false;console.error(error);showToast("حدث خطأ أثناء تسجيل الخروج.");}
+ }catch(error){
+  button.disabled=false;
+  console.error(error);
+  showToast("حدث خطأ أثناء تسجيل الخروج.");
+ }
 });
 
 /* التحديث المباشر */
 function setupRealtime(){
  if(messagesChannel)db.removeChannel(messagesChannel);
+
  messagesChannel=db.channel("wasla-inquiry-messages")
- .on("postgres_changes",{event:"INSERT",schema:"public",table:"inquiry_messages"},payload=>{
-  if(selectedInquiry&&String(payload.new.inquiry_id)===String(selectedInquiry))loadMessages(selectedInquiry);
- })
- .subscribe();
+  .on("postgres_changes",{
+   event:"INSERT",
+   schema:"public",
+   table:"inquiry_messages"
+  },payload=>{
+   if(selectedInquiry&&String(payload.new.inquiry_id)===String(selectedInquiry)){
+    loadMessages(selectedInquiry);
+   }
+  })
+  .subscribe();
 
  if(directMessagesChannel)db.removeChannel(directMessagesChannel);
+
  directMessagesChannel=db.channel("wasla-direct-messages")
- .on("postgres_changes",{event:"INSERT",schema:"public",table:"conversation_messages"},refreshDirectRealtimeMessage)
- .subscribe();
+  .on("postgres_changes",{
+   event:"INSERT",
+   schema:"public",
+   table:"conversation_messages"
+  },refreshDirectRealtimeMessage)
+  .subscribe();
 }
 
 /* تشغيل اللوحة */
