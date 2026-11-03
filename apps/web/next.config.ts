@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
 
   productionBrowserSourceMaps: false,
 
+  transpilePackages: ["@wasla/shared"],
+
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: []
